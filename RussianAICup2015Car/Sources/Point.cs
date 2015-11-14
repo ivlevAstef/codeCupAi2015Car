@@ -19,17 +19,54 @@ namespace RussianAICup2015Car.Sources {
       X = p.X;
       Y = p.Y;
     }
+  }
 
-    public bool Equals(Point<Type> p) {
-      if ((object)p == null) {
+  class PointInt : Point<int> {
+    public PointInt(int all) : base(all) {
+    }
+
+    public PointInt(int x, int y) : base(x,y) {
+    }
+
+    public PointInt(PointInt p) : base(p){
+    }
+
+    public override bool Equals(object obj) {
+      var p = obj as PointInt;
+      if (null == p) {
         return false;
       }
 
-      return ((dynamic)X == (dynamic)p.X) && ((dynamic)Y == (dynamic)p.Y);
+      return (X == p.X) && (Y == p.Y);
     }
 
-    public Point<Type> Add(Point<Type> p) {
-      return new Point<Type>((dynamic)X + (dynamic)p.X, (dynamic)Y + (dynamic)p.Y);
+    public PointInt Add(PointInt p) {
+      return new PointInt(X + p.X, Y + p.Y);
+    }
+  }
+
+
+  class PointDouble : Point<double> {
+    public PointDouble(double all) : base(all) {
+    }
+
+    public PointDouble(double x, double y) : base(x, y) {
+    }
+
+    public PointDouble(PointDouble p) : base(p) {
+    }
+
+    public override bool Equals(object obj) {
+      var p = obj as PointDouble;
+      if (null == p) {
+        return false;
+      }
+
+      return (X == p.X) && (Y == p.Y);
+    }
+
+    public PointDouble Add(PointDouble p) {
+      return new PointDouble(X + p.X, Y + p.Y);
     }
   }
 }

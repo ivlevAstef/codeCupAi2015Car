@@ -9,12 +9,12 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
     private Car self = null;
     private World world = null;
     private Game game = null;
-    private Point<int>[] path = null;
+    private PointInt[] path = null;
 
-    private static Point<int> DirLeft = new Point<int>(-1, 0);
-    private static Point<int> DirRight = new Point<int>(1, 0);
-    private static Point<int> DirUp = new Point<int>(0, -1);
-    private static Point<int> DirDown = new Point<int>(0, 1);
+    private static PointInt DirLeft = new PointInt(-1, 0);
+    private static PointInt DirRight = new PointInt(1, 0);
+    private static PointInt DirUp = new PointInt(0, -1);
+    private static PointInt DirDown = new PointInt(0, 1);
 
     public MyStrategy() {
     }
@@ -32,12 +32,12 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
         return;
       }
 
-      Point<int> currentWay = new Point<int>((int)(self.X / game.TrackTileSize), (int)(self.Y /game.TrackTileSize));
-      Point<int>[] wayPoints = wayPointsFrom(currentWay, 3);
+      PointInt currentWay = new PointInt((int)(self.X / game.TrackTileSize), (int)(self.Y /game.TrackTileSize));
+      PointInt[] wayPoints = wayPointsFrom(currentWay, 3);
       log.Assert(3 == wayPoints.Length, "incorrect calculate way points.");
 
-      Point<int> posTypeSelfToNext = positionTypeFor(wayPoints[0], wayPoints[1]);
-      Point<int> posTypeNextToNextNext = positionTypeFor(wayPoints[1], wayPoints[2]);
+      PointInt posTypeSelfToNext = positionTypeFor(wayPoints[0], wayPoints[1]);
+      PointInt posTypeNextToNextNext = positionTypeFor(wayPoints[1], wayPoints[2]);
 
       Point<double> idealPoint = null;
       double procent = procentToWay(wayPoints[1], wayPoints[0]);
@@ -75,7 +75,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       move.IsUseNitro = true;
     }
 
-    private Point<double> convert(Point<int> point) {
+    private Point<double> convert(PointInt point) {
       log.Assert(null != game, "zero game");
 
       double nextWaypointX = (point.X + 0.5D) * game.TrackTileSize;
@@ -83,7 +83,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       return new Point<double>(nextWaypointX, nextWaypointY);
     }
 
-    private int wayIndex(Point<int> way) {
+    private int wayIndex(PointInt way) {
       log.Assert(null != path, "zero path");
 
       for (int index = 0; index < path.Length; index++) {
@@ -96,14 +96,14 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       return 0;
     }
 
-    private Point<int>[] wayPointsFrom(Point<int> way, int count) {
+    private PointInt[] wayPointsFrom(PointInt way, int count) {
       log.Assert(null != way, "zero way");
       log.Assert(null != path, "zero path");
 
       int currentIndex = wayIndex(way);
       log.Assert(currentIndex >= 0, "negative current index");
 
-      List<Point<int>> points = new List<Point<int>>();
+      List<PointInt> points = new List<PointInt>();
       while (count > 0) {
         points.Add(path[currentIndex]);
 
@@ -114,7 +114,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       return points.ToArray();
     }
 
-    private double pixelsToWay(Point<int> way, Point<int> prevWay) {
+    private double pixelsToWay(PointInt way, PointInt prevWay) {
       log.Assert(null != way, "zero way");
       log.Assert(null != prevWay, "zero prev way");
       log.Assert(null != game, "zero game");
@@ -131,7 +131,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       return Math.Abs(A * self.X + B * self.Y - C)/Math.Sqrt(A*A + B*B);
     }
 
-    private double procentToWay(Point<int> way, Point<int> prevWay) {
+    private double procentToWay(PointInt way, PointInt prevWay) {
       log.Assert(null != way, "zero way");
       log.Assert(null != prevWay, "zero prev way");
       log.Assert(null != game, "zero game");
@@ -139,8 +139,8 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       return pixelsToWay(way, prevWay) / game.TrackTileSize;
     }
 
-    private Point<int> positionTypeFor(Point<int> way, Point<int> nextWay) {
-      Point<int> posType = new Point<int>(nextWay.X - way.X, nextWay.Y - way.Y);
+    private PointInt positionTypeFor(PointInt way, PointInt nextWay) {
+      PointInt posType = new PointInt(nextWay.X - way.X, nextWay.Y - way.Y);
       
       log.Assert(posType.Equals(DirLeft) ||
                  posType.Equals(DirRight) ||
@@ -150,7 +150,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       return posType;
     }
 
-    private Point<int> startDirection() {
+    private PointInt startDirection() {
       switch (world.StartingDirection) {
       case Direction.Left:
         return DirLeft;
@@ -161,23 +161,25 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       case Direction.Down:
         return DirDown;
       }
-      return new Point<int>(0);
+      return new PointInt(0);
     }
 
     private void calculatePath() {
       log.Assert(null != world, "zero world");
       log.Assert(world.Waypoints.Length >= 2, "waypoints length < 2");
 
-      List<Point<int>> newPath = new List<Point<int>>();
+      List<PointInt> newPath = new List<PointInt>();
 
-      Point<int> direction = startDirection();
+      PointInt direction = startDirection();
 
       for (int index = 0; index < world.Waypoints.Length; index++) {
-        Point<int> begin = new Point<int>(world.Waypoints[index][0], world.Waypoints[index][1]);
+        PointInt begin = new PointInt(world.Waypoints[index][0], world.Waypoints[index][1]);
         int nextIndex = (index+1) % world.Waypoints.Length;
-        Point<int> end = new Point<int>(world.Waypoints[nextIndex][0], world.Waypoints[nextIndex][1]);
+        PointInt end = new PointInt(world.Waypoints[nextIndex][0], world.Waypoints[nextIndex][1]);
 
-        Tuple<List<Point<int>>, Point<int>> subpath = calculatePath(begin, end, direction);
+        HashSet<PointInt> visited = new HashSet<PointInt>();
+
+        Tuple<List<PointInt>, PointInt> subpath = calculatePath(begin, end, direction, visited);
         log.Assert(null != subpath, "zero subpath");
 
         newPath.AddRange(subpath.Item1);
@@ -188,17 +190,21 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       path = newPath.ToArray();
     }
 
-    private Tuple<List<Point<int>>, Point<int>> calculatePath(Point<int> current, Point<int> end, Point<int> direction) {
+    private Tuple<List<PointInt>, PointInt> calculatePath(PointInt current, PointInt end, PointInt direction, HashSet<PointInt> visited) {
       log.Assert(null != world, "zero world");
 
       if (current.X == end.X && current.Y == end.Y) {
-        return new Tuple<List<Point<int>>,Point<int>>(new List<Point<int>>(), new Point<int>(direction));
+        return new Tuple<List<PointInt>,PointInt>(new List<PointInt>(), new PointInt(direction));
+      }
+
+      if (visited.Contains(current)) {
+        return null;
       }
 
       log.Assert(0 <= current.X && current.X < world.Width, "0 < x < width");
       log.Assert(0 <= current.Y && current.Y < world.Height, "0 < y < height");
 
-      List<Point<int>> directions = new List<Point<int>>();
+      List<PointInt> directions = new List<PointInt>();
 
       switch (world.TilesXY[current.X][current.Y]) {
       case TileType.Empty:
@@ -258,15 +264,20 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
 
       directions.RemoveAll(p => p.X == -direction.X && p.Y == -direction.Y);
 
-      Tuple<List<Point<int>>, Point<int>> result = null;
-      foreach (Point<int> dir in directions) {
-        Tuple<List<Point<int>>, Point<int>> subpath = calculatePath(current.Add(dir), end, dir);
+      visited.Add(current);
+
+      Tuple<List<PointInt>, PointInt> result = null;
+      foreach (PointInt dir in directions) {
+        Tuple<List<PointInt>, PointInt> subpath = calculatePath(current.Add(dir), end, dir, visited);
+        
         if (null != subpath) {
           if (null == result || subpath.Item1.Count < result.Item1.Count) {
             result = subpath;
           }
         }
       }
+
+      visited.Remove(current);
 
       if (null != result) {
         result.Item1.Insert(0, current);
