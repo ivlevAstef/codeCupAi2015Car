@@ -16,6 +16,8 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
     private static PointInt DirUp = new PointInt(0, -1);
     private static PointInt DirDown = new PointInt(0, 1);
 
+    private int wayIndex = 0;
+
     public MyStrategy() {
     }
 
@@ -33,6 +35,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       }
 
       PointInt currentWay = new PointInt((int)(self.X / game.TrackTileSize), (int)(self.Y /game.TrackTileSize));
+      updateWayIndex(currentWay);
       PointInt[] wayPoints = wayPointsFrom(currentWay, 3);
       log.Assert(3 == wayPoints.Length, "incorrect calculate way points.");
 
@@ -41,7 +44,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
 
       Point<double> idealPoint = null;
       double procent = procentToWay(wayPoints[1], wayPoints[0]);
-      if (procent > 0.5) {
+      if (procent > 1.0) {
         idealPoint = convert(wayPoints[0]);
         idealPoint.X += posTypeSelfToNext.X * game.TrackTileSize;
         idealPoint.Y += posTypeSelfToNext.Y * game.TrackTileSize;
@@ -59,16 +62,16 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       log.Debug("Speed:{0}", speedModule);
 
       if (posTypeSelfToNext.X != posTypeNextToNextNext.X || posTypeSelfToNext.Y != posTypeNextToNextNext.Y) {
-        move.WheelTurn = (angleToWaypoint * 90.0D / Math.PI);
+        move.WheelTurn = (angleToWaypoint * 180.0 / Math.PI);
 
-        if (speedModule > 20) {
+        if (speedModule > 22) {
           move.IsBrake = true;
         } else {
-          move.EnginePower = 1.0D;
+          move.EnginePower = 1.0;
         }
       } else {
-        move.WheelTurn = (angleToWaypoint * 15.0D / Math.PI);
-        move.EnginePower = 1.0D;
+        move.WheelTurn = (angleToWaypoint * 15.0 / Math.PI);
+        move.EnginePower = 1.0;
       }
 
 
@@ -83,24 +86,29 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       return new Point<double>(nextWaypointX, nextWaypointY);
     }
 
-    private int wayIndex(PointInt way) {
+    private int wayIndexFor(PointInt way) {
       log.Assert(null != path, "zero path");
 
       for (int index = 0; index < path.Length; index++) {
-        if (path[index].X == way.X &&  path[index].Y == way.Y) {
-          return index;
+        int realIndex = (wayIndex + index)% path.Length;
+        if (path[realIndex].X == way.X && path[realIndex].Y == way.Y) {
+          return realIndex;
         }
       }
 
-      log.Assert(false, "Didn't find way index");
-      return 0;
+      log.Error("Didn't find way index");
+      return wayIndex;
+    }
+
+    private void updateWayIndex(PointInt point) {
+      wayIndex = wayIndexFor(point);
     }
 
     private PointInt[] wayPointsFrom(PointInt way, int count) {
       log.Assert(null != way, "zero way");
       log.Assert(null != path, "zero path");
 
-      int currentIndex = wayIndex(way);
+      int currentIndex = wayIndex;
       log.Assert(currentIndex >= 0, "negative current index");
 
       List<PointInt> points = new List<PointInt>();
@@ -197,7 +205,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
         return new Tuple<List<PointInt>,PointInt>(new List<PointInt>(), new PointInt(direction));
       }
 
-      if (visited.Contains(current)) {
+      if (visited.Contains(current) || visited.Count > 30) {
         return null;
       }
 
@@ -247,11 +255,11 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       case TileType.TopHeadedT:
         directions.Add(DirLeft);
         directions.Add(DirRight);
-        directions.Add(DirDown);
+        directions.Add(DirUp);
         break;
       case TileType.BottomHeadedT:
         directions.Add(DirLeft);
-        directions.Add(DirUp);
+        directions.Add(DirDown);
         directions.Add(DirRight);
         break;
       case TileType.Crossroads:
@@ -284,7 +292,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
         return result;
       }
 
-      log.Error("Can't find path.");
+
       return null;
     }
         

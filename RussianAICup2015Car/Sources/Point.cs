@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace RussianAICup2015Car.Sources {
   class Point<Type> where Type : struct {
@@ -40,6 +41,10 @@ namespace RussianAICup2015Car.Sources {
       return (X == p.X) && (Y == p.Y);
     }
 
+    public override int GetHashCode() {
+      return (X^Y).GetHashCode();
+    }
+
     public PointInt Add(PointInt p) {
       return new PointInt(X + p.X, Y + p.Y);
     }
@@ -63,6 +68,10 @@ namespace RussianAICup2015Car.Sources {
       }
 
       return (X == p.X) && (Y == p.Y);
+    }
+
+    public override int GetHashCode() {
+      return (X + 100 * Y).GetHashCode();
     }
 
     public PointDouble Add(PointDouble p) {
