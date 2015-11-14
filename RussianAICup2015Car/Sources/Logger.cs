@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿//#define USE_LOG
+using System;
 
 namespace RussianAICup2015Car.Sources {
   public class Logger {
+#if USE_LOG
     public void Error(String message, params object[] args) {
        System.Console.WriteLine("Error: " + message, args);
     }
@@ -22,5 +20,19 @@ namespace RussianAICup2015Car.Sources {
     public void Assert(bool condition) {
       System.Diagnostics.Debug.Assert(condition);
     }
+#else
+    public void Error(String message, params object[] args) {
+    }
+    public void Warning(String message, params object[] args) {
+    }
+    public void Debug(String message, params object[] args) {
+    }
+    public void Info(String message, params object[] args) {
+    }
+
+    public void Assert(bool condition) {
+    }
+
+#endif
   }
 }

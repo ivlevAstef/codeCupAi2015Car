@@ -1,4 +1,5 @@
 using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
+using System;
 
 namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
     public sealed class Runner {
@@ -51,6 +52,8 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
 
                     remoteProcessClient.WriteMovesMessage(moves);
                 }
+            } catch (Exception e) {
+              e.ToString();
             } finally {
                 remoteProcessClient.Close();
             }

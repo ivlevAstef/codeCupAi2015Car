@@ -29,7 +29,8 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       }
 
       if (world.Tick < game.InitialFreezeDurationTicks) {
-          return;
+        move.EnginePower = 1.0;
+        return;
       }
 
       Point<int> currentWay = new Point<int>((int)(self.X / game.TrackTileSize), (int)(self.Y /game.TrackTileSize));
