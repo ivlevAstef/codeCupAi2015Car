@@ -1,11 +1,11 @@
-﻿//#define USE_LOG
+﻿#define USE_LOG
 using System;
 
 namespace RussianAICup2015Car.Sources {
   public class Logger {
 #if USE_LOG
     public void Error(String message, params object[] args) {
-       System.Console.WriteLine("Error: " + message, args);
+       System.Console.Error.WriteLine("Error: " + message, args);
     }
     public void Warning(String message, params object[] args) {
       System.Console.WriteLine("Warning: " + message, args);
@@ -17,7 +17,10 @@ namespace RussianAICup2015Car.Sources {
       System.Console.WriteLine("Info: " + message, args);
     }
 
-    public void Assert(bool condition) {
+    public void Assert(bool condition, String message) {
+      if (!condition) {
+        System.Console.Error.WriteLine("Assert: {0} ", message);
+      }
       System.Diagnostics.Debug.Assert(condition);
     }
 #else

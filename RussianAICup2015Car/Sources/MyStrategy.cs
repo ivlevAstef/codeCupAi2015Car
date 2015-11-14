@@ -29,14 +29,12 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       }
 
       if (world.Tick < game.InitialFreezeDurationTicks) {
-        move.EnginePower = 1.0;
         return;
       }
 
       Point<int> currentWay = new Point<int>((int)(self.X / game.TrackTileSize), (int)(self.Y /game.TrackTileSize));
       Point<int>[] wayPoints = wayPointsFrom(currentWay, 3);
-      log.Assert(3 == wayPoints.Length);
-
+      log.Assert(3 == wayPoints.Length, "incorrect calculate way points.");
 
       Point<int> posTypeSelfToNext = positionTypeFor(wayPoints[0], wayPoints[1]);
       Point<int> posTypeNextToNextNext = positionTypeFor(wayPoints[1], wayPoints[2]);
@@ -78,7 +76,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
     }
 
     private Point<double> convert(Point<int> point) {
-      log.Assert(null != game);
+      log.Assert(null != game, "zero game");
 
       double nextWaypointX = (point.X + 0.5D) * game.TrackTileSize;
       double nextWaypointY = (point.Y + 0.5D) * game.TrackTileSize;
@@ -86,7 +84,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
     }
 
     private int wayIndex(Point<int> way) {
-      log.Assert(null != path);
+      log.Assert(null != path, "zero path");
 
       for (int index = 0; index < path.Length; index++) {
         if (path[index].X == way.X &&  path[index].Y == way.Y) {
@@ -94,16 +92,16 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
         }
       }
 
-      log.Assert(false);
+      log.Assert(false, "Didn't find way index");
       return 0;
     }
 
     private Point<int>[] wayPointsFrom(Point<int> way, int count) {
-      log.Assert(null != way);
-      log.Assert(null != path);
+      log.Assert(null != way, "zero way");
+      log.Assert(null != path, "zero path");
 
       int currentIndex = wayIndex(way);
-      log.Assert(currentIndex >= 0);
+      log.Assert(currentIndex >= 0, "negative current index");
 
       List<Point<int>> points = new List<Point<int>>();
       while (count > 0) {
@@ -117,9 +115,9 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
     }
 
     private double pixelsToWay(Point<int> way, Point<int> prevWay) {
-      log.Assert(null != way);
-      log.Assert(null != prevWay);
-      log.Assert(null != game);
+      log.Assert(null != way, "zero way");
+      log.Assert(null != prevWay, "zero prev way");
+      log.Assert(null != game, "zero game");
 
       double A = way.X - prevWay.X;
       double B = way.Y - prevWay.Y;
@@ -134,9 +132,9 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
     }
 
     private double procentToWay(Point<int> way, Point<int> prevWay) {
-      log.Assert(null != way);
-      log.Assert(null != prevWay);
-      log.Assert(null != game);
+      log.Assert(null != way, "zero way");
+      log.Assert(null != prevWay, "zero prev way");
+      log.Assert(null != game, "zero game");
 
       return pixelsToWay(way, prevWay) / game.TrackTileSize;
     }
@@ -147,7 +145,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       log.Assert(posType.Equals(DirLeft) ||
                  posType.Equals(DirRight) ||
                  posType.Equals(DirUp) ||
-                 posType.Equals(DirDown));
+                 posType.Equals(DirDown), "incorrect pos type");
 
       return posType;
     }
@@ -167,8 +165,8 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
     }
 
     private void calculatePath() {
-      log.Assert(null != world);
-      log.Assert(world.Waypoints.Length >= 2);
+      log.Assert(null != world, "zero world");
+      log.Assert(world.Waypoints.Length >= 2, "waypoints length < 2");
 
       List<Point<int>> newPath = new List<Point<int>>();
 
@@ -180,7 +178,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
         Point<int> end = new Point<int>(world.Waypoints[nextIndex][0], world.Waypoints[nextIndex][1]);
 
         Tuple<List<Point<int>>, Point<int>> subpath = calculatePath(begin, end, direction);
-        log.Assert(null != subpath);
+        log.Assert(null != subpath, "zero subpath");
 
         newPath.AddRange(subpath.Item1);
         direction = subpath.Item2;
@@ -190,77 +188,92 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       path = newPath.ToArray();
     }
 
-    private Tuple<List<Point<int>>, Point<int>> addIfNeed(Tuple<List<Point<int>>, Point<int>> data, Point<int> point) {
-      if (null == data) {
-        return null;
-      }
-      data.Item1.Insert(0, point);
-      return data;
-    }
-
     private Tuple<List<Point<int>>, Point<int>> calculatePath(Point<int> current, Point<int> end, Point<int> direction) {
-      log.Assert(null != world);
+      log.Assert(null != world, "zero world");
 
       if (current.X == end.X && current.Y == end.Y) {
         return new Tuple<List<Point<int>>,Point<int>>(new List<Point<int>>(), new Point<int>(direction));
       }
 
-      log.Assert(0 <= current.X && current.X < world.Width);
-      log.Assert(0 <= current.Y && current.Y < world.Height);
+      log.Assert(0 <= current.X && current.X < world.Width, "0 < x < width");
+      log.Assert(0 <= current.Y && current.Y < world.Height, "0 < y < height");
+
+      List<Point<int>> directions = new List<Point<int>>();
 
       switch (world.TilesXY[current.X][current.Y]) {
       case TileType.Empty:
-        log.Assert(false);
+        log.Error("Empty tile");
         return null;
       case TileType.Vertical:
-        if (direction.Y > 0) {
-          return addIfNeed(calculatePath(current.Add(DirDown), end, DirDown), current);
-        } else {
-          return addIfNeed(calculatePath(current.Add(DirUp), end, DirUp), current);
-        }
+        directions.Add(DirDown);
+        directions.Add(DirUp);
+        break;
       case TileType.Horizontal:
-        if (direction.X > 0) {
-          return addIfNeed(calculatePath(current.Add(DirRight), end, DirRight), current);
-        } else {
-          return addIfNeed(calculatePath(current.Add(DirLeft), end, DirLeft), current);
-        }
+        directions.Add(DirRight);
+        directions.Add(DirLeft);
+        break;
       case TileType.LeftTopCorner:
-        if (direction.X < 0) {
-          return addIfNeed(calculatePath(current.Add(DirDown), end, DirDown), current);
-        } else {
-          return addIfNeed(calculatePath(current.Add(DirRight), end, DirRight), current);
-        }
+        directions.Add(DirDown);
+        directions.Add(DirRight);
+        break;
       case TileType.RightTopCorner:
-        if (direction.X > 0) {
-          return addIfNeed(calculatePath(current.Add(DirDown), end, DirDown), current);
-        } else {
-          return addIfNeed(calculatePath(current.Add(DirLeft), end, DirLeft), current);
-        }
+       directions.Add(DirDown);
+        directions.Add(DirLeft);
+        break;
       case TileType.LeftBottomCorner:
-        if (direction.X < 0) {
-          return addIfNeed(calculatePath(current.Add(DirUp), end, DirUp), current);
-        } else {
-          return addIfNeed(calculatePath(current.Add(DirRight), end, DirRight), current);
-        }
+        directions.Add(DirUp);
+        directions.Add(DirRight);
+        break;
       case TileType.RightBottomCorner:
-        if (direction.X > 0) {
-          return addIfNeed(calculatePath(current.Add(DirUp), end, DirUp), current);
-        } else {
-          return addIfNeed(calculatePath(current.Add(DirLeft), end, DirLeft), current);
-        }
+        directions.Add(DirUp);
+        directions.Add(DirLeft);
+        break;
       case TileType.LeftHeadedT:
+        directions.Add(DirLeft);
+        directions.Add(DirUp);
+        directions.Add(DirDown);
         break;
       case TileType.RightHeadedT:
+        directions.Add(DirRight);
+        directions.Add(DirUp);
+        directions.Add(DirDown);
         break;
       case TileType.TopHeadedT:
+        directions.Add(DirLeft);
+        directions.Add(DirRight);
+        directions.Add(DirDown);
         break;
       case TileType.BottomHeadedT:
+        directions.Add(DirLeft);
+        directions.Add(DirUp);
+        directions.Add(DirRight);
         break;
       case TileType.Crossroads:
+        directions.Add(DirLeft);
+        directions.Add(DirRight);
+        directions.Add(DirUp);
+        directions.Add(DirDown);
         break;
       }
 
-      log.Assert(false);
+      directions.RemoveAll(p => p.X == -direction.X && p.Y == -direction.Y);
+
+      Tuple<List<Point<int>>, Point<int>> result = null;
+      foreach (Point<int> dir in directions) {
+        Tuple<List<Point<int>>, Point<int>> subpath = calculatePath(current.Add(dir), end, dir);
+        if (null != subpath) {
+          if (null == result || subpath.Item1.Count < result.Item1.Count) {
+            result = subpath;
+          }
+        }
+      }
+
+      if (null != result) {
+        result.Item1.Insert(0, current);
+        return result;
+      }
+
+      log.Error("Can't find path.");
       return null;
     }
         
