@@ -23,14 +23,9 @@ namespace RussianAICup2015Car.Sources {
   }
 
   class PointInt : Point<int> {
-    public PointInt(int all) : base(all) {
-    }
-
-    public PointInt(int x, int y) : base(x,y) {
-    }
-
-    public PointInt(PointInt p) : base(p){
-    }
+    public PointInt(int all) : base(all) {}
+    public PointInt(int x, int y) : base(x,y) {}
+    public PointInt(PointInt p) : base(p){}
 
     public override bool Equals(object obj) {
       var p = obj as PointInt;
@@ -52,14 +47,9 @@ namespace RussianAICup2015Car.Sources {
 
 
   class PointDouble : Point<double> {
-    public PointDouble(double all) : base(all) {
-    }
-
-    public PointDouble(double x, double y) : base(x, y) {
-    }
-
-    public PointDouble(PointDouble p) : base(p) {
-    }
+    public PointDouble(double all) : base(all) {}
+    public PointDouble(double x, double y) : base(x, y) {}
+    public PointDouble(PointDouble p) : base(p) {}
 
     public override bool Equals(object obj) {
       var p = obj as PointDouble;
