@@ -57,12 +57,47 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
         }
       }
 
-      needAngle -= self.AngularSpeed;
+      if (dirSelfToNext.X == dirNextToNextNext.X && dirSelfToNext.Y == dirNextToNextNext.Y) {
+        double moveX = self.X - (Math.Floor(self.X / game.TrackTileSize) + 0.5) * game.TrackTileSize;
+        double moveY = self.Y - (Math.Floor(self.Y / game.TrackTileSize) + 0.5) * game.TrackTileSize;
+        needAngle -= dirSelfToNext.X * moveY / game.TrackTileSize;
+        needAngle += dirSelfToNext.Y * moveX / game.TrackTileSize;
+      }
 
+      brakeBeforeAccident(move, dirSelfToNext);
+
+      needAngle -= self.AngularSpeed;
       move.WheelTurn = (needAngle * 15.0 / Math.PI);
 
       if (isStraight()) {
         move.IsUseNitro = true;
+      }
+
+      if ((dirSelfToNext.X != dirNextToNextNext.X || dirSelfToNext.Y != dirNextToNextNext.Y) && procent < 0.1) {
+        move.IsSpillOil = true;
+      }
+    }
+
+    private void brakeBeforeAccident(Move move, PointInt dir) {
+      int tickTest = 10;
+
+      int xSign = (self.SpeedX > 0) ? 1 : -1;
+      int ySign = (self.SpeedY > 0) ? 1 : -1;
+
+      double minX = (int)(self.X / game.TrackTileSize) * game.TrackTileSize;
+      double minY = (int)(self.Y / game.TrackTileSize) * game.TrackTileSize;
+      double maxX = (int)((self.X / game.TrackTileSize) + 1) * game.TrackTileSize;
+      double maxY = (int)((self.Y / game.TrackTileSize) + 1) * game.TrackTileSize;
+
+      double x = self.X + (self.SpeedX * tickTest + xSign * 80) * -dir.Y;
+      double y = self.Y + (self.SpeedY * tickTest + ySign * 80) * -dir.X;
+
+      if (x < minX || x > maxX) {
+        move.IsBrake = true;
+      }
+
+      if (y < minY || y > maxY) {
+        move.IsBrake = true;
       }
     }
 
@@ -80,12 +115,16 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       return (0 == moveX) || (0 == moveY);
     }
 
-    private Point<double> convert(PointInt point) {
+    private PointInt convert(double x, double y) {
+      return new PointInt((int)(self.X / game.TrackTileSize), (int)(self.Y / game.TrackTileSize));
+    }
+
+    private PointDouble convert(PointInt point) {
       log.Assert(null != game, "zero game");
 
       double nextWaypointX = (point.X + 0.5D) * game.TrackTileSize;
       double nextWaypointY = (point.Y + 0.5D) * game.TrackTileSize;
-      return new Point<double>(nextWaypointX, nextWaypointY);
+      return new PointDouble(nextWaypointX, nextWaypointY);
     }
 
     private double pixelsToWay(PointInt way, PointInt prevWay) {
@@ -96,7 +135,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       double A = way.X - prevWay.X;
       double B = way.Y - prevWay.Y;
 
-      Point<double> prevWayPixels = convert(prevWay);
+      PointDouble prevWayPixels = convert(prevWay);
       double Xcenter = prevWayPixels.X + A * game.TrackTileSize * 0.5;
       double Ycenter = prevWayPixels.Y + B * game.TrackTileSize * 0.5;
 
