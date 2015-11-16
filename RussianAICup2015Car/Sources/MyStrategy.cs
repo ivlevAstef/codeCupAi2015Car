@@ -30,7 +30,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
 
       path.update(self, world, game);
 
-      PointInt[] wayPoints = path.wayPoints(3);
+      PointInt[] wayPoints = path.wayPoints(self, world, game, 2);
       log.Assert(3 == wayPoints.Length, "incorrect calculate way points.");
 
       PointInt posTypeSelfToNext = positionTypeFor(wayPoints[0], wayPoints[1]);
@@ -58,14 +58,14 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       if (posTypeSelfToNext.X != posTypeNextToNextNext.X || posTypeSelfToNext.Y != posTypeNextToNextNext.Y) {
         move.WheelTurn = (angleToWaypoint * 180.0 / Math.PI);
 
-        if (speedModule > 22) {
+        if (speedModule > 15) {
           move.IsBrake = true;
         } else {
-          move.EnginePower = 1.0;
+          move.EnginePower = 0.75;
         }
       } else {
         move.WheelTurn = (angleToWaypoint * 15.0 / Math.PI);
-        move.EnginePower = 1.0;
+        move.EnginePower = 0.75;
       }
 
 
@@ -108,10 +108,10 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
     private PointInt positionTypeFor(PointInt way, PointInt nextWay) {
       PointInt posType = new PointInt(nextWay.X - way.X, nextWay.Y - way.Y);
       
-      log.Assert(posType.Equals(Path.DirLeft) ||
+      /*log.Assert(posType.Equals(Path.DirLeft) ||
                  posType.Equals(Path.DirRight) ||
                  posType.Equals(Path.DirUp) ||
-                 posType.Equals(Path.DirDown), "incorrect pos type");
+                 posType.Equals(Path.DirDown), "incorrect pos type");*/
 
       return posType;
     }
