@@ -33,43 +33,51 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       PointInt[] wayPoints = path.wayPoints(self, world, game, 2);
       log.Assert(3 == wayPoints.Length, "incorrect calculate way points.");
 
-      PointInt posTypeSelfToNext = positionTypeFor(wayPoints[0], wayPoints[1]);
-      PointInt posTypeNextToNextNext = positionTypeFor(wayPoints[1], wayPoints[2]);
+      PointInt dirSelfToNext = dirFor(wayPoints[0], wayPoints[1]);
+      PointInt dirNextToNextNext = dirFor(wayPoints[1], wayPoints[2]);
 
-      Point<double> idealPoint = null;
       double procent = procentToWay(wayPoints[1], wayPoints[0]);
-      if (procent > 1.0) {
-        idealPoint = convert(wayPoints[0]);
-        idealPoint.X += posTypeSelfToNext.X * game.TrackTileSize;
-        idealPoint.Y += posTypeSelfToNext.Y * game.TrackTileSize;
-        idealPoint.X += posTypeNextToNextNext.X * game.TrackTileSize * 0.5;
-        idealPoint.Y += posTypeNextToNextNext.Y * game.TrackTileSize * 0.5;
-      } else {
-        idealPoint = convert(wayPoints[1]);
-        idealPoint.X += posTypeNextToNextNext.X * game.TrackTileSize * 0.5;
-        idealPoint.Y += posTypeNextToNextNext.Y * game.TrackTileSize * 0.5;
-      }
+      double needAngle = 0;
 
-      double angleToWaypoint = self.GetAngleTo(idealPoint.X, idealPoint.Y);
       double speedModule = hypot(self.SpeedX, self.SpeedY);
+      double speedNormal = (self.SpeedX * dirSelfToNext.X) + (self.SpeedY * dirSelfToNext.Y);
+      double procentIdeal = (speedNormal * 23) / game.TrackTileSize;
 
-      log.Debug("Speed:{0}", speedModule);
-
-      if (posTypeSelfToNext.X != posTypeNextToNextNext.X || posTypeSelfToNext.Y != posTypeNextToNextNext.Y) {
-        move.WheelTurn = (angleToWaypoint * 180.0 / Math.PI);
-
-        if (speedModule > 15) {
-          move.IsBrake = true;
-        } else {
-          move.EnginePower = 0.75;
-        }
+      if (procent < procentIdeal) {
+        needAngle = self.GetAngleTo(self.X + dirNextToNextNext.X, self.Y + dirNextToNextNext.Y);
+        move.EnginePower = speedModule * (1.0f - Math.Abs(needAngle / Math.PI));
       } else {
-        move.WheelTurn = (angleToWaypoint * 15.0 / Math.PI);
-        move.EnginePower = 0.75;
+        needAngle = self.GetAngleTo(self.X + dirSelfToNext.X, self.Y + dirSelfToNext.Y);
+        move.EnginePower = 1.0;
       }
 
+      if (dirSelfToNext.X != dirNextToNextNext.X || dirSelfToNext.Y != dirNextToNextNext.Y) {
+        if (speedNormal > game.TrackTileSize / 60) {
+          move.IsBrake = true;
+        }
+      }
 
-      move.IsUseNitro = true;
+      needAngle -= self.AngularSpeed;
+
+      move.WheelTurn = (needAngle * 15.0 / Math.PI);
+
+      if (isStraight()) {
+        move.IsUseNitro = true;
+      }
+    }
+
+    private bool isStraight() {
+      PointInt[] wayPoints = path.wayPoints(self, world, game, 4);
+      log.Assert(5 == wayPoints.Length, "incorrect calculate way points.");
+
+      int moveX = 0;
+      int moveY = 0;
+      for (int index = 1; index < wayPoints.Length; index++) {
+        moveX += Math.Abs(wayPoints[index].X - wayPoints[index - 1].X);
+        moveY += Math.Abs(wayPoints[index].Y - wayPoints[index - 1].Y);
+      }
+
+      return (0 == moveX) || (0 == moveY);
     }
 
     private Point<double> convert(PointInt point) {
@@ -105,15 +113,15 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       return pixelsToWay(way, prevWay) / game.TrackTileSize;
     }
 
-    private PointInt positionTypeFor(PointInt way, PointInt nextWay) {
-      PointInt posType = new PointInt(nextWay.X - way.X, nextWay.Y - way.Y);
-      
-      /*log.Assert(posType.Equals(Path.DirLeft) ||
-                 posType.Equals(Path.DirRight) ||
-                 posType.Equals(Path.DirUp) ||
-                 posType.Equals(Path.DirDown), "incorrect pos type");*/
+    private PointInt dirFor(PointInt way, PointInt nextWay) {
+      PointInt dir = new PointInt(nextWay.X - way.X, nextWay.Y - way.Y);
 
-      return posType;
+      log.Assert(dir.Equals(Path.DirLeft) ||
+                 dir.Equals(Path.DirRight) ||
+                 dir.Equals(Path.DirUp) ||
+                 dir.Equals(Path.DirDown), "incorrect dir");
+
+      return dir;
     }
         
     private static double hypot(double a, double b) {
