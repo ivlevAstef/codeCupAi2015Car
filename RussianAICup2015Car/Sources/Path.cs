@@ -45,16 +45,18 @@ namespace RussianAICup2015Car.Sources {
         int minDepth = int.MaxValue;
         foreach (PointInt dir in directionsForTile(world.TilesXY[iterPos.X][iterPos.Y])) {
           PointInt nextPos = iterPos.Add(dir);
-          if (path[nextPos.X, nextPos.Y] < minDepth) {
+          if (path[nextPos.X, nextPos.Y] <= minDepth) {
             min = nextPos;
             minDepth = path[min.X, min.Y];
-            if (dir.Equals(carDirection(self))) {
+            if (dir.Equals(carDirection(self, game, world))) {
               minDepth -= 2;
             }
           }
         }
 
-        log.Assert(null != min, "Can't find next way for tile");
+        if (null == min) {
+          break;
+        }
 
         points.Add(min);
         count--;
@@ -63,7 +65,11 @@ namespace RussianAICup2015Car.Sources {
       return points.ToArray();
     }
 
-    private PointInt carDirection(Car car) {
+    private PointInt carDirection(Car car, Game game, World world) {
+      if (Math.Abs(car.SpeedX) + Math.Abs(car.SpeedY) < 1.0e-3 && world.TickCount < game.InitialFreezeDurationTicks + 10) {
+        return startDirection(world);
+      }
+
       if(Math.Abs(car.SpeedX) > Math.Abs(car.SpeedY)) {
         return new PointInt(Math.Sign(car.SpeedX), 0);
       } else {
@@ -84,7 +90,7 @@ namespace RussianAICup2015Car.Sources {
       return path;
     }
 
-    /*private PointInt startDirection(World world) {
+    private PointInt startDirection(World world) {
       switch (world.StartingDirection) {
       case Direction.Left:
         return DirLeft;
@@ -96,7 +102,7 @@ namespace RussianAICup2015Car.Sources {
         return DirDown;
       }
       return new PointInt(0);
-    }*/
+    }
 
     private int[,] initPath(World world) {
       int[,] data = new int[world.Width, world.Height];
@@ -151,7 +157,7 @@ namespace RussianAICup2015Car.Sources {
         return false;
       }
 
-      if (pos.Equals(end)) {
+      if (pos.Equals(end) || TileType.Unknown == world.TilesXY[pos.X][pos.Y]) {
         path[pos.X, pos.Y] = 0;
         return true;
       }
