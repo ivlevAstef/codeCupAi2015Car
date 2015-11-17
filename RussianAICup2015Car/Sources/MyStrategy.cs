@@ -119,7 +119,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
         { BonusType.NitroBoost , 80 - 10 * self.NitroChargeCount },
         { BonusType.OilCanister , 50 - 10 * self.OilCanisterCount },
         { BonusType.PureScore , 100 },
-        { BonusType.RepairKit , (int)(150 * self.Durability) }
+        { BonusType.RepairKit , (int)(150 * (1.0 - self.Durability)) }
       };
 
       Bonus priorityBonus = null;
