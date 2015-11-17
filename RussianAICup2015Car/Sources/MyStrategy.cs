@@ -94,7 +94,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
         }
 
         double angle = self.GetAngleTo(car);
-        if (Math.Abs(angle) < Math.PI / 9) {
+        if (Math.Abs(angle) < Math.PI / 18) {
           return true;
         }
       }
