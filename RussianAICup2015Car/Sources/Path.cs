@@ -11,8 +11,6 @@ namespace RussianAICup2015Car.Sources {
 
     private Logger log = null;
     private List<int[,]> paths = new List<int[,]>();//checkpoint index, depth[,]
-    private PointInt checkpoint = null;
-    private int pathIndex = 0;
 
     private const int depthMax = 16 * 16;
 
@@ -23,25 +21,15 @@ namespace RussianAICup2015Car.Sources {
       this.log = log;
 
       calculatePath(world);
-
-      pathIndex = 0;
-      checkpoint = checkPointFor(world, pathIndex);
     }
 
     public void update(Car self, World world, Game game) {
       PointInt nextWayPoint = new PointInt(self.NextWaypointX, self.NextWaypointY);
-
-      if (!checkpoint.Equals(nextWayPoint)) {
-        pathIndex = (pathIndex + 1) % world.Waypoints.Length;
-        checkpoint = checkPointFor(world, pathIndex);
-        log.Assert(checkpoint.Equals(nextWayPoint), "next checkpoint don't equals next way point");
-      }
     }
 
     public PointInt[] wayPoints(Car self, World world, Game game, int count) {
-      int iterPathIndex = pathIndex;
+      int iterPathIndex = (self.NextWaypointIndex + world.Waypoints.Length - 1) % world.Waypoints.Length;
       PointInt iterCheckPoint = checkPointFor(world, iterPathIndex);
-      log.Assert(iterCheckPoint.Equals(new PointInt(self.NextWaypointX, self.NextWaypointY)), "checkpoint don't equals way point");
 
       int[,] path = paths[iterPathIndex];
       log.Assert(null != path, "Can't find path for checkpoint");
