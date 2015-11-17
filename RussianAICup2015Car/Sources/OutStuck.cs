@@ -55,14 +55,9 @@ namespace RussianAICup2015Car.Sources {
       double timePower = Math.Sin((Math.PI*0.5) * (double)(maxTicks - outStuckTicks) / maxTicks);
       move.EnginePower = -timePower;
 
-      double mX = dir.X * timePower + dir.Y * (1.0 - timePower);
-      double mY = dir.Y * timePower + dir.X * (1.0 - timePower);
-      double angle = -self.GetAngleTo(self.X + mX, self.Y + mY);
+      double angle = -self.GetAngleTo(self.X + dir.X, self.Y + dir.Y) * timePower;
 
-      angle *= 25;
-      angle -= 5 * self.AngularSpeed;
-
-      move.WheelTurn = (angle / Math.PI);
+      move.WheelTurn = (25 * angle / Math.PI);
     }
   }
 }

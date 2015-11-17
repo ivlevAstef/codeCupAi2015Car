@@ -47,15 +47,14 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
         double nSpeed = speed * Math.Abs(idealAngle / (Math.PI * 0.5));
 
         double procent = procentToWay(wayPoints[1]);
-        procent = Math.Min(1.0, Math.Max(0.0, procent));
-
         if (!oneDir && procent < 0.55) {
           move.IsSpillOil = true;
         }
 
-        double procentToSpeed = Math.Min(1.0f, nSpeed / (game.TrackTileSize / 40));
-        procent = Math.Sin(Math.PI * 0.5 * procent) * (1.0 - procentToSpeed * procentToSpeed);
+        double procentToSpeed = Math.Min(2.0f, nSpeed / (game.TrackTileSize / 140));
+        procent = Math.Sin(Math.PI * 0.5 * procent) * (4.0 - procentToSpeed * procentToSpeed);
 
+        procent = Math.Min(1.0, Math.Max(0.0, procent));
         double xMoved = dirSelfToNext.X * procent + dirNextToNextNext.X * (1.0 - procent);
         double yMoved = dirSelfToNext.Y * procent + dirNextToNextNext.Y * (1.0 - procent);
 
