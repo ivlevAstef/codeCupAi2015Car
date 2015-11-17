@@ -115,9 +115,9 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
 
     private double magniteToBonus(PointInt dir) {
       Dictionary<BonusType, int> priority = new Dictionary<BonusType,int> {
-        { BonusType.AmmoCrate , 50 - 10 * self.ProjectileCount },
-        { BonusType.NitroBoost , 80 - 10 * self.NitroChargeCount },
-        { BonusType.OilCanister , 50 - 10 * self.OilCanisterCount },
+        { BonusType.AmmoCrate , Math.Min(10, 50 - 10 * self.ProjectileCount) },
+        { BonusType.NitroBoost , Math.Min(10, 80 - 10 * self.NitroChargeCount) },
+        { BonusType.OilCanister , Math.Min(10, 50 - 10 * self.OilCanisterCount) },
         { BonusType.PureScore , 100 },
         { BonusType.RepairKit , (int)(150 * (1.0 - self.Durability)) }
       };
