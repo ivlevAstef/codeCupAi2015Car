@@ -11,6 +11,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
     private Game game = null;
 
     private Path path = null;
+    private OutStuck outStuck = new OutStuck();
 
     public MyStrategy() {
     }
@@ -25,10 +26,12 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       }
 
       if (world.Tick < game.InitialFreezeDurationTicks) {
+        move.EnginePower = 1.0;
         return;
       }
 
       path.update(self, world, game);
+      outStuck.update(self);
 
       PointInt[] wayPoints = path.wayPoints(self, world, game, 2);
       log.Assert(3 == wayPoints.Length, "incorrect calculate way points.");
@@ -36,31 +39,35 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       PointInt dirSelfToNext = dirFor(wayPoints[0], wayPoints[1]);
       PointInt dirNextToNextNext = dirFor(wayPoints[1], wayPoints[2]);
 
-      double procent = Math.Min(1.0,Math.Max(0.0,procentToWay(wayPoints[1])));
+      if (outStuck.needRunOutStuck()) {
+        outStuck.updateUseOutStuck(self, dirSelfToNext, game, move);
+      } else {
+        double procent = Math.Min(1.0, Math.Max(0.0, procentToWay(wayPoints[1])));
 
-      double xMoved = dirSelfToNext.X * procent + dirNextToNextNext.X * (1.0 - procent);
-      double yMoved = dirSelfToNext.Y * procent + dirNextToNextNext.Y * (1.0 - procent);
+        double xMoved = dirSelfToNext.X * procent + dirNextToNextNext.X * (1.0 - procent);
+        double yMoved = dirSelfToNext.Y * procent + dirNextToNextNext.Y * (1.0 - procent);
 
-      double needAngle = self.GetAngleTo(self.X + xMoved, self.Y + yMoved);
-      double idealAngle = self.GetAngleTo(self.X + dirNextToNextNext.X, self.Y + dirNextToNextNext.Y);
-      move.EnginePower = 1.0f - Math.Abs(needAngle / (Math.PI * 0.5));
+        double needAngle = self.GetAngleTo(self.X + xMoved, self.Y + yMoved);
+        double idealAngle = self.GetAngleTo(self.X + dirNextToNextNext.X, self.Y + dirNextToNextNext.Y);
+        move.EnginePower = 1.0f - Math.Abs(needAngle / (Math.PI * 0.5));
 
-      double speedModule = hypot(self.SpeedX, self.SpeedY);
-      if (speedModule * Math.Abs(idealAngle / (Math.PI * 0.5)) > game.TrackTileSize / 50) {
-        move.IsBrake = true;
-      }
+        double speed = hypot(self.SpeedX, self.SpeedY);
+        if (speed * Math.Abs(idealAngle / (Math.PI * 0.5)) > game.TrackTileSize / 50) {
+          move.IsBrake = true;
+        }
 
-      needAngle += magniteToCenter(dirSelfToNext);
+        needAngle += magniteToCenter(dirSelfToNext);
 
-      needAngle -= self.AngularSpeed;
-      move.WheelTurn = (needAngle * 15.0 / Math.PI);
+        needAngle -= self.AngularSpeed;
+        move.WheelTurn = (needAngle * 15.0 / Math.PI);
 
-      if (isStraight()) {
-        move.IsUseNitro = true;
-      }
+        if (isStraight()) {
+          move.IsUseNitro = true;
+        }
 
-      if ((dirSelfToNext.X != dirNextToNextNext.X || dirSelfToNext.Y != dirNextToNextNext.Y) && procent < 0.55) {
-        move.IsSpillOil = true;
+        if ((dirSelfToNext.X != dirNextToNextNext.X || dirSelfToNext.Y != dirNextToNextNext.Y) && procent < 0.55) {
+          move.IsSpillOil = true;
+        }
       }
     }
 
