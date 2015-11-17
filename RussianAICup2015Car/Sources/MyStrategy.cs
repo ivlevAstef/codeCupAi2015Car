@@ -42,17 +42,27 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       if (outStuck.needRunOutStuck()) {
         outStuck.updateUseOutStuck(self, dirSelfToNext, game, move);
       } else {
-        double procent = Math.Min(1.0, Math.Max(0.0, procentToWay(wayPoints[1])));
+        double idealAngle = self.GetAngleTo(self.X + dirNextToNextNext.X, self.Y + dirNextToNextNext.Y);
+        double speed = hypot(self.SpeedX, self.SpeedY);
+        double nSpeed = speed * Math.Abs(idealAngle / (Math.PI * 0.5));
+
+        double procent = procentToWay(wayPoints[1]);
+        procent = Math.Min(1.0, Math.Max(0.0, procent));
+
+        if (!oneDir && procent < 0.55) {
+          move.IsSpillOil = true;
+        }
+
+        double procentToSpeed = Math.Min(1.0f, nSpeed / (game.TrackTileSize / 40));
+        procent = Math.Sin(Math.PI * 0.5 * procent) * (1.0 - procentToSpeed * procentToSpeed);
 
         double xMoved = dirSelfToNext.X * procent + dirNextToNextNext.X * (1.0 - procent);
         double yMoved = dirSelfToNext.Y * procent + dirNextToNextNext.Y * (1.0 - procent);
 
         double needAngle = self.GetAngleTo(self.X + xMoved, self.Y + yMoved);
-        double idealAngle = self.GetAngleTo(self.X + dirNextToNextNext.X, self.Y + dirNextToNextNext.Y);
         move.EnginePower = 1.0f - Math.Min(0.2f, Math.Abs(needAngle / (Math.PI * 0.5)));
 
-        double speed = hypot(self.SpeedX, self.SpeedY);
-        if (speed * Math.Abs(idealAngle / (Math.PI * 0.5)) > game.TrackTileSize / 60) {
+        if (nSpeed > game.TrackTileSize / 40) {
           move.IsBrake = true;
         }
 
@@ -69,13 +79,10 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
         needAngle -= 15 * self.AngularSpeed;
         move.WheelTurn = (needAngle / Math.PI);
 
-        if (isStraight()) {
+        if (isStraight() && Math.Abs(needAngle) < 0.1) {
           move.IsUseNitro = true;
         }
 
-        if (!oneDir && procent < 0.55) {
-          move.IsSpillOil = true;
-        }
       }
 
       if (enemyAhead()) {
