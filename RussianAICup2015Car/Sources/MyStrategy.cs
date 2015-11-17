@@ -49,14 +49,21 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
 
         double needAngle = self.GetAngleTo(self.X + xMoved, self.Y + yMoved);
         double idealAngle = self.GetAngleTo(self.X + dirNextToNextNext.X, self.Y + dirNextToNextNext.Y);
-        move.EnginePower = 1.0f - Math.Abs(needAngle / (Math.PI * 0.5));
+        move.EnginePower = 1.0f - Math.Min(1.0f,Math.Abs(needAngle / (Math.PI * 0.5)));
 
         double speed = hypot(self.SpeedX, self.SpeedY);
         if (speed * Math.Abs(idealAngle / (Math.PI * 0.5)) > game.TrackTileSize / 50) {
           move.IsBrake = true;
         }
 
-        needAngle += magniteToCenter(dirSelfToNext);
+        double bonusMagnited = magniteToBonus(dirSelfToNext);
+        double centerMagnited = magniteToCenter(dirSelfToNext);
+
+        if (Math.Abs(bonusMagnited) > 0.01) {
+          needAngle += bonusMagnited;
+        } else {
+          needAngle += centerMagnited;
+        }
 
         needAngle -= self.AngularSpeed;
         move.WheelTurn = (needAngle * 15.0 / Math.PI);
@@ -71,10 +78,53 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       }
     }
 
+    private double magniteToPoint(double x, double y, PointInt dir) {
+      return (dir.Y * (self.X - x) - dir.X * (self.Y - y)) / game.TrackTileSize;
+    }
+
     private double magniteToCenter(PointInt dir) {
-      double moveX = self.X - (Math.Floor(self.X / game.TrackTileSize) + 0.5) * game.TrackTileSize;
-      double moveY = self.Y - (Math.Floor(self.Y / game.TrackTileSize) + 0.5) * game.TrackTileSize;
-      return (dir.Y * moveX - dir.X * moveY) / game.TrackTileSize;
+      double moveX = (Math.Floor(self.X / game.TrackTileSize) + 0.5) * game.TrackTileSize;
+      double moveY = (Math.Floor(self.Y / game.TrackTileSize) + 0.5) * game.TrackTileSize;
+      return magniteToPoint(moveX, moveY, dir);
+    }
+
+    private double magniteToBonus(PointInt dir) {
+      Dictionary<BonusType, int> priority = new Dictionary<BonusType,int> {
+        { BonusType.AmmoCrate , 50 - 10 * self.ProjectileCount },
+        { BonusType.NitroBoost , 80 - 10 * self.NitroChargeCount },
+        { BonusType.OilCanister , 50 - 10 * self.OilCanisterCount },
+        { BonusType.PureScore , 100 },
+        { BonusType.RepairKit , (int)(150 * self.Durability) }
+      };
+
+      Bonus priorityBonus = null;
+      foreach (Bonus bonus in world.Bonuses) {
+        double distance = self.GetDistanceTo(bonus);
+        if (distance > game.TrackTileSize*1.5) {
+          continue;
+        }
+        double angle = self.GetAngleTo(bonus);
+        if (Math.Abs(angle) > Math.PI / 6) {
+          continue;
+        }
+
+        PointInt selfTile = convert(self.X, self.Y);
+        PointInt bonusTile = convert(bonus.X, bonus.Y);
+        if (!selfTile.Equals(bonusTile) && !selfTile.Add(dir).Equals(bonusTile)) {
+          continue;
+        }
+
+
+        if (null == priorityBonus || priority[priorityBonus.Type] < priority[bonus.Type]) {
+          priorityBonus = bonus;
+        }
+      }
+
+      if (null == priorityBonus) {
+        return 0;
+      }
+
+      return magniteToPoint(priorityBonus.X, priorityBonus.Y, dir);
     }
 
     private bool isStraight() {
@@ -92,7 +142,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
     }
 
     private PointInt convert(double x, double y) {
-      return new PointInt((int)(self.X / game.TrackTileSize), (int)(self.Y / game.TrackTileSize));
+      return new PointInt((int)(x / game.TrackTileSize), (int)(y / game.TrackTileSize));
     }
 
     private PointDouble convert(PointInt point) {
