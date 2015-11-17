@@ -49,10 +49,10 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
 
         double needAngle = self.GetAngleTo(self.X + xMoved, self.Y + yMoved);
         double idealAngle = self.GetAngleTo(self.X + dirNextToNextNext.X, self.Y + dirNextToNextNext.Y);
-        move.EnginePower = 1.0f - Math.Min(0.8f, Math.Abs(needAngle / (Math.PI * 0.5)));
+        move.EnginePower = 1.0f - Math.Min(0.2f, Math.Abs(needAngle / (Math.PI * 0.5)));
 
         double speed = hypot(self.SpeedX, self.SpeedY);
-        if (speed * Math.Abs(idealAngle / (Math.PI * 0.5)) > game.TrackTileSize / 50) {
+        if (speed * Math.Abs(idealAngle / (Math.PI * 0.5)) > game.TrackTileSize / 60) {
           move.IsBrake = true;
         }
 
