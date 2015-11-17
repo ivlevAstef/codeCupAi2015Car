@@ -37,6 +37,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
 
       PointInt dirSelfToNext = dirFor(wayPoints[0], wayPoints[1]);
       PointInt dirNextToNextNext = dirFor(wayPoints[1], wayPoints[2]);
+      bool oneDir = dirSelfToNext.X == dirNextToNextNext.X && dirSelfToNext.Y == dirNextToNextNext.Y;
 
       if (outStuck.needRunOutStuck()) {
         outStuck.updateUseOutStuck(self, dirSelfToNext, game, move);
@@ -58,10 +59,10 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
         double bonusMagnited = magniteToBonus(dirSelfToNext);
         double centerMagnited = magniteToCenter(dirSelfToNext);
 
-        if (Math.Abs(bonusMagnited) > 1.0e-3) {
+        if (oneDir && Math.Abs(bonusMagnited) > 1.0e-3) {
           needAngle += bonusMagnited;
         } else {
-          needAngle += centerMagnited;
+          needAngle += centerMagnited* 0.1;
         }
 
         needAngle *= 25;
@@ -72,7 +73,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
           move.IsUseNitro = true;
         }
 
-        if ((dirSelfToNext.X != dirNextToNextNext.X || dirSelfToNext.Y != dirNextToNextNext.Y) && procent < 0.55) {
+        if (!oneDir && procent < 0.55) {
           move.IsSpillOil = true;
         }
       }
@@ -125,12 +126,12 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       Bonus priorityBonus = null;
       foreach (Bonus bonus in world.Bonuses) {
         double distance = self.GetDistanceTo(bonus);
-        if (distance > game.TrackTileSize*1.5) {
+        if (distance > game.TrackTileSize*2.0) {
           continue;
         }
 
         double angle = self.GetAngleTo(bonus);
-        if (Math.Abs(angle) > Math.PI / 6) {
+        if (Math.Abs(angle) > Math.PI / 9) {
           continue;
         }
 

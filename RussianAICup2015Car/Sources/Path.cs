@@ -157,8 +157,13 @@ namespace RussianAICup2015Car.Sources {
         return false;
       }
 
-      if (pos.Equals(end) || TileType.Unknown == world.TilesXY[pos.X][pos.Y]) {
+      if (pos.Equals(end)) {
         path[pos.X, pos.Y] = 0;
+        return true;
+      }
+
+      if (TileType.Unknown == world.TilesXY[pos.X][pos.Y]) {
+        path[pos.X, pos.Y] = Math.Abs(pos.X - end.X) + Math.Abs(pos.Y - end.Y);
         return true;
       }
 
