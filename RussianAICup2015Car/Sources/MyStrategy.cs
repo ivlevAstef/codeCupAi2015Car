@@ -76,7 +76,32 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
           move.IsSpillOil = true;
         }
       }
+
+      if (enemyAhead()) {
+        move.IsThrowProjectile = true;
+      }
     }
+
+    private bool enemyAhead() {
+      foreach (Car car in world.Cars) {
+        if (car.IsTeammate || car.IsFinishedTrack || 0 == car.Durability) {
+          continue;
+        }
+
+        double distance = self.GetDistanceTo(car);
+        if (distance > game.TrackTileSize) {
+          continue;
+        }
+
+        double angle = self.GetAngleTo(car);
+        if (Math.Abs(angle) < Math.PI / 9) {
+          return true;
+        }
+      }
+
+      return false;
+    }
+
 
     private double magniteToPoint(double x, double y, PointInt dir) {
       return (dir.Y * (self.X - x) - dir.X * (self.Y - y)) / game.TrackTileSize;
@@ -103,6 +128,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
         if (distance > game.TrackTileSize*1.5) {
           continue;
         }
+
         double angle = self.GetAngleTo(bonus);
         if (Math.Abs(angle) > Math.PI / 6) {
           continue;
