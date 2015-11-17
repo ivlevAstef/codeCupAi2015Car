@@ -58,14 +58,15 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
         double bonusMagnited = magniteToBonus(dirSelfToNext);
         double centerMagnited = magniteToCenter(dirSelfToNext);
 
-        if (Math.Abs(bonusMagnited) > 0.01) {
+        if (Math.Abs(bonusMagnited) > 1.0e-3) {
           needAngle += bonusMagnited;
         } else {
           needAngle += centerMagnited;
         }
 
-        needAngle -= self.AngularSpeed;
-        move.WheelTurn = (needAngle * 15.0 / Math.PI);
+        needAngle *= 25;
+        needAngle -= 15 * self.AngularSpeed;
+        move.WheelTurn = (needAngle / Math.PI);
 
         if (isStraight()) {
           move.IsUseNitro = true;

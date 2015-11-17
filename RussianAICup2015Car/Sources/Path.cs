@@ -49,7 +49,7 @@ namespace RussianAICup2015Car.Sources {
             min = nextPos;
             minDepth = path[min.X, min.Y];
             if (dir.Equals(carDirection(self))) {
-              minDepth -= speedToDepth(self);
+              minDepth -= 2;
             }
           }
         }
@@ -61,14 +61,6 @@ namespace RussianAICup2015Car.Sources {
       }
 
       return points.ToArray();
-    }
-
-    private int speedToDepth(Car car) {
-      double speed = Math.Sqrt(car.SpeedX * car.SpeedX + car.SpeedY * car.SpeedY);
-      if (speed > 15) {
-        return 2;
-      }
-      return 1;
     }
 
     private PointInt carDirection(Car car) {

@@ -10,8 +10,9 @@ namespace RussianAICup2015Car.Sources {
     private PointDouble outStuckPos = null;
 
     public void update(Car self) {
-      if (ignoreTicks > 0) {
+      if (ignoreTicks > 0 || 0 == self.Durability) {
         ignoreTicks--;
+        zeroSpeedTick = 0;
         return;
       }
 
@@ -37,7 +38,9 @@ namespace RussianAICup2015Car.Sources {
       double needDistance = game.TrackTileSize * 0.5;
 
       zeroSpeedTick = 0;
-      outStuckTicks++;
+      if (self.EnginePower < 0 || outStuckTicks > 10) {
+        outStuckTicks++;
+      }
 
       double distanceX = Math.Abs(self.X - outStuckPos.X);
       double distanceY = Math.Abs(self.Y - outStuckPos.Y);
@@ -51,11 +54,15 @@ namespace RussianAICup2015Car.Sources {
 
       double timePower = Math.Sin((Math.PI*0.5) * (double)(maxTicks - outStuckTicks) / maxTicks);
       move.EnginePower = -timePower;
-      
-      double angle = -self.GetAngleTo(self.X + dir.X, self.Y + dir.Y);
-      angle -= self.AngularSpeed;
 
-      move.WheelTurn = (angle * 15.0 / Math.PI);
+      double mX = dir.X * timePower + dir.Y * (1.0 - timePower);
+      double mY = dir.Y * timePower + dir.X * (1.0 - timePower);
+      double angle = -self.GetAngleTo(self.X + mX, self.Y + mY);
+
+      angle *= 25;
+      angle -= 5 * self.AngularSpeed;
+
+      move.WheelTurn = (angle / Math.PI);
     }
   }
 }
