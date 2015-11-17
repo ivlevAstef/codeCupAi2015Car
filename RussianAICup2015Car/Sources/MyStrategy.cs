@@ -30,7 +30,6 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
         return;
       }
 
-      path.update(self, world, game);
       outStuck.update(self);
 
       PointInt[] wayPoints = path.wayPoints(self, world, game, 2);

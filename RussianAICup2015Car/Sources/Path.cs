@@ -10,7 +10,6 @@ namespace RussianAICup2015Car.Sources {
     public static PointInt DirDown = new PointInt(0, 1);
 
     private Logger log = null;
-    private List<int[,]> paths = new List<int[,]>();//checkpoint index, depth[,]
 
     private const int depthMax = 16 * 16;
 
@@ -19,38 +18,39 @@ namespace RussianAICup2015Car.Sources {
       log.Assert(world.Waypoints.Length >= 2, "waypoints length < 2");
 
       this.log = log;
-
-      calculatePath(world);
     }
 
-    public void update(Car self, World world, Game game) {
-      PointInt nextWayPoint = new PointInt(self.NextWaypointX, self.NextWaypointY);
-    }
 
     public PointInt[] wayPoints(Car self, World world, Game game, int count) {
-      int iterPathIndex = (self.NextWaypointIndex + world.Waypoints.Length - 1) % world.Waypoints.Length;
-      PointInt iterCheckPoint = checkPointFor(world, iterPathIndex);
+      PointInt begin = new PointInt((int)(self.X / game.TrackTileSize), (int)(self.Y / game.TrackTileSize));
 
-      int[,] path = paths[iterPathIndex];
-      log.Assert(null != path, "Can't find path for checkpoint");
+      int checkPointOffset = 0;
+      PointInt checkPoint = checkpointByOffset(self, world, checkPointOffset);
+      int[,] path = pathFor(begin, world, checkPoint);
 
       List<PointInt> points = new List<PointInt>();
-      points.Add(new PointInt((int)(self.X / game.TrackTileSize), (int)(self.Y / game.TrackTileSize)));
+      points.Add(begin);
 
       while (count > 0) {
         PointInt iterPos = points[points.Count-1];
 
-        if (iterPos.Equals(iterCheckPoint)) {
-          iterPathIndex = (iterPathIndex + 1) % world.Waypoints.Length;
-          iterCheckPoint = checkPointFor(world, iterPathIndex);
-          path = paths[iterPathIndex];
+        while (iterPos.Equals(checkPoint)) {
+          checkPointOffset++;
+          PointInt nextCheckPoint = checkpointByOffset(self, world, checkPointOffset);
+          path = pathFor(checkPoint, world, nextCheckPoint);
+          checkPoint = nextCheckPoint;
         }
 
         PointInt min = null;
+        int minDepth = int.MaxValue;
         foreach (PointInt dir in directionsForTile(world.TilesXY[iterPos.X][iterPos.Y])) {
           PointInt nextPos = iterPos.Add(dir);
-          if (null == min || path[nextPos.X, nextPos.Y] < path[min.X, min.Y]) {
+          if (path[nextPos.X, nextPos.Y] < minDepth) {
             min = nextPos;
+            minDepth = path[min.X, min.Y];
+            if (dir.Equals(carDirection(self))) {
+              minDepth -= speedToDepth(self);
+            }
           }
         }
 
@@ -63,14 +63,36 @@ namespace RussianAICup2015Car.Sources {
       return points.ToArray();
     }
 
-    private PointInt checkPointFor(World world, int pathIndex) {
-      log.Assert(null != world, "zero world");
+    private int speedToDepth(Car car) {
+      double speed = Math.Sqrt(car.SpeedX * car.SpeedX + car.SpeedY * car.SpeedY);
+      if (speed > 15) {
+        return 2;
+      }
+      return 1;
+    }
 
-      int checkPointIndex = (pathIndex + 1) % world.Waypoints.Length;
+    private PointInt carDirection(Car car) {
+      if(Math.Abs(car.SpeedX) > Math.Abs(car.SpeedY)) {
+        return new PointInt(Math.Sign(car.SpeedX), 0);
+      } else {
+        return new PointInt(0, Math.Sign(car.SpeedY));
+      }
+    }
+
+    private PointInt checkpointByOffset(Car self, World world, int offset) {
+      int checkPointIndex = (self.NextWaypointIndex + offset) % world.Waypoints.Length;
       return new PointInt(world.Waypoints[checkPointIndex][0], world.Waypoints[checkPointIndex][1]);
     }
 
-    private PointInt startDirection(World world) {
+    private int[,] pathFor(PointInt begin, World world, PointInt checkPoint) {
+      int[,] path = initPath(world);
+      bool success = calculatePath(path, begin, checkPoint, world);
+      log.Assert(success, "can't find path to way point");
+
+      return path;
+    }
+
+    /*private PointInt startDirection(World world) {
       switch (world.StartingDirection) {
       case Direction.Left:
         return DirLeft;
@@ -82,7 +104,7 @@ namespace RussianAICup2015Car.Sources {
         return DirDown;
       }
       return new PointInt(0);
-    }
+    }*/
 
     private int[,] initPath(World world) {
       int[,] data = new int[world.Width, world.Height];
@@ -92,21 +114,6 @@ namespace RussianAICup2015Car.Sources {
         }
       }
       return data;
-    }
-
-    private void calculatePath(World world) {
-      log.Assert(null != world, "zero world");
-      log.Assert(world.Waypoints.Length >= 2, "waypoints length < 2");
-
-      for (int index = 0; index < world.Waypoints.Length; index++) {
-        PointInt begin = new PointInt(world.Waypoints[index][0], world.Waypoints[index][1]);
-        int nextIndex = (index + 1) % world.Waypoints.Length;
-        PointInt end = new PointInt(world.Waypoints[nextIndex][0], world.Waypoints[nextIndex][1]);
-
-        paths.Add(initPath(world));
-        bool success = calculatePath(paths[paths.Count-1], begin, end, world);
-        log.Assert(success, "can't find path to way point");
-      }
     }
 
     private PointInt[] directionsForTile(TileType tile) {
