@@ -155,7 +155,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
 
     private bool isStraight() {
       PointInt[] wayPoints = path.wayPoints(self, world, game, 4);
-      log.Assert(5 == wayPoints.Length, "incorrect calculate way points.");
+      log.Assert(3 <= wayPoints.Length, "incorrect calculate way points.");
 
       int moveX = 0;
       int moveY = 0;
