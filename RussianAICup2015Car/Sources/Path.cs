@@ -84,7 +84,7 @@ namespace RussianAICup2015Car.Sources {
 
     private int[,] pathFor(PointInt begin, World world, PointInt checkPoint) {
       int[,] path = initPath(world);
-      bool success = calculatePath(path, begin, checkPoint, world);
+      bool success = calculatePath(path, begin, checkPoint, world, 0);
       log.Assert(success, "can't find path to way point");
 
       return path;
@@ -146,7 +146,7 @@ namespace RussianAICup2015Car.Sources {
       }
     }
 
-    private bool calculatePath(int[,] path, PointInt pos, PointInt end, World world) {
+    private bool calculatePath(int[,] path, PointInt pos, PointInt end, World world, int depth) {
       log.Assert(null != world, "zero world");
 
       if (path[pos.X, pos.Y] < depthMax) {
@@ -162,6 +162,11 @@ namespace RussianAICup2015Car.Sources {
         return true;
       }
 
+      if (depth > 32) {
+        path[pos.X, pos.Y] = 0;
+        return true;
+      }
+
       log.Assert(0 <= pos.X && pos.X < world.Width, "0 < x < width");
       log.Assert(0 <= pos.Y && pos.Y < world.Height, "0 < y < height");
 
@@ -173,7 +178,7 @@ namespace RussianAICup2015Car.Sources {
       foreach (PointInt dirIter in directions) {
         PointInt nextPos = pos.Add(dirIter);
 
-        if (calculatePath(path, nextPos, end, world)) {
+        if (calculatePath(path, nextPos, end, world, depth+1)) {
           min = Math.Min(min, path[nextPos.X, nextPos.Y] + 1);
         }
       }
