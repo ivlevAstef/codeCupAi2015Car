@@ -3,6 +3,16 @@ using System.Collections.Generic;
 using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
 
 namespace RussianAICup2015Car.Sources {
+  class PathCell {
+    public readonly PointInt Pos;
+    public readonly PointInt Dir;
+
+    public PathCell(PointInt pos, PointInt dir) {
+      Pos = pos;
+      Dir = dir;
+    }
+  }
+
   class Path {
     public static PointInt DirLeft = new PointInt(-1, 0);
     public static PointInt DirRight = new PointInt(1, 0);
@@ -10,6 +20,7 @@ namespace RussianAICup2015Car.Sources {
     public static PointInt DirDown = new PointInt(0, 1);
 
     private Logger log = null;
+    private PathCell[] lastWayCells = null;
 
     private static Dictionary<TileType, PointInt[]> directionsByTileType = new Dictionary<TileType, PointInt[]> {
       {TileType.Empty , new PointInt[0]},
@@ -27,45 +38,49 @@ namespace RussianAICup2015Car.Sources {
       {TileType.Unknown , new PointInt[0]}
     };
 
-    public Path(World world, Logger log) {
-      log.Assert(null != world, "zero world");
-      log.Assert(world.Waypoints.Length >= 2, "waypoints length < 2");
-
+    public Path(Logger log) {
       this.log = log;
     }
 
 
-    public PointInt[] wayPoints(Car self, World world, Game game, int count) {
+    public void update(Car self, World world, Game game) {
+      lastWayCells = calculateWayCells(self, world, game, 2);
+      log.Assert(3 == lastWayCells.Length, "incorrect calculate way cells.");
+    }
+
+    public PathCell[] wayCells() {
+      return lastWayCells;
+    }
+
+    public PathCell[] calculateWayCells(Car self, World world, Game game, int count) {
       PointInt begin = new PointInt((int)(self.X / game.TrackTileSize), (int)(self.Y / game.TrackTileSize));
 
       int checkPointOffset = 0;
       PointInt checkPoint = checkpointByOffset(self, world, checkPointOffset);
       int[,] path = pathFor(begin, world, checkPoint);
 
-      List<PointInt> points = new List<PointInt>();
-      points.Add(begin);
-
-      PointInt wayDir = carDirection(self, game, world);
+      List<PathCell> result = new List<PathCell>();
+      result.Add(new PathCell(begin, carDirection(self, game, world)));
 
       while (count > 0) {
-        PointInt iterPos = points[points.Count-1];
+        PathCell iterCell = result[result.Count - 1];
 
-        while (iterPos.Equals(checkPoint)) {
+        while (iterCell.Pos.Equals(checkPoint)) {
           checkPointOffset++;
           PointInt nextCheckPoint = checkpointByOffset(self, world, checkPointOffset);
           path = pathFor(checkPoint, world, nextCheckPoint);
           checkPoint = nextCheckPoint;
         }
 
-        PointInt min = null;
+        PathCell min = null;
         int minDepth = int.MaxValue;
-        foreach (PointInt dir in directionsByTileType[world.TilesXY[iterPos.X][iterPos.Y]]) {
-          PointInt nextPos = iterPos.Add(dir);
+        foreach (PointInt dir in directionsByTileType[world.TilesXY[iterCell.Pos.X][iterCell.Pos.Y]]) {
+          PointInt nextPos = iterCell.Pos.Add(dir);
           int depth = (0 == path[nextPos.X, nextPos.Y]) ? -10 : path[nextPos.X, nextPos.Y];//because checkpoint needs all time
-          depth -= dir.Equals(wayDir) ? 2 : 0;
+          depth -= dir.Equals(iterCell.Dir) ? 2 : 0;
 
           if (depth < minDepth) {
-            min = nextPos;
+            min = new PathCell(nextPos, dir);
             minDepth = depth;
           }
         }
@@ -74,12 +89,11 @@ namespace RussianAICup2015Car.Sources {
           break;
         }
 
-        wayDir = new PointInt(min.X - iterPos.X, min.Y - iterPos.Y);
-        points.Add(min);
+        result.Add(min);
         count--;
       }
 
-      return points.ToArray();
+      return result.ToArray();
     }
 
     private PointInt carDirection(Car car, Game game, World world) {

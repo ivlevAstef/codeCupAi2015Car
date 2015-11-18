@@ -16,6 +16,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
     private PointInt useOilOn = null;
 
     public MyStrategy() {
+      path = new Path(log);
     }
 
     public void Move(Car self, World world, Game game, Move move) {
@@ -23,23 +24,21 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       this.world = world;
       this.game = game;
 
-      if (null == path) {
-        path = new Path(world, log);        
-      }
-
       if (world.Tick < game.InitialFreezeDurationTicks) {
         move.EnginePower = 1.0;
         return;
       }
 
+      path.update(self, world, game);
+
       outStuck.update(self);
 
-      PointInt[] wayPoints = path.wayPoints(self, world, game, 2);
-      log.Assert(3 == wayPoints.Length, "incorrect calculate way points.");
+      PathCell[] wayCells = path.wayCells();
 
-      PointInt dirSelfToNext = dirFor(wayPoints[0], wayPoints[1]);
-      PointInt dirNextToNextNext = dirFor(wayPoints[1], wayPoints[2]);
+      PointInt dirSelfToNext = dirFor(wayCells[0].Pos, wayCells[1].Pos);
+      PointInt dirNextToNextNext = dirFor(wayCells[1].Pos, wayCells[2].Pos);
       bool oneDir = dirSelfToNext.X == dirNextToNextNext.X && dirSelfToNext.Y == dirNextToNextNext.Y;
+
       if (dirNextToNextNext.X == -dirSelfToNext.X || dirNextToNextNext.Y == -dirSelfToNext.Y) {
         dirNextToNextNext = dirSelfToNext;
       }
@@ -53,7 +52,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
         double speed = hypot(self.SpeedX, self.SpeedY);
         double nSpeed = speed * nIdealAngle;
 
-        double procent = procentToWay(wayPoints[1], dirSelfToNext);
+        double procent = procentToWay(wayCells[1].Pos, dirSelfToNext);
 
         double procentToSpeed = Math.Min(2.0f, nSpeed / (game.TrackTileSize / 80));
         procent = procent * ((4.0 - procentToSpeed * procentToSpeed)/2.5);
@@ -65,7 +64,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
         double needAngle = self.GetAngleTo(self.X + xMoved, self.Y + yMoved);
         move.EnginePower = 1.0f - Math.Min(0.2f, Math.Abs(needAngle / (Math.PI * 0.5)));
 
-        if (!oneDir && nSpeed > game.TrackTileSize / 40) {
+        if (!isStraight() && nSpeed > game.TrackTileSize / 40) {
           move.IsBrake = true;
         }
 
@@ -88,13 +87,13 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
 
       }
 
-      if (null != useOilOn && useOilOn.Equals(wayPoints[0])) {
+      if (null != useOilOn && useOilOn.Equals(wayCells[0].Pos)) {
         move.IsSpillOil = true;
         useOilOn = null;
       }
 
       if (!oneDir && null == useOilOn) {
-        useOilOn = wayPoints[1];
+        useOilOn = wayCells[1].Pos;
        }
 
       if (enemyAhead()) {
@@ -143,7 +142,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       };
 
       double speed = hypot(self.SpeedX, self.SpeedY);
-      double maxAngle = (Math.PI / 6) / (speed / (game.TrackTileSize/80));
+      double maxAngle = (Math.PI / 6) / Math.Min(0.75, speed / (game.TrackTileSize/80));
 
       Bonus priorityBonus = null;
       foreach (Bonus bonus in world.Bonuses) {
@@ -177,14 +176,13 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
     }
 
     private bool isStraight() {
-      PointInt[] wayPoints = path.wayPoints(self, world, game, 4);
-      log.Assert(3 <= wayPoints.Length, "incorrect calculate way points.");
+      PathCell[] wayCells = path.wayCells();
 
       int moveX = 0;
       int moveY = 0;
-      for (int index = 1; index < wayPoints.Length; index++) {
-        moveX += Math.Abs(wayPoints[index].X - wayPoints[index - 1].X);
-        moveY += Math.Abs(wayPoints[index].Y - wayPoints[index - 1].Y);
+      for (int index = 0; index < wayCells.Length; index++) {
+        moveX += Math.Abs(wayCells[index].Dir.X);
+        moveY += Math.Abs(wayCells[index].Dir.Y);
       }
 
       return (0 == moveX) || (0 == moveY);
