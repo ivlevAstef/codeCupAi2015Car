@@ -13,6 +13,8 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
     private Path path = null;
     private OutStuck outStuck = new OutStuck();
 
+    private PointInt useOilOn = null;
+
     public MyStrategy() {
     }
 
@@ -52,9 +54,6 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
         double nSpeed = speed * nIdealAngle;
 
         double procent = procentToWay(wayPoints[1], dirSelfToNext);
-        if (!oneDir && procent < 0.55) {
-          move.IsSpillOil = true;
-        }
 
         double procentToSpeed = Math.Min(2.0f, nSpeed / (game.TrackTileSize / 80));
         procent = procent * ((4.0 - procentToSpeed * procentToSpeed)/2.5);
@@ -88,6 +87,15 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
         }
 
       }
+
+      if (null != useOilOn && useOilOn.Equals(wayPoints[0])) {
+        move.IsSpillOil = true;
+        useOilOn = null;
+      }
+
+      if (!oneDir && null == useOilOn) {
+        useOilOn = wayPoints[1];
+       }
 
       if (enemyAhead()) {
         move.IsThrowProjectile = true;
@@ -127,12 +135,15 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
 
     private double magniteToBonus(PointInt dir) {
       Dictionary<BonusType, int> priority = new Dictionary<BonusType,int> {
-        { BonusType.AmmoCrate , Math.Min(10, 50 - 10 * self.ProjectileCount) },
+        { BonusType.AmmoCrate , Math.Min(10, 70 - 10 * self.ProjectileCount) },
         { BonusType.NitroBoost , Math.Min(10, 80 - 10 * self.NitroChargeCount) },
         { BonusType.OilCanister , Math.Min(10, 50 - 10 * self.OilCanisterCount) },
         { BonusType.PureScore , 100 },
         { BonusType.RepairKit , (int)(150 * (1.0 - self.Durability)) }
       };
+
+      double speed = hypot(self.SpeedX, self.SpeedY);
+      double maxAngle = (Math.PI / 6) / (speed / (game.TrackTileSize/80));
 
       Bonus priorityBonus = null;
       foreach (Bonus bonus in world.Bonuses) {
@@ -142,7 +153,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
         }
 
         double angle = self.GetAngleTo(bonus);
-        if (Math.Abs(angle) > Math.PI / 9) {
+        if (Math.Abs(angle) > maxAngle) {
           continue;
         }
 
