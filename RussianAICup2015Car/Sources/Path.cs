@@ -102,7 +102,7 @@ namespace RussianAICup2015Car.Sources {
     private bool checkToAlternative(World world, int[,] path, PointInt pos, PointInt newPos) {
       foreach (PointInt nextDir in directionsByTileType[world.TilesXY[newPos.X][newPos.Y]]) {
         PointInt nextPos = newPos.Add(nextDir);
-        if (!nextPos.Equals(pos) && path[nextPos.X, nextPos.Y] == path[pos.X, pos.Y]) {
+        if (!nextPos.Equals(pos) && path[nextPos.X, nextPos.Y] < path[newPos.X, newPos.Y]) {
           return true;
         }
       }

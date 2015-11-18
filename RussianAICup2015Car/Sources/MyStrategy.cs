@@ -92,7 +92,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
         useOilOn = null;
       }
 
-      if (!oneDir && null == useOilOn) {
+      if (!oneDir) {
         useOilOn = wayCells[1].Pos;
        }
 
