@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
 
 namespace RussianAICup2015Car.Sources {
@@ -19,7 +18,8 @@ namespace RussianAICup2015Car.Sources {
     Shooting,
     OilSpill,
     UseNitro
-  }
+  };
+
   interface A_IAction {
     void setupEnvironment(Car car, World world, Game game, Path path);
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
 
 namespace RussianAICup2015Car.Sources {
-  struct PathCell {
+  public struct PathCell {
     public PointInt Pos;
     public PointInt DirIn;
     public PointInt DirOut;
@@ -21,7 +21,7 @@ namespace RussianAICup2015Car.Sources {
     }
   }
 
-  class Path {
+  public class Path {
     public static PointInt DirLeft = new PointInt(-1, 0);
     public static PointInt DirRight = new PointInt(1, 0);
     public static PointInt DirUp = new PointInt(0, -1);
@@ -44,10 +44,6 @@ namespace RussianAICup2015Car.Sources {
       {TileType.Crossroads , new PointInt[4] { DirLeft, DirRight, DirUp, DirDown }},
       {TileType.Unknown , new PointInt[0]}
     };
-
-    public Path() {
-    }
-
 
     public void update(Car self, World world, Game game) {
       lastWayCells = calculateWayCells(self, world, game, 3);

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 namespace RussianAICup2015Car.Sources {
-  class Point<Type> where Type : struct {
+  public class Point<Type> where Type : struct {
     public Type X;
     public Type Y;
 
@@ -22,7 +22,7 @@ namespace RussianAICup2015Car.Sources {
     }
   }
 
-  class PointInt : Point<int> {
+  public class PointInt : Point<int> {
     public PointInt(int all) : base(all) {}
     public PointInt(int x, int y) : base(x,y) {}
     public PointInt(PointInt p) : base(p){}
@@ -46,7 +46,7 @@ namespace RussianAICup2015Car.Sources {
   }
 
 
-  class PointDouble : Point<double> {
+  public class PointDouble : Point<double> {
     public PointDouble(double all) : base(all) {}
     public PointDouble(double x, double y) : base(x, y) {}
     public PointDouble(PointDouble p) : base(p) {}

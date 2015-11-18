@@ -2,16 +2,12 @@
 using System.Collections.Generic;
 
 namespace RussianAICup2015Car.Sources {
-  class A_BackAction : A_IAction {
-    public void setupEnvironment(Car car, World world, Game game, Path path) {
-
-    }
-
-    public bool valid() {
+  class A_BackAction : A_BaseAction {
+    public override bool valid() {
       return false;
     }
 
-    public void execute(Dictionary<ActionType, bool> valid, Move move) {
+    public override void execute(Dictionary<ActionType, bool> valid, Move move) {
 
     }
   }
