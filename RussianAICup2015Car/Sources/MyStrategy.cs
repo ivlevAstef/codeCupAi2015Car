@@ -38,21 +38,26 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       PointInt dirSelfToNext = dirFor(wayPoints[0], wayPoints[1]);
       PointInt dirNextToNextNext = dirFor(wayPoints[1], wayPoints[2]);
       bool oneDir = dirSelfToNext.X == dirNextToNextNext.X && dirSelfToNext.Y == dirNextToNextNext.Y;
+      if (dirNextToNextNext.X == -dirSelfToNext.X || dirNextToNextNext.Y == -dirSelfToNext.Y) {
+        dirNextToNextNext = dirSelfToNext;
+      }
 
       if (outStuck.needRunOutStuck()) {
         outStuck.updateUseOutStuck(self, dirSelfToNext, game, move);
       } else {
         double idealAngle = self.GetAngleTo(self.X + dirNextToNextNext.X, self.Y + dirNextToNextNext.Y);
+        double nIdealAngle = Math.Abs(Math.Sin(idealAngle));
+        nIdealAngle = (idealAngle < Math.PI/2) ? nIdealAngle : (2 - nIdealAngle);
         double speed = hypot(self.SpeedX, self.SpeedY);
-        double nSpeed = speed * Math.Abs(idealAngle / (Math.PI * 0.5));
+        double nSpeed = speed * nIdealAngle;
 
-        double procent = procentToWay(wayPoints[1]);
+        double procent = procentToWay(wayPoints[1], dirSelfToNext);
         if (!oneDir && procent < 0.55) {
           move.IsSpillOil = true;
         }
 
-        double procentToSpeed = Math.Min(2.0f, nSpeed / (game.TrackTileSize / 140));
-        procent = Math.Sin(Math.PI * 0.5 * procent) * (4.0 - procentToSpeed * procentToSpeed);
+        double procentToSpeed = Math.Min(2.0f, nSpeed / (game.TrackTileSize / 80));
+        procent = procent * ((4.0 - procentToSpeed * procentToSpeed)/2.5);
 
         procent = Math.Min(1.0, Math.Max(0.0, procent));
         double xMoved = dirSelfToNext.X * procent + dirNextToNextNext.X * (1.0 - procent);
@@ -61,7 +66,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
         double needAngle = self.GetAngleTo(self.X + xMoved, self.Y + yMoved);
         move.EnginePower = 1.0f - Math.Min(0.2f, Math.Abs(needAngle / (Math.PI * 0.5)));
 
-        if (nSpeed > game.TrackTileSize / 40) {
+        if (!oneDir && nSpeed > game.TrackTileSize / 40) {
           move.IsBrake = true;
         }
 
@@ -71,11 +76,11 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
         if (oneDir && Math.Abs(bonusMagnited) > 1.0e-3) {
           needAngle += bonusMagnited;
         } else {
-          needAngle += centerMagnited* 0.1;
+          needAngle += centerMagnited * 0.5;
         }
 
         needAngle *= 25;
-        needAngle -= 15 * self.AngularSpeed;
+        //needAngle -= 15 * self.AngularSpeed;
         move.WheelTurn = (needAngle / Math.PI);
 
         if (isStraight() && Math.Abs(needAngle) < 0.1) {
@@ -181,24 +186,26 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
     private PointDouble convert(PointInt point) {
       log.Assert(null != game, "zero game");
 
-      double nextWaypointX = (point.X + 0.5D) * game.TrackTileSize;
-      double nextWaypointY = (point.Y + 0.5D) * game.TrackTileSize;
+      double nextWaypointX = (point.X + 0.5) * game.TrackTileSize;
+      double nextWaypointY = (point.Y + 0.5) * game.TrackTileSize;
       return new PointDouble(nextWaypointX, nextWaypointY);
     }
 
-    private double pixelsToWay(PointInt way) {
+    private double pixelsToWay(PointInt way, PointInt dir) {
       log.Assert(null != way, "zero way");
       log.Assert(null != game, "zero game");
 
       PointDouble wayPos = convert(way);
+      wayPos.X = self.X * Math.Abs(dir.Y) + wayPos.X * Math.Abs(dir.X);
+      wayPos.Y = self.Y * Math.Abs(dir.X) + wayPos.Y * Math.Abs(dir.Y);
       return self.GetDistanceTo(wayPos.X, wayPos.Y);
     }
 
-    private double procentToWay(PointInt way) {
+    private double procentToWay(PointInt way, PointInt dir) {
       log.Assert(null != way, "zero way");
       log.Assert(null != game, "zero game");
 
-      return pixelsToWay(way) / game.TrackTileSize;
+      return pixelsToWay(way, dir) / game.TrackTileSize;
     }
 
     private PointInt dirFor(PointInt way, PointInt nextWay) {
