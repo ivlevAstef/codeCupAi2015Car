@@ -27,7 +27,6 @@ namespace RussianAICup2015Car.Sources {
     public static PointInt DirUp = new PointInt(0, -1);
     public static PointInt DirDown = new PointInt(0, 1);
 
-    private Logger log = null;
     private PathCell[] lastWayCells = null;
 
     private static Dictionary<TileType, PointInt[]> directionsByTileType = new Dictionary<TileType, PointInt[]> {
@@ -46,14 +45,13 @@ namespace RussianAICup2015Car.Sources {
       {TileType.Unknown , new PointInt[0]}
     };
 
-    public Path(Logger log) {
-      this.log = log;
+    public Path() {
     }
 
 
     public void update(Car self, World world, Game game) {
       lastWayCells = calculateWayCells(self, world, game, 3);
-      log.Assert(3 == lastWayCells.Length, "incorrect calculate way cells.");
+      Logger.instance.Assert(3 == lastWayCells.Length, "incorrect calculate way cells.");
     }
 
     public PathCell[] wayCells() {
@@ -153,7 +151,7 @@ namespace RussianAICup2015Car.Sources {
 
     private int[,] pathFor(PointInt begin, World world, PointInt checkPoint) {
       int[,] path = calculatePath(begin, checkPoint, world);
-      log.Assert(null != path, "can't find path to way point");
+      Logger.instance.Assert(null != path, "can't find path to way point");
 
       return path;
     }
@@ -193,7 +191,7 @@ namespace RussianAICup2015Car.Sources {
     }
 
     private int[,] calculatePath(PointInt begin, PointInt end, World world) {
-      log.Assert(null != world, "zero world");
+      Logger.instance.Assert(null != world, "zero world");
 
       int[,] result = initPath(world);
       bool[,] visited = initForward(world);

@@ -5,18 +5,16 @@ using System.Collections.Generic;
 
 namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
   public sealed class MyStrategy : IStrategy {
-    private Logger log = new Logger();
     private Car self = null;
     private World world = null;
     private Game game = null;
 
-    private Path path = null;
+    private Path path = new Path();
     private OutStuck outStuck = new OutStuck();
 
     private PointInt useOilOn = null;
 
     public MyStrategy() {
-      path = new Path(log);
     }
 
     public void Move(Car self, World world, Game game, Move move) {
@@ -195,7 +193,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
     }
 
     private PointDouble convert(PointInt point) {
-      log.Assert(null != game, "zero game");
+      Logger.instance.Assert(null != game, "zero game");
 
       double nextWaypointX = (point.X + 0.5) * game.TrackTileSize;
       double nextWaypointY = (point.Y + 0.5) * game.TrackTileSize;
@@ -203,8 +201,8 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
     }
 
     private double pixelsToWay(PointInt way, PointInt dir) {
-      log.Assert(null != way, "zero way");
-      log.Assert(null != game, "zero game");
+      Logger.instance.Assert(null != way, "zero way");
+      Logger.instance.Assert(null != game, "zero game");
 
       PointDouble wayPos = convert(way);
       wayPos.X = self.X * Math.Abs(dir.Y) + wayPos.X * Math.Abs(dir.X);
@@ -213,8 +211,8 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
     }
 
     private double procentToWay(PointInt way, PointInt dir) {
-      log.Assert(null != way, "zero way");
-      log.Assert(null != game, "zero game");
+      Logger.instance.Assert(null != way, "zero way");
+      Logger.instance.Assert(null != game, "zero game");
 
       return pixelsToWay(way, dir) / game.TrackTileSize;
     }
@@ -222,7 +220,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
     private PointInt dirFor(PointInt way, PointInt nextWay) {
       PointInt dir = new PointInt(nextWay.X - way.X, nextWay.Y - way.Y);
 
-      log.Assert(dir.Equals(Path.DirLeft) ||
+      Logger.instance.Assert(dir.Equals(Path.DirLeft) ||
                  dir.Equals(Path.DirRight) ||
                  dir.Equals(Path.DirUp) ||
                  dir.Equals(Path.DirDown), "incorrect dir");

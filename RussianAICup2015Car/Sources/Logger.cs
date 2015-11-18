@@ -3,6 +3,8 @@ using System;
 
 namespace RussianAICup2015Car.Sources {
   public class Logger {
+    public static readonly Logger instance = new Logger();
+
 #if USE_LOG
     public void Error(String message, params object[] args) {
        System.Console.Error.WriteLine("Error: " + message, args);

@@ -42,12 +42,24 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Runner.cs" />
+    <Compile Include="Sources\A_AroundAction.cs" />
+    <Compile Include="Sources\A_BackAction.cs" />
+    <Compile Include="Sources\A_ForwardAction.cs" />
+    <Compile Include="Sources\A_IAction.cs" />
     <Compile Include="Sources\Logger.cs" />
+    <Compile Include="Sources\A_MoveToBonusAction.cs" />
     <Compile Include="Sources\MyStrategy.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Sources\A_OilSpillAction.cs" />
     <Compile Include="Sources\OutStuck.cs" />
+    <Compile Include="Sources\A_OvertakeAction.cs" />
     <Compile Include="Sources\Path.cs" />
     <Compile Include="Sources\Point.cs" />
+    <Compile Include="Sources\A_ShootingAction.cs" />
+    <Compile Include="Sources\A_SnakeAction.cs" />
+    <Compile Include="Sources\A_StuckOutAction.cs" />
+    <Compile Include="Sources\A_TurnAction.cs" />
+    <Compile Include="Sources\A_UseNitroAction.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
