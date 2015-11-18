@@ -139,7 +139,10 @@ namespace RussianAICup2015Car.Sources {
     }
 
     private PointInt carDirection(Car car, Game game, World world) {
-      if (Math.Abs(car.SpeedX) + Math.Abs(car.SpeedY) < 1.0e-3 && world.TickCount < game.InitialFreezeDurationTicks + 10) {
+      PointInt carPos = new PointInt((int)(car.X / game.TrackTileSize), (int)(car.Y / game.TrackTileSize));
+      PointInt firstWayPoint = new PointInt(world.Waypoints[0][0], world.Waypoints[0][1]);
+
+      if (Math.Abs(car.SpeedX) + Math.Abs(car.SpeedY) < 0.1 && carPos.Equals(firstWayPoint)) {
         return startDirection(world);
       }
 

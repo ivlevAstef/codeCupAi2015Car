@@ -39,7 +39,19 @@ namespace RussianAICup2015Car.Sources {
       return false;
     }
 
-    public override void execute(Dictionary<ActionType, bool> valid, Move move) {
+    public override void execute(Move move) {
+      runOut(move);
+    }
+
+    public override void blockedBy(HashSet<ActionType> actions) {
+      ignoreTicks = 10;
+      zeroSpeedTicks = 0;
+      outStuckTicks = 0;
+    }
+
+    public override HashSet<ActionType> blockers { get { return new HashSet<ActionType>() { ActionType.InitialFreeze }; } }
+
+    private void runOut(Move move) {
       const double maxTicks = 115;
 
       if (car.EnginePower < 0 || outStuckTicks > 1) {

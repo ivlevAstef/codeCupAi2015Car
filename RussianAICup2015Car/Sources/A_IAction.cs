@@ -3,6 +3,8 @@ using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
 
 namespace RussianAICup2015Car.Sources {
   public enum ActionType {
+    InitialFreeze,
+
     Forward,
     Backward,
     PreTurn, //moved car to opposite side border turn
@@ -21,11 +23,15 @@ namespace RussianAICup2015Car.Sources {
     UseNitro
   };
 
-  interface A_IAction {
+  public interface A_IAction {
     void setupEnvironment(Car car, World world, Game game, Path path);
 
     bool valid();
 
-    void execute(Dictionary<ActionType, bool> valid, Move move);
+    void execute(Move move);
+
+    void blockedBy(HashSet<ActionType> actions);
+
+    HashSet<ActionType> blockers { get; }
   }
 }

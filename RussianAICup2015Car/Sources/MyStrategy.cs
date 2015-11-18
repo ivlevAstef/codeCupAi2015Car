@@ -5,29 +5,66 @@ using System.Collections.Generic;
 
 namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
   public sealed class MyStrategy : IStrategy {
-    private Car self = null;
-    private World world = null;
-    private Game game = null;
-
     private Path path = new Path();
-    private OutStuck outStuck = new OutStuck();
 
-    private PointInt useOilOn = null;
+    private Dictionary<ActionType, A_IAction> actions = new Dictionary<ActionType, A_IAction> {
+      { ActionType.InitialFreeze, new A_InitialFreeze()},
 
-    public MyStrategy() {
-    }
+      { ActionType.Forward, new A_M_ForwardAction()},
+      { ActionType.Backward, new A_M_BackwardAction()},
+      { ActionType.PreTurn, new A_M_PreTurnAction()},
+      { ActionType.Turn, new A_M_TurnAction()},
+      { ActionType.Snake, new A_M_SnakeAction()},
+      { ActionType.Around, new A_M_AroundAction()},
+      { ActionType.StuckOut, new A_M_StuckOutAction()},
+
+      { ActionType.MoveToBonus, new A_MoveToBonusAction()},
+      { ActionType.Overtake, new A_OvertakeAction()},
+      //{ ActionType.AvoidSideHit, new ()},
+      //{ ActionType.AvoidWindShieldHit, new ()},
+
+      { ActionType.Shooting, new A_ShootingAction()},
+      { ActionType.OilSpill, new A_OilSpillAction()},
+      { ActionType.UseNitro, new A_UseNitroAction()},
+    };
 
     public void Move(Car self, World world, Game game, Move move) {
-      this.self = self;
-      this.world = world;
-      this.game = game;
+      path.update(self, world, game);
 
-      if (world.Tick < game.InitialFreezeDurationTicks) {
-        move.EnginePower = 1.0;
-        return;
+      foreach (A_IAction action in actions.Values) {
+        action.setupEnvironment(self, world, game, path);
       }
 
-      path.update(self, world, game);
+      HashSet<ActionType> validActions = new HashSet<ActionType>();
+
+      foreach (KeyValuePair<ActionType, A_IAction> actionInfo in actions) {
+        if (actionInfo.Value.valid()) {
+          validActions.Add(actionInfo.Key);
+        }
+      }
+
+      move.WheelTurn = 0;
+      move.EnginePower = 0;
+      foreach (ActionType actionType in validActions) {
+        A_IAction action = actions[actionType];
+
+        HashSet<ActionType> blocked = new HashSet<ActionType>();
+        foreach (ActionType subActionType in validActions) {
+          if (action.blockers.Contains(subActionType)) {
+            blocked.Add(subActionType);
+          }
+        }
+
+        if (blocked.Count > 0) {
+          action.blockedBy(blocked);
+          continue;
+        }
+
+        action.execute(move);
+      }
+
+
+      /*path.update(self, world, game);
 
       outStuck.update(self);
 
@@ -83,7 +120,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
         if (isStraight() && Math.Abs(needAngle) < 0.1) {
           move.IsUseNitro = true;
         }
-
+        
       }
 
       if (null != useOilOn && useOilOn.Equals(wayCells[0].Pos)) {
@@ -98,9 +135,10 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       if (enemyAhead()) {
         move.IsThrowProjectile = true;
       }
+       */
     }
 
-    private bool enemyAhead() {
+    /*private bool enemyAhead() {
       foreach (Car car in world.Cars) {
         if (car.IsTeammate || car.IsFinishedTrack || 0 == car.Durability) {
           continue;
@@ -229,6 +267,6 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
     private static double hypot(double a, double b) {
        return Math.Sqrt(Math.Pow(a, 2) + Math.Pow(b, 2));
     }
-
+    */
   }
 }

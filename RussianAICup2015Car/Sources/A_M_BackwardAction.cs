@@ -18,8 +18,10 @@ namespace RussianAICup2015Car.Sources {
       return Math.Abs(angle) > ((Math.PI / 2) + (Math.PI / 18) );///100 degrees
     }
 
-    public override void execute(Dictionary<ActionType, bool> valid, Move move) {
-
+    public override void execute(Move move) {
+      move.EnginePower = -1.0;
     }
+
+    public override HashSet<ActionType> blockers { get { return new HashSet<ActionType>() { ActionType.InitialFreeze, ActionType.StuckOut }; } }
   }
 }

@@ -42,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Runner.cs" />
+    <Compile Include="Sources\A_InitialFreeze.cs" />
     <Compile Include="Sources\A_M_AroundAction.cs" />
     <Compile Include="Sources\A_M_BackwardAction.cs" />
     <Compile Include="Sources\A_BaseAction.cs" />

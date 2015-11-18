@@ -12,15 +12,19 @@ namespace RussianAICup2015Car.Sources {
       PointInt dirIn = path.wayCells[1].DirIn;
       PointInt dirOut = path.wayCells[2].DirOut;
 
-      if (null == dirOut) {
+      if (null == dirOut || dirOut.Equals(new PointInt(0))) {
         return false;
       }
 
-      return dirIn.Equals(dirOut) && !posIn.Equals(posOut);
+      PointInt dir = new PointInt(posOut.X - posIn.X, posOut.Y - posIn.Y);
+
+      return dirIn.Equals(dirOut) && (dir.Equals(dirIn.Perpendicular()) || dir.Equals(dirIn.Perpendicular().Negative()));
     }
 
-    public override void execute(Dictionary<ActionType, bool> valid, Move move) {
-
+    public override void execute(Move move) {
+      move.EnginePower = 1.0;
     }
+
+    public override HashSet<ActionType> blockers { get { return new HashSet<ActionType>() { ActionType.InitialFreeze, ActionType.StuckOut }; } }
   }
 }

@@ -24,7 +24,10 @@ namespace RussianAICup2015Car.Sources {
       return dirIn.Equals(dirOut.Perpendicular()) || dirIn.Equals(dirOut.Perpendicular().Negative()); 
     }
 
-    public override void execute(Dictionary<ActionType, bool> valid, Move move) {
+    public override void execute(Move move) {
+      move.EnginePower = 1.0;
     }
+
+    public override HashSet<ActionType> blockers { get { return new HashSet<ActionType>() { ActionType.InitialFreeze, ActionType.StuckOut }; } }
   }
 }

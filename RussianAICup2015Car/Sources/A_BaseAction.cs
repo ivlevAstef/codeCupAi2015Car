@@ -18,6 +18,10 @@ namespace RussianAICup2015Car.Sources {
 
     public abstract bool valid();
 
-    public abstract void execute(Dictionary<ActionType, bool> valid, Move move);
+    public abstract void execute(Move move);
+
+    public virtual void blockedBy(HashSet<ActionType> actions) { }
+
+    public virtual HashSet<ActionType> blockers { get { return new HashSet<ActionType>(); } }
   }
 }

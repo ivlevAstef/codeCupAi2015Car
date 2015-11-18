@@ -7,8 +7,10 @@ namespace RussianAICup2015Car.Sources {
       return false;
     }
 
-    public override void execute(Dictionary<ActionType, bool> valid, Move move) {
+    public override void execute(Move move) {
 
     }
+
+    public override HashSet<ActionType> blockers { get { return new HashSet<ActionType>() { ActionType.StuckOut }; } }
   }
 }

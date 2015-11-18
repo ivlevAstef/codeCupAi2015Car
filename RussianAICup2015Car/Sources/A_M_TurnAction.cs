@@ -21,7 +21,7 @@ namespace RussianAICup2015Car.Sources {
       return dirIn.Equals(dirOut.Perpendicular()) || dirIn.Equals(dirOut.Perpendicular().Negative()); 
     }
 
-    public override void execute(Dictionary<ActionType, bool> valid, Move move) {
+    public override void execute(Move move) {
       PointInt dirSelfToNext = path.wayCells[0].DirOut;
       PointInt dirNextToNextNext = path.wayCells[1].DirOut;
 
@@ -46,8 +46,12 @@ namespace RussianAICup2015Car.Sources {
       if (!path.isStraight() && speed > game.TrackTileSize / 40) {
         needAngle *= 0.4;
         move.IsBrake = true;
-      }  
+      }
+
+      move.WheelTurn = 25 * needAngle;
     }
+
+    public override HashSet<ActionType> blockers { get { return new HashSet<ActionType>() { ActionType.InitialFreeze, ActionType.StuckOut }; } }
 
     private PointDouble convert(PointInt point) {
       double nextWaypointX = (point.X + 0.5) * game.TrackTileSize;
