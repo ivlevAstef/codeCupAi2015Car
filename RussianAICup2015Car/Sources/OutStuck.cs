@@ -10,7 +10,12 @@ namespace RussianAICup2015Car.Sources {
     private PointDouble outStuckPos = null;
 
     public void update(Car self) {
-      if (ignoreTicks > 0 || 0 == self.Durability) {
+      if (0 == self.Durability) {
+        ignoreTicks = 15;
+        return;
+      }
+
+      if (ignoreTicks > 0) {
         ignoreTicks--;
         zeroSpeedTick = 0;
         return;
