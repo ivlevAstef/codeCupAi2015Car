@@ -5,6 +5,7 @@ namespace RussianAICup2015Car.Sources {
   public enum ActionType {
     Forward,
     Backward,
+    PreTurn, //moved car to opposite side border turn
     Turn,//90 degrees
     Snake,//45 degrees
     Around,//180 degrees

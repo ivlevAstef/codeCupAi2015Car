@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System;
 
 namespace RussianAICup2015Car.Sources {
-  class A_StuckOutAction : A_BaseAction {
+  class A_M_StuckOutAction : A_BaseAction {
     private int ignoreTicks = 0;
     private int zeroSpeedTicks = 0;
     private int outStuckTicks = 0;

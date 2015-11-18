@@ -56,7 +56,7 @@ namespace RussianAICup2015Car.Sources {
 
     public bool isStraight() {
       foreach (PathCell cell in lastWayCells) {
-        if (null == cell.DirOut || cell.DirOut.X != cell.DirIn.X || cell.DirOut.Y != cell.DirIn.Y) {
+        if (null == cell.DirOut || !cell.DirOut.Equals(cell.DirIn)) {
           return false;
         }
       }

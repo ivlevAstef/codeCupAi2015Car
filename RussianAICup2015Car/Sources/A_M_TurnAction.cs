@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System;
 
 namespace RussianAICup2015Car.Sources {
-  class A_TurnAction : A_BaseAction {
+  class A_M_TurnAction : A_BaseAction {
     public override bool valid() {
       Logger.instance.Assert(3 == path.wayCells.Length, "incorrect way cells count.");
 

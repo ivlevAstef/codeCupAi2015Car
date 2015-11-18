@@ -42,11 +42,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Runner.cs" />
-    <Compile Include="Sources\A_AroundAction.cs" />
-    <Compile Include="Sources\A_BackAction.cs" />
+    <Compile Include="Sources\A_M_AroundAction.cs" />
+    <Compile Include="Sources\A_M_BackwardAction.cs" />
     <Compile Include="Sources\A_BaseAction.cs" />
-    <Compile Include="Sources\A_ForwardAction.cs" />
+    <Compile Include="Sources\A_M_ForwardAction.cs" />
     <Compile Include="Sources\A_IAction.cs" />
+    <Compile Include="Sources\A_M_PreTurnAction.cs" />
     <Compile Include="Sources\Logger.cs" />
     <Compile Include="Sources\A_MoveToBonusAction.cs" />
     <Compile Include="Sources\MyStrategy.cs" />
@@ -57,9 +58,9 @@
     <Compile Include="Sources\Path.cs" />
     <Compile Include="Sources\Point.cs" />
     <Compile Include="Sources\A_ShootingAction.cs" />
-    <Compile Include="Sources\A_SnakeAction.cs" />
-    <Compile Include="Sources\A_StuckOutAction.cs" />
-    <Compile Include="Sources\A_TurnAction.cs" />
+    <Compile Include="Sources\A_M_SnakeAction.cs" />
+    <Compile Include="Sources\A_M_StuckOutAction.cs" />
+    <Compile Include="Sources\A_M_TurnAction.cs" />
     <Compile Include="Sources\A_UseNitroAction.cs" />
   </ItemGroup>
   <ItemGroup>
