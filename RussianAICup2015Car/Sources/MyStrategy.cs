@@ -65,14 +65,14 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
         move.EnginePower = 1.0f - Math.Min(0.2f, Math.Abs(needAngle / (Math.PI * 0.5)));
 
         if (!isStraight() && speed > game.TrackTileSize / 40) {
-          needAngle *= 0.25;
+          needAngle *= 0.4;
           move.IsBrake = true;
         }
 
         double bonusMagnited = magniteToBonus(dirSelfToNext);
         double centerMagnited = magniteToCenter(dirSelfToNext);
 
-        if (oneDir && Math.Abs(bonusMagnited) > 1.0e-3) {
+        if (isStraight() && Math.Abs(bonusMagnited) > 1.0e-3) {
           needAngle += bonusMagnited;
         } else {
           needAngle += centerMagnited * 0.5;
