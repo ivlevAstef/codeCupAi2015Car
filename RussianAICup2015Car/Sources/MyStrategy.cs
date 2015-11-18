@@ -64,7 +64,8 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
         double needAngle = self.GetAngleTo(self.X + xMoved, self.Y + yMoved);
         move.EnginePower = 1.0f - Math.Min(0.2f, Math.Abs(needAngle / (Math.PI * 0.5)));
 
-        if (!isStraight() && nSpeed > game.TrackTileSize / 40) {
+        if (!isStraight() && speed > game.TrackTileSize / 40) {
+          needAngle *= 0.25;
           move.IsBrake = true;
         }
 
@@ -178,14 +179,15 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
     private bool isStraight() {
       PathCell[] wayCells = path.wayCells();
 
-      int moveX = 0;
-      int moveY = 0;
       for (int index = 0; index < wayCells.Length; index++) {
-        moveX += Math.Abs(wayCells[index].Dir.X);
-        moveY += Math.Abs(wayCells[index].Dir.Y);
+        if (null == wayCells[index].DirOut ||
+          wayCells[index].DirOut.X != wayCells[index].DirIn.X || 
+          wayCells[index].DirOut.Y != wayCells[index].DirIn.Y) {
+          return false;
+        }
       }
 
-      return (0 == moveX) || (0 == moveY);
+      return true;
     }
 
     private PointInt convert(double x, double y) {

@@ -3,13 +3,21 @@ using System.Collections.Generic;
 using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
 
 namespace RussianAICup2015Car.Sources {
-  class PathCell {
-    public readonly PointInt Pos;
-    public readonly PointInt Dir;
+  struct PathCell {
+    public PointInt Pos;
+    public PointInt DirIn;
+    public PointInt DirOut;
 
-    public PathCell(PointInt pos, PointInt dir) {
-      Pos = pos;
-      Dir = dir;
+    public PathCell(PointInt pos, PointInt dirIn) {
+      this.Pos = pos;
+      this.DirIn = dirIn;
+      this.DirOut = null;
+    }
+
+    public PathCell(PathCell cell, PointInt dirOut) {
+      this.Pos = cell.Pos;
+      this.DirIn = cell.DirIn;
+      this.DirOut = dirOut;
     }
   }
 
@@ -44,7 +52,7 @@ namespace RussianAICup2015Car.Sources {
 
 
     public void update(Car self, World world, Game game) {
-      lastWayCells = calculateWayCells(self, world, game, 2);
+      lastWayCells = calculateWayCells(self, world, game, 3);
       log.Assert(3 == lastWayCells.Length, "incorrect calculate way cells.");
     }
 
@@ -59,44 +67,60 @@ namespace RussianAICup2015Car.Sources {
       PointInt checkPoint = checkpointByOffset(self, world, checkPointOffset);
       int[,] path = pathFor(begin, world, checkPoint);
 
-      List<PathCell> result = new List<PathCell>();
-      result.Add(new PathCell(begin, carDirection(self, game, world)));
+      List<PathCell> cells = new List<PathCell>();
+      cells.Add(new PathCell(begin, carDirection(self, game, world)));
 
-      while (count > 0) {
-        PathCell iterCell = result[result.Count - 1];
+      for (int i = 0; i < count; i++) {
+        PathCell iter = cells[i];
 
-        while (iterCell.Pos.Equals(checkPoint)) {
+        while (iter.Pos.Equals(checkPoint)) {
           checkPointOffset++;
           PointInt nextCheckPoint = checkpointByOffset(self, world, checkPointOffset);
           path = pathFor(checkPoint, world, nextCheckPoint);
           checkPoint = nextCheckPoint;
         }
 
-        PathCell min = null;
-        int minDepth = int.MaxValue;
-        foreach (PointInt dir in directionsByTileType[world.TilesXY[iterCell.Pos.X][iterCell.Pos.Y]]) {
-          PointInt nextPos = iterCell.Pos.Add(dir);
-          int depth = (0 == path[nextPos.X, nextPos.Y]) ? -10 : path[nextPos.X, nextPos.Y];//because checkpoint needs all time
-
-          if (dir.Equals(iterCell.Dir) && checkToAlternative(world, path, iterCell.Pos, nextPos)) {
-            depth -= 2;
-          }
-
-          if (depth < minDepth) {
-            min = new PathCell(nextPos, dir);
-            minDepth = depth;
-          }
-        }
-
+        PointInt min = findMinPoint(iter.Pos, iter.DirIn, world, path);
         if (null == min) {
           break;
         }
 
-        result.Add(min);
-        count--;
+        cells.Add(new PathCell(min, new PointInt(min.X - iter.Pos.X, min.Y - iter.Pos.Y)));
       }
 
-      return result.ToArray();
+      setDirOut(ref cells);
+      if (cells.Count > count) {
+        cells.RemoveRange(count, cells.Count - count);
+      }
+
+      return cells.ToArray();
+    }
+
+    private PointInt findMinPoint(PointInt from, PointInt dirIn, World world, int [,] path) {
+      PointInt min = null;
+      int minDepth = int.MaxValue;
+
+      foreach (PointInt dir in directionsByTileType[world.TilesXY[from.X][from.Y]]) {
+        PointInt nextPos = from.Add(dir);
+        int depth = (0 == path[nextPos.X, nextPos.Y]) ? -10 : path[nextPos.X, nextPos.Y];//because checkpoint needs all time
+
+        if (dir.Equals(dirIn) && checkToAlternative(world, path, from, nextPos)) {
+          depth -= 2;
+        }
+
+        if (depth < minDepth) {
+          min = nextPos;
+          minDepth = depth;
+        }
+      }
+
+      return min;
+    }
+
+    private void setDirOut(ref List<PathCell> cells) {
+      for (int i = 1; i < cells.Count; i++) {
+        cells[i - 1] = new PathCell(cells[i-1], cells[i].DirIn);
+      }
     }
 
     private bool checkToAlternative(World world, int[,] path, PointInt pos, PointInt newPos) {
