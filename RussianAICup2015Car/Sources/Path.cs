@@ -77,7 +77,10 @@ namespace RussianAICup2015Car.Sources {
         foreach (PointInt dir in directionsByTileType[world.TilesXY[iterCell.Pos.X][iterCell.Pos.Y]]) {
           PointInt nextPos = iterCell.Pos.Add(dir);
           int depth = (0 == path[nextPos.X, nextPos.Y]) ? -10 : path[nextPos.X, nextPos.Y];//because checkpoint needs all time
-          depth -= dir.Equals(iterCell.Dir) ? 2 : 0;
+
+          if (dir.Equals(iterCell.Dir) && checkToAlternative(world, path, iterCell.Pos, nextPos)) {
+            depth -= 2;
+          }
 
           if (depth < minDepth) {
             min = new PathCell(nextPos, dir);
@@ -94,6 +97,17 @@ namespace RussianAICup2015Car.Sources {
       }
 
       return result.ToArray();
+    }
+
+    private bool checkToAlternative(World world, int[,] path, PointInt pos, PointInt newPos) {
+      foreach (PointInt nextDir in directionsByTileType[world.TilesXY[newPos.X][newPos.Y]]) {
+        PointInt nextPos = newPos.Add(nextDir);
+        if (!nextPos.Equals(pos) && path[nextPos.X, nextPos.Y] == path[pos.X, pos.Y]) {
+          return true;
+        }
+      }
+
+      return false;
     }
 
     private PointInt carDirection(Car car, Game game, World world) {
