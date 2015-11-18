@@ -31,7 +31,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
 
       outStuck.update(self);
 
-      PathCell[] wayCells = path.wayCells();
+      PathCell[] wayCells = path.wayCells;
 
       PointInt dirSelfToNext = dirFor(wayCells[0].Pos, wayCells[1].Pos);
       PointInt dirNextToNextNext = dirFor(wayCells[1].Pos, wayCells[2].Pos);
@@ -175,12 +175,10 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
     }
 
     private bool isStraight() {
-      PathCell[] wayCells = path.wayCells();
-
-      for (int index = 0; index < wayCells.Length; index++) {
-        if (null == wayCells[index].DirOut ||
-          wayCells[index].DirOut.X != wayCells[index].DirIn.X || 
-          wayCells[index].DirOut.Y != wayCells[index].DirIn.Y) {
+      for (int index = 0; index < path.wayCells.Length; index++) {
+        if (null == path.wayCells[index].DirOut ||
+          path.wayCells[index].DirOut.X != path.wayCells[index].DirIn.X ||
+          path.wayCells[index].DirOut.Y != path.wayCells[index].DirIn.Y) {
           return false;
         }
       }

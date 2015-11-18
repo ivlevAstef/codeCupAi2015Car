@@ -43,6 +43,14 @@ namespace RussianAICup2015Car.Sources {
     public PointInt Add(PointInt p) {
       return new PointInt(X + p.X, Y + p.Y);
     }
+
+    public PointInt Negative() {
+      return new PointInt(-X, -Y);
+    }
+
+    public PointInt Perpendicular() {
+      return new PointInt(Y, -X);
+    }
   }
 
 

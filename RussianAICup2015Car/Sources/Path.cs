@@ -27,6 +27,10 @@ namespace RussianAICup2015Car.Sources {
     public static PointInt DirUp = new PointInt(0, -1);
     public static PointInt DirDown = new PointInt(0, 1);
 
+    public PathCell[] wayCells {
+      get { return lastWayCells; }
+    }
+
     private PathCell[] lastWayCells = null;
 
     private static Dictionary<TileType, PointInt[]> directionsByTileType = new Dictionary<TileType, PointInt[]> {
@@ -50,11 +54,17 @@ namespace RussianAICup2015Car.Sources {
       Logger.instance.Assert(3 == lastWayCells.Length, "incorrect calculate way cells.");
     }
 
-    public PathCell[] wayCells() {
-      return lastWayCells;
+    public bool isStraight() {
+      foreach (PathCell cell in lastWayCells) {
+        if (null == cell.DirOut || cell.DirOut.X != cell.DirIn.X || cell.DirOut.Y != cell.DirIn.Y) {
+          return false;
+        }
+      }
+
+      return true;
     }
 
-    public PathCell[] calculateWayCells(Car self, World world, Game game, int count) {
+    private PathCell[] calculateWayCells(Car self, World world, Game game, int count) {
       PointInt begin = new PointInt((int)(self.X / game.TrackTileSize), (int)(self.Y / game.TrackTileSize));
 
       int checkPointOffset = 0;
