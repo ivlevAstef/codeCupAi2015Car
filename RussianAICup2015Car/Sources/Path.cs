@@ -11,7 +11,21 @@ namespace RussianAICup2015Car.Sources {
 
     private Logger log = null;
 
-    private const int depthMax = 16 * 16;
+    private static Dictionary<TileType, PointInt[]> directionsByTileType = new Dictionary<TileType, PointInt[]> {
+      {TileType.Empty , new PointInt[0]},
+      {TileType.Vertical , new PointInt[2] {DirDown, DirUp }},
+      {TileType.Horizontal , new PointInt[2] { DirRight, DirLeft }},
+      {TileType.LeftTopCorner , new PointInt[2] { DirDown, DirRight }},
+      {TileType.RightTopCorner , new PointInt[2] { DirDown, DirLeft }},
+      {TileType.LeftBottomCorner , new PointInt[2] { DirUp, DirRight }},
+      {TileType.RightBottomCorner , new PointInt[2] { DirUp, DirLeft }},
+      {TileType.LeftHeadedT , new PointInt[3] { DirLeft, DirUp, DirDown }},
+      {TileType.RightHeadedT , new PointInt[3] { DirRight, DirUp, DirDown }},
+      {TileType.TopHeadedT , new PointInt[3] { DirLeft, DirRight, DirUp }},
+      {TileType.BottomHeadedT , new PointInt[3] { DirLeft, DirRight, DirDown }},
+      {TileType.Crossroads , new PointInt[4] { DirLeft, DirRight, DirUp, DirDown }},
+      {TileType.Unknown , new PointInt[0]}
+    };
 
     public Path(World world, Logger log) {
       log.Assert(null != world, "zero world");
@@ -31,6 +45,8 @@ namespace RussianAICup2015Car.Sources {
       List<PointInt> points = new List<PointInt>();
       points.Add(begin);
 
+      PointInt wayDir = carDirection(self, game, world);
+
       while (count > 0) {
         PointInt iterPos = points[points.Count-1];
 
@@ -43,14 +59,14 @@ namespace RussianAICup2015Car.Sources {
 
         PointInt min = null;
         int minDepth = int.MaxValue;
-        foreach (PointInt dir in directionsForTile(world.TilesXY[iterPos.X][iterPos.Y])) {
+        foreach (PointInt dir in directionsByTileType[world.TilesXY[iterPos.X][iterPos.Y]]) {
           PointInt nextPos = iterPos.Add(dir);
-          if (path[nextPos.X, nextPos.Y] <= minDepth) {
+          int depth = (0 == path[nextPos.X, nextPos.Y]) ? -10 : path[nextPos.X, nextPos.Y];//because checkpoint needs all time
+          depth -= dir.Equals(wayDir) ? 2 : 0;
+
+          if (depth < minDepth) {
             min = nextPos;
-            minDepth = path[min.X, min.Y];
-            if (dir.Equals(carDirection(self, game, world))) {
-              minDepth -= 2;
-            }
+            minDepth = depth;
           }
         }
 
@@ -58,6 +74,7 @@ namespace RussianAICup2015Car.Sources {
           break;
         }
 
+        wayDir = new PointInt(min.X - iterPos.X, min.Y - iterPos.Y);
         points.Add(min);
         count--;
       }
@@ -83,9 +100,8 @@ namespace RussianAICup2015Car.Sources {
     }
 
     private int[,] pathFor(PointInt begin, World world, PointInt checkPoint) {
-      int[,] path = initPath(world);
-      bool success = calculatePath(path, begin, checkPoint, world, 0);
-      log.Assert(success, "can't find path to way point");
+      int[,] path = calculatePath(begin, checkPoint, world);
+      log.Assert(null != path, "can't find path to way point");
 
       return path;
     }
@@ -108,88 +124,64 @@ namespace RussianAICup2015Car.Sources {
       int[,] data = new int[world.Width, world.Height];
       for (int i = 0; i < world.Width; i++) {
         for (int j = 0; j < world.Height; j++) {
-          data[i, j] = int.MaxValue;
+          data[i, j] = world.Width * world.Height;
         }
       }
       return data;
     }
 
-    private PointInt[] directionsForTile(TileType tile) {
-      switch (tile) {
-      case TileType.Empty:
-        log.Error("Empty tile");
-        return new PointInt[0];
-      case TileType.Vertical:
-        return new PointInt[2] {DirDown, DirUp };
-      case TileType.Horizontal:
-        return new PointInt[2] { DirRight, DirLeft };
-      case TileType.LeftTopCorner:
-        return new PointInt[2] { DirDown, DirRight };
-      case TileType.RightTopCorner:
-        return new PointInt[2] { DirDown, DirLeft };
-      case TileType.LeftBottomCorner:
-        return new PointInt[2] { DirUp, DirRight };
-      case TileType.RightBottomCorner:
-        return new PointInt[2] { DirUp, DirLeft };
-      case TileType.LeftHeadedT:
-        return new PointInt[3] { DirLeft, DirUp, DirDown };
-      case TileType.RightHeadedT:
-        return new PointInt[3] { DirRight, DirUp, DirDown };
-      case TileType.TopHeadedT:
-        return new PointInt[3] { DirLeft, DirRight, DirUp };
-      case TileType.BottomHeadedT:
-        return new PointInt[3] { DirLeft, DirRight, DirDown };
-      case TileType.Crossroads:
-        return new PointInt[4] { DirLeft, DirRight, DirUp, DirDown };
-      default:
-        return new PointInt[0];
+    private bool[,] initForward(World world) {
+      bool[,] data = new bool[world.Width, world.Height];
+      for (int i = 0; i < world.Width; i++) {
+        for (int j = 0; j < world.Height; j++) {
+          data[i, j] = false;
+        }
       }
+      return data;
     }
 
-    private bool calculatePath(int[,] path, PointInt pos, PointInt end, World world, int depth) {
+    private int[,] calculatePath(PointInt begin, PointInt end, World world) {
       log.Assert(null != world, "zero world");
 
-      if (path[pos.X, pos.Y] < depthMax) {
-        return true;
-      }
+      int[,] result = initPath(world);
+      bool[,] visited = initForward(world);
 
-      if (path[pos.X, pos.Y] == depthMax) {
-        return false;
-      }
+      Queue<PointInt> backStack = new Queue<PointInt>();
 
-      if (pos.Equals(end)) {
-        path[pos.X, pos.Y] = 0;
-        return true;
-      }
+      Queue<PointInt> stack = new Queue<PointInt>();
+      stack.Enqueue(begin);
 
-      if (TileType.Unknown == world.TilesXY[pos.X][pos.Y]) {
-        path[pos.X, pos.Y] = Math.Abs(pos.X - end.X) + Math.Abs(pos.Y - end.Y);
-        return true;
-      }
+      while (stack.Count > 0) {
+        PointInt pos = stack.Dequeue();
 
-      if (depth > 32) {
-        path[pos.X, pos.Y] = 0;
-        return true;
-      }
+        if (visited[pos.X, pos.Y]) {
+          continue;
+        }
 
-      log.Assert(0 <= pos.X && pos.X < world.Width, "0 < x < width");
-      log.Assert(0 <= pos.Y && pos.Y < world.Height, "0 < y < height");
+        if (pos.Equals(end) || TileType.Unknown == world.TilesXY[pos.X][pos.Y]) {
+          result[pos.X, pos.Y] = Math.Abs(pos.X - end.X) + Math.Abs(pos.Y - end.Y);
+          backStack.Enqueue(pos);
+        }
 
-      PointInt[] directions = directionsForTile(world.TilesXY[pos.X][pos.Y]);
-
-      path[pos.X, pos.Y] = depthMax;
-
-      int min = int.MaxValue;
-      foreach (PointInt dirIter in directions) {
-        PointInt nextPos = pos.Add(dirIter);
-
-        if (calculatePath(path, nextPos, end, world, depth+1)) {
-          min = Math.Min(min, path[nextPos.X, nextPos.Y] + 1);
+        visited[pos.X, pos.Y] = true;
+        foreach (PointInt dir in directionsByTileType[world.TilesXY[pos.X][pos.Y]]) {
+          stack.Enqueue(pos.Add(dir));
         }
       }
 
-      path[pos.X, pos.Y] = min;
-      return (min < depthMax);
+      while (backStack.Count > 0) {
+        PointInt pos = backStack.Dequeue();
+
+        foreach (PointInt dir in directionsByTileType[world.TilesXY[pos.X][pos.Y]]) {
+          PointInt nextPos = pos.Add(dir);
+          if (result[nextPos.X, nextPos.Y] > result[pos.X, pos.Y] + 1) {
+            result[nextPos.X, nextPos.Y] = result[pos.X, pos.Y] + 1;
+            backStack.Enqueue(nextPos);
+          }
+        }
+      }
+
+      return result;
     }
 
   }
