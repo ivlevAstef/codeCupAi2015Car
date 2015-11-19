@@ -4,13 +4,13 @@ using System.Collections.Generic;
 namespace RussianAICup2015Car.Sources {
   class A_M_SnakeAction : A_BaseAction {
     public override bool valid() {
-      Logger.instance.Assert(3 == path.wayCells.Length, "incorrect way cells count.");
+      Logger.instance.Assert(3 == path.WayCells.Length, "incorrect way cells count.");
 
-      PointInt posIn = path.wayCells[1].Pos;
-      PointInt posOut = path.wayCells[2].Pos;
+      PointInt posIn = path.WayCells[1].Pos;
+      PointInt posOut = path.WayCells[2].Pos;
 
-      PointInt dirIn = path.wayCells[1].DirIn;
-      PointInt dirOut = path.wayCells[2].DirOut;
+      PointInt dirIn = path.WayCells[1].DirIn;
+      PointInt dirOut = path.WayCells[2].DirOut;
 
       if (null == dirOut || dirOut.Equals(new PointInt(0))) {
         return false;

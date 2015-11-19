@@ -5,10 +5,9 @@ using System;
 namespace RussianAICup2015Car.Sources {
   class A_M_ForwardAction : A_BaseAction {
     public override bool valid() {
-      Logger.instance.Assert(3 == path.wayCells.Length, "incorrect way cells count.");
+      Logger.instance.Assert(3 == path.WayCells.Length, "incorrect way cells count.");
 
-      for (int i = 1; i < path.wayCells.Length; i++) {
-        PathCell cell = path.wayCells[i];
+      foreach(PathCell cell in path.ShortWayCells) {
         if (null != cell.DirOut && !cell.DirOut.Equals(cell.DirIn)) {
           return false;
         }
@@ -20,8 +19,7 @@ namespace RussianAICup2015Car.Sources {
     public override void execute(Move move) {
       move.EnginePower = 1.0;
 
-      
-      double magnitedForce = magniteToCenter(path.wayCells[0].DirIn);
+      double magnitedForce = magniteToCenter(path.FirstWayCell.DirOut);
 
       move.WheelTurn = magnitedForce / (Math.PI * 0.5);
     }
@@ -45,11 +43,7 @@ namespace RussianAICup2015Car.Sources {
       double x = car.X * Math.Abs(dir.X) + centerX * Math.Abs(dir.Y) + powerTilt * dir.X;
       double y = car.Y * Math.Abs(dir.Y) + centerY * Math.Abs(dir.X) + powerTilt * dir.Y;
 
-      return car.GetAngleTo(x, y);
-    }
-
-    private double magniteToPoint(double x, double y, PointInt dir) {
-      return car.GetAngleTo(x,y);
+      return car.GetAngleTo(new PointDouble(centerX,centerY), dir, powerTilt);
     }
   }
 }

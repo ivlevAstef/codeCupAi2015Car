@@ -5,25 +5,25 @@ using System;
 namespace RussianAICup2015Car.Sources {
   class A_M_TurnAction : A_BaseAction {
     public override bool valid() {
-      Logger.instance.Assert(3 == path.wayCells.Length, "incorrect way cells count.");
+      Logger.instance.Assert(3 == path.WayCells.Length, "incorrect way cells count.");
 
-      if (!path.wayCells[0].DirIn.Equals(path.wayCells[0].DirOut)) {
+      if (!path.WayCells[0].DirIn.Equals(path.WayCells[0].DirOut)) {
         return false;
       }
 
-      if (null != path.wayCells[2].DirOut && !path.wayCells[2].DirIn.Equals(path.wayCells[2].DirOut)) {
+      if (null != path.WayCells[2].DirOut && !path.WayCells[2].DirIn.Equals(path.WayCells[2].DirOut)) {
         return false;
       }
 
-      PointInt dirIn = path.wayCells[1].DirIn;
-      PointInt dirOut = path.wayCells[1].DirOut;
+      PointInt dirIn = path.WayCells[1].DirIn;
+      PointInt dirOut = path.WayCells[1].DirOut;
 
       return dirIn.Equals(dirOut.Perpendicular()) || dirIn.Equals(dirOut.Perpendicular().Negative()); 
     }
 
     public override void execute(Move move) {
-      PointInt dirSelfToNext = path.wayCells[0].DirOut;
-      PointInt dirNextToNextNext = path.wayCells[1].DirOut;
+      PointInt dirSelfToNext = path.WayCells[0].DirOut;
+      PointInt dirNextToNextNext = path.WayCells[1].DirOut;
 
       double idealAngle = car.GetAngleTo(car.X + dirNextToNextNext.X, car.Y + dirNextToNextNext.Y);
       double nIdealAngle = Math.Abs(Math.Sin(idealAngle));
@@ -31,7 +31,7 @@ namespace RussianAICup2015Car.Sources {
       double speed = car.SpeedX * car.SpeedX + car.SpeedY * car.SpeedY;
       double nSpeed = speed * nIdealAngle;
 
-      double procent = procentToWay(path.wayCells[1].Pos, dirSelfToNext);
+      double procent = procentToWay(path.WayCells[1].Pos, dirSelfToNext);
 
       double procentToSpeed = Math.Min(2.0f, nSpeed / (game.TrackTileSize / 80));
       procent = procent * ((4.0 - procentToSpeed * procentToSpeed) / 2.5);
@@ -42,11 +42,6 @@ namespace RussianAICup2015Car.Sources {
 
       double needAngle = car.GetAngleTo(car.X + xMoved, car.Y + yMoved);
       move.EnginePower = 1.0f - Math.Min(0.2f, Math.Abs(needAngle / (Math.PI * 0.5)));
-
-      if (!path.isStraight() && speed > game.TrackTileSize / 40) {
-        needAngle *= 0.4;
-        move.IsBrake = true;
-      }
 
       move.WheelTurn = 25 * needAngle;
     }

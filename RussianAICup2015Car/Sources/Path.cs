@@ -7,17 +7,20 @@ namespace RussianAICup2015Car.Sources {
     public PointInt Pos;
     public PointInt DirIn;
     public PointInt DirOut;
+    public PointInt[] Dirs;
 
-    public PathCell(PointInt pos, PointInt dirIn) {
+    public PathCell(PointInt pos, PointInt dirIn, PointInt[] dirs) {
       this.Pos = pos;
       this.DirIn = dirIn;
       this.DirOut = null;
+      this.Dirs = dirs;
     }
 
     public PathCell(PathCell cell, PointInt dirOut) {
       this.Pos = cell.Pos;
       this.DirIn = cell.DirIn;
       this.DirOut = dirOut;
+      this.Dirs = cell.Dirs;
     }
   }
 
@@ -27,11 +30,20 @@ namespace RussianAICup2015Car.Sources {
     public static PointInt DirUp = new PointInt(0, -1);
     public static PointInt DirDown = new PointInt(0, 1);
 
-    public PathCell[] wayCells {
-      get { return lastWayCells; }
+    public PathCell[] WayCells {
+      get { return wayCells; }
     }
 
-    private PathCell[] lastWayCells = null;
+    public PathCell FirstWayCell {
+      get { return wayCells[0]; }
+    }
+
+    public PathCell[] ShortWayCells {
+      get { return wayCellsWithoutSelf; }
+    }
+
+    private PathCell[] wayCells = null;
+    private PathCell[] wayCellsWithoutSelf = null;
 
     private static Dictionary<TileType, PointInt[]> directionsByTileType = new Dictionary<TileType, PointInt[]> {
       {TileType.Empty , new PointInt[0]},
@@ -50,18 +62,23 @@ namespace RussianAICup2015Car.Sources {
     };
 
     public void update(Car self, World world, Game game) {
-      lastWayCells = calculateWayCells(self, world, game, 3);
-      Logger.instance.Assert(3 == lastWayCells.Length, "incorrect calculate way cells.");
+      wayCells = calculateWayCells(self, world, game, 3);
+      Logger.instance.Assert(3 == wayCells.Length, "incorrect calculate way cells.");
+      wayCellsWithoutSelf = wayCells.RemoveFirst();
     }
 
     public bool isStraight() {
-      foreach (PathCell cell in lastWayCells) {
+      foreach (PathCell cell in wayCells) {
         if (null == cell.DirOut || !cell.DirOut.Equals(cell.DirIn)) {
           return false;
         }
       }
 
       return true;
+    }
+
+    private PointInt[] dirsFor(World world, PointInt pos) {
+      return directionsByTileType[world.TilesXY[pos.X][pos.Y]];
     }
 
     private PathCell[] calculateWayCells(Car self, World world, Game game, int count) {
@@ -72,7 +89,7 @@ namespace RussianAICup2015Car.Sources {
       int[,] path = pathFor(begin, world, checkPoint);
 
       List<PathCell> cells = new List<PathCell>();
-      cells.Add(new PathCell(begin, carDirection(self, game, world)));
+      cells.Add(new PathCell(begin, carDirection(self, game, world), dirsFor(world, begin)));
 
       for (int i = 0; i < count; i++) {
         PathCell iter = cells[i];
@@ -89,7 +106,8 @@ namespace RussianAICup2015Car.Sources {
           break;
         }
 
-        cells.Add(new PathCell(min, new PointInt(min.X - iter.Pos.X, min.Y - iter.Pos.Y)));
+        PointInt dir = new PointInt(min.X - iter.Pos.X, min.Y - iter.Pos.Y);
+        cells.Add(new PathCell(min, dir, dirsFor(world, min)));
       }
 
       setDirOut(ref cells);
@@ -104,7 +122,7 @@ namespace RussianAICup2015Car.Sources {
       PointInt min = null;
       int minDepth = int.MaxValue;
 
-      foreach (PointInt dir in directionsByTileType[world.TilesXY[from.X][from.Y]]) {
+      foreach (PointInt dir in dirsFor(world, from)) {
         PointInt nextPos = from.Add(dir);
         int depth = (0 == path[nextPos.X, nextPos.Y]) ? -10 : path[nextPos.X, nextPos.Y];//because checkpoint needs all time
 
@@ -128,7 +146,7 @@ namespace RussianAICup2015Car.Sources {
     }
 
     private bool checkToAlternative(World world, int[,] path, PointInt pos, PointInt newPos) {
-      foreach (PointInt nextDir in directionsByTileType[world.TilesXY[newPos.X][newPos.Y]]) {
+      foreach (PointInt nextDir in dirsFor(world, newPos)) {
         PointInt nextPos = newPos.Add(nextDir);
         if (!nextPos.Equals(pos) && path[nextPos.X, nextPos.Y] < path[newPos.X, newPos.Y]) {
           return true;
@@ -223,7 +241,7 @@ namespace RussianAICup2015Car.Sources {
         }
 
         visited[pos.X, pos.Y] = true;
-        foreach (PointInt dir in directionsByTileType[world.TilesXY[pos.X][pos.Y]]) {
+        foreach (PointInt dir in dirsFor(world,pos)) {
           stack.Enqueue(pos.Add(dir));
         }
       }
@@ -231,7 +249,7 @@ namespace RussianAICup2015Car.Sources {
       while (backStack.Count > 0) {
         PointInt pos = backStack.Dequeue();
 
-        foreach (PointInt dir in directionsByTileType[world.TilesXY[pos.X][pos.Y]]) {
+        foreach (PointInt dir in dirsFor(world,pos)) {
           PointInt nextPos = pos.Add(dir);
           if (result[nextPos.X, nextPos.Y] > result[pos.X, pos.Y] + 1) {
             result[nextPos.X, nextPos.Y] = result[pos.X, pos.Y] + 1;

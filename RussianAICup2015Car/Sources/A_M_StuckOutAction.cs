@@ -67,7 +67,7 @@ namespace RussianAICup2015Car.Sources {
       double timePower = Math.Sin((Math.PI * 0.5) * (double)(maxTicks - outStuckTicks) / maxTicks);
       move.EnginePower = -timePower;
 
-      PointInt dir = path.wayCells[0].DirOut;
+      PointInt dir = path.WayCells[0].DirOut;
 
       double angle = -car.GetAngleTo(car.X + dir.X, car.Y + dir.Y) * timePower;
 

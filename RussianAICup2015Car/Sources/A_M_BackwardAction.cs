@@ -5,11 +5,11 @@ using System;
 namespace RussianAICup2015Car.Sources {
   class A_M_BackwardAction : A_BaseAction {
     public override bool valid() {
-      Logger.instance.Assert(3 == path.wayCells.Length, "incorrect way cells count.");
+      Logger.instance.Assert(3 == path.WayCells.Length, "incorrect way cells count.");
 
-      PointInt dir = path.wayCells[0].DirIn;
+      PointInt dir = path.WayCells[0].DirIn;
 
-      if (!dir.Equals(path.wayCells[0].DirOut)) {
+      if (!dir.Equals(path.WayCells[0].DirOut)) {
         return false;
       }
 
