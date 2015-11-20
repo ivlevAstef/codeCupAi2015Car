@@ -7,11 +7,16 @@ namespace RussianAICup2015Car.Sources {
     public override bool valid() {
       Logger.instance.Assert(3 == path.WayCells.Length, "incorrect way cells count.");
 
-      foreach(PathCell cell in path.ShortWayCells) {
+      PathCell cell = path.ShortWayCells[0];
+      if (null != cell.DirOut && !cell.DirOut.Equals(cell.DirIn)) {
+        return false;
+      }
+
+      /*foreach(PathCell cell in path.ShortWayCells) {
         if (null != cell.DirOut && !cell.DirOut.Equals(cell.DirIn)) {
           return false;
         }
-      }
+      }*/
 
       return true;
     }
@@ -20,10 +25,10 @@ namespace RussianAICup2015Car.Sources {
       move.EnginePower = 1.0;
 
       double magnitedAngle = magniteToCenter(path.FirstWayCell.DirOut);
-      double magnitedForce = Math.Sin(magnitedAngle);
+      double magnitedForce = 0.5 * magnitedAngle * car.WheelTurnFactor(game);
 
       if (Math.Abs(magnitedAngle) > Math.PI / (3 * car.Speed() / 25)) {
-        magnitedForce *= 10;
+        //magnitedForce *= 10;
         move.IsBrake = true;
       }
 
@@ -41,7 +46,7 @@ namespace RussianAICup2015Car.Sources {
     } }
 
     private double magniteToCenter(PointInt dir) {
-      double powerTilt = game.TrackTileSize * 1.5;
+      double powerTilt = game.TrackTileSize * 3;
 
       double centerX = (Math.Floor(car.X / game.TrackTileSize) + 0.5) * game.TrackTileSize;
       double centerY = (Math.Floor(car.Y / game.TrackTileSize) + 0.5) * game.TrackTileSize;

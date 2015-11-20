@@ -25,38 +25,49 @@ namespace RussianAICup2015Car.Sources {
       PointInt dirMove = path.FirstWayCell.DirOut;
       PointInt dirEnd = path.ShortWayCells[0].DirOut;
 
+      PointDouble wayEnd = GetWayEnd(path.FirstWayCell.Pos, dirMove);
       PointDouble endPoint = GetWaySideEnd(path.FirstWayCell.Pos, dirMove, dirEnd);
 
       double needAngle = car.GetAngleTo(endPoint.X, endPoint.Y);
-      double needWheelTurn = 25 * needAngle / (Math.PI * 0.25);
-      needWheelTurn = Math.Max(-1.0, Math.Min(1.0, needWheelTurn));
-
-      move.WheelTurn = needWheelTurn;
-
-      move.EnginePower = 1.0;
 
       double normalAngle = car.GetAngleTo(car.X + dirMove.X + dirEnd.X, car.Y + dirMove.Y + dirEnd.Y);
-      double procentToEnd = car.GetDistanceTo(endPoint, dirMove) / game.TrackTileSize;
+      double distanceToEnd = car.GetDistanceTo(wayEnd, dirMove);
+      double procentToEnd = distanceToEnd / game.TrackTileSize;
 
-      double diffAngle = (normalAngle - needAngle);
-      if (diffAngle > 0 && procentToEnd < 0.75 && car.SpeedN(dirMove) * diffAngle * diffAngle > 4) {
-        move.IsBrake = true;
+      if (distanceToEnd < game.CarWidth * 0.5 && normalAngle > needAngle) {
+        move.WheelTurn = 0.5 * normalAngle * car.WheelTurnFactor(game);
+      } else {
+        move.WheelTurn = 0.5 * needAngle * car.WheelTurnFactor(game);
+
+        double diffAngle = (normalAngle - needAngle);
+        if (diffAngle > 0 && procentToEnd < 0.5 && car.SpeedN(dirMove) * diffAngle > 4) {
+          move.IsBrake = true;
+        }
       }
 
-      if (car.SpeedN(dirMove) > 23) {
+      if (car.SpeedN(dirMove) > 21 + Math.Max(0, car.SpeedN2(dirEnd))) {
         move.IsBrake = true;
+      } else {
+        move.EnginePower = 1.0;
       }
     }
 
     public override HashSet<ActionType> blockers { get { return new HashSet<ActionType>() { ActionType.InitialFreeze, ActionType.StuckOut }; } }
 
+    private double AngleToWheelTurn(double angle) {
+      double scalar = car.SpeedX * Math.Sin(car.Angle) + car.SpeedY * Math.Cos(car.Angle);
+
+      return angle / (game.CarAngularSpeedFactor * Math.Abs(scalar));
+    }
+
     private PointDouble GetWaySideEnd(PointInt pos, PointInt dir, PointInt normal) {
-      double endSideDistance = game.TrackTileSize * 0.5 - game.TrackTileMargin - game.CarHeight * 0.5;
+      double sideDistance = game.TrackTileMargin + game.CarHeight * 0.5;
+      double endSideDistance = game.TrackTileSize * 0.5 - sideDistance;
 
       PointDouble wayEnd = GetWayEnd(pos, dir);
 
-      double endX = wayEnd.X + normal.X * endSideDistance;
-      double endY = wayEnd.Y + normal.Y * endSideDistance;
+      double endX = wayEnd.X + normal.X * endSideDistance + dir.X * sideDistance;
+      double endY = wayEnd.Y + normal.Y * endSideDistance + dir.Y * sideDistance;
 
       return new PointDouble(endX, endY);
     }

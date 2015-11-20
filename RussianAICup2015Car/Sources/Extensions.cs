@@ -25,6 +25,9 @@ namespace RussianAICup2015Car.Sources {
     public static double SpeedN(this Car car, PointInt dir) {
       return Math.Sqrt(car.SpeedX * car.SpeedX * Math.Abs(dir.X) + car.SpeedY * car.SpeedY * Math.Abs(dir.Y));
     }
+    public static double SpeedN2(this Car car, PointInt dir) {
+      return car.SpeedX * car.SpeedX * Math.Sign(car.SpeedX) * dir.X + car.SpeedY * car.SpeedY * Math.Sign(car.SpeedY) * dir.Y;
+    }
 
     public static double Speed2(this Car car) {
       return car.SpeedX * car.SpeedX + car.SpeedY * car.SpeedY;
@@ -35,6 +38,26 @@ namespace RussianAICup2015Car.Sources {
       double y = car.Y * Math.Abs(dir.Y) + point.Y * Math.Abs(dir.X) + powerTilt * dir.Y;
 
       return car.GetAngleTo(x, y);
+    }
+
+    public static double GetAbsoluteAngleTo(this Car car, PointDouble point, PointInt dir, double powerTilt) {
+      double x = car.X * Math.Abs(dir.X) + point.X * Math.Abs(dir.Y) + powerTilt * dir.X;
+      double y = car.Y * Math.Abs(dir.Y) + point.Y * Math.Abs(dir.X) + powerTilt * dir.Y;
+
+      return car.GetAbsoluteAngleTo(x, y, dir.X, dir.Y);
+    }
+
+    public static double WheelTurnFactor(this Car car, Game game) {
+      double scalar = 1;
+      double speed = car.Speed();
+
+      if (speed < 1) {
+         scalar = (car.SpeedX / speed) * Math.Cos(car.Angle) + (car.SpeedY / speed) * Math.Sin(car.Angle);
+      } else {
+         scalar = car.SpeedX * Math.Cos(car.Angle) + car.SpeedY * Math.Sin(car.Angle);
+      }
+
+      return 1.0 / (game.CarAngularSpeedFactor * scalar);
     }
 
     public static double GetAbsoluteAngleTo(this Car car, double x, double y, double dirX, double dirY) {
