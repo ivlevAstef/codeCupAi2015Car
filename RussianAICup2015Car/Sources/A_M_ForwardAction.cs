@@ -25,10 +25,10 @@ namespace RussianAICup2015Car.Sources {
       move.EnginePower = 1.0;
 
       double magnitedAngle = magniteToCenter(path.FirstWayCell.DirOut);
-      double magnitedForce = 0.5 * magnitedAngle * car.WheelTurnFactor(game);
+      double magnitedForce = 0.75 * car.WheelTurnForAngle(magnitedAngle, game);
 
       if (Math.Abs(magnitedAngle) > Math.PI / (3 * car.Speed() / 25)) {
-        //magnitedForce *= 10;
+        magnitedForce *= 2;
         move.IsBrake = true;
       }
 

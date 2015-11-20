@@ -7,14 +7,6 @@ namespace RussianAICup2015Car.Sources {
     public override bool valid() {
       Logger.instance.Assert(3 == path.WayCells.Length, "incorrect way cells count.");
 
-      if (!path.WayCells[0].DirIn.Equals(path.WayCells[0].DirOut)) {
-        return false;
-      }
-
-      if (null != path.WayCells[2].DirOut && !path.WayCells[2].DirIn.Equals(path.WayCells[2].DirOut)) {
-        return false;
-      }
-
       PointInt dirIn = path.WayCells[1].DirIn;
       PointInt dirOut = path.WayCells[1].DirOut;
 
@@ -35,9 +27,9 @@ namespace RussianAICup2015Car.Sources {
       double procentToEnd = distanceToEnd / game.TrackTileSize;
 
       if (distanceToEnd < game.CarWidth * 0.5 && normalAngle > needAngle) {
-        move.WheelTurn = 0.5 * normalAngle * car.WheelTurnFactor(game);
+        move.WheelTurn = car.WheelTurnForAngle(normalAngle, game);
       } else {
-        move.WheelTurn = 0.5 * needAngle * car.WheelTurnFactor(game);
+        move.WheelTurn = car.WheelTurnForAngle(needAngle, game);
 
         double diffAngle = (normalAngle - needAngle);
         if (diffAngle > 0 && procentToEnd < 0.5 && car.SpeedN(dirMove) * diffAngle > 4) {
@@ -52,7 +44,12 @@ namespace RussianAICup2015Car.Sources {
       }
     }
 
-    public override HashSet<ActionType> blockers { get { return new HashSet<ActionType>() { ActionType.InitialFreeze, ActionType.StuckOut }; } }
+    public override HashSet<ActionType> blockers { get { return new HashSet<ActionType>() { 
+      ActionType.InitialFreeze, 
+      ActionType.StuckOut, 
+      ActionType.Snake,
+      ActionType.Around
+    }; } }
 
     private double AngleToWheelTurn(double angle) {
       double scalar = car.SpeedX * Math.Sin(car.Angle) + car.SpeedY * Math.Cos(car.Angle);

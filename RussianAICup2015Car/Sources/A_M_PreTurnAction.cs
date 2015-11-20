@@ -42,9 +42,9 @@ namespace RussianAICup2015Car.Sources {
       double magnitedAngle = car.GetAngleTo(car.X + dirMove.X, car.Y + dirMove.Y);
 
       double procentToEnd = distanceToEnd / game.TrackTileSize;
-      double finalAngle = magnitedAngleNegative * procentToEnd + magnitedAngle * (1.0 - procentToEnd);
+      double finalAngle = magnitedAngleNegative * procentToEnd + 2 * magnitedAngle * (1.0 - procentToEnd);
 
-      move.WheelTurn = 0.5 * finalAngle * car.WheelTurnFactor(game);
+      move.WheelTurn = 0.5 * car.WheelTurnForAngle(finalAngle, game);
     }
 
     public override HashSet<ActionType> blockers { get { return new HashSet<ActionType>() { ActionType.InitialFreeze, ActionType.StuckOut }; } }
@@ -56,7 +56,7 @@ namespace RussianAICup2015Car.Sources {
     }
 
     private double magniteToSide(PointInt dir, PointInt normal) {
-      double powerTilt = game.TrackTileSize * 1.0;
+      double powerTilt = game.TrackTileSize * 0.75;
       double sideDistance = (game.TrackTileSize * 0.5) - game.TrackTileMargin - game.CarWidth * 0.5;
 
       double centerX = (Math.Floor(car.X / game.TrackTileSize) + 0.5) * game.TrackTileSize;

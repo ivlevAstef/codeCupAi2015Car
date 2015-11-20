@@ -60,6 +60,10 @@ namespace RussianAICup2015Car.Sources {
       return 1.0 / (game.CarAngularSpeedFactor * scalar);
     }
 
+    public static double WheelTurnForAngle(this Car car, double angle, Game game) {
+      return angle * car.WheelTurnFactor(game);
+    }
+
     public static double GetAbsoluteAngleTo(this Car car, double x, double y, double dirX, double dirY) {
       double absoluteAngleTo = Math.Atan2(y - car.Y, x - car.X);
       absoluteAngleTo -= Math.Atan2(dirY, dirX);
