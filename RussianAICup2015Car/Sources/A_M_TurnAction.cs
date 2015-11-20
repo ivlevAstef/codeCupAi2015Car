@@ -28,8 +28,6 @@ namespace RussianAICup2015Car.Sources {
       double distanceToEnd = car.GetDistanceTo(wayEnd, dirMove);
       double procentToEnd = distanceToEnd / game.TrackTileSize;
 
-      Logger.instance.Debug("N angle {0} need angle {1}", normalAngle, needAngle);
-
       double diffAngle = sign * (normalAngle - needAngle);
 
       if (distanceToEnd < game.CarWidth * 0.5 && sign * normalAngle > 0) {

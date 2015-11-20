@@ -14,7 +14,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       { ActionType.Backward, new A_M_BackwardAction()},
       { ActionType.PreTurn, new A_M_PreTurnAction()},
       { ActionType.Turn, new A_M_TurnAction()},
-      //{ ActionType.Snake, new A_M_SnakeAction()},
+      { ActionType.Snake, new A_M_SnakeAction()},
       //{ ActionType.Around, new A_M_AroundAction()},
       { ActionType.StuckOut, new A_M_StuckOutAction()},
 

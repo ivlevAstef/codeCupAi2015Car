@@ -40,11 +40,12 @@ namespace RussianAICup2015Car.Sources {
       return car.GetAngleTo(x, y);
     }
 
-    public static double GetAbsoluteAngleTo(this Car car, PointDouble point, PointInt dir, double powerTilt) {
-      double x = car.X * Math.Abs(dir.X) + point.X * Math.Abs(dir.Y) + powerTilt * dir.X;
-      double y = car.Y * Math.Abs(dir.Y) + point.Y * Math.Abs(dir.X) + powerTilt * dir.Y;
+    public static double GetAngleTo(this Car car, PointDouble point, PointDouble dir, double powerTilt) {
+      double projectT = (car.X - point.X) * dir.X + (car.Y - point.Y) * dir.Y;
+      double x = point.X + (projectT + powerTilt) * dir.X;
+      double y = point.Y + (projectT + powerTilt) * dir.Y;
 
-      return car.GetAbsoluteAngleTo(x, y, dir.X, dir.Y);
+      return car.GetAngleTo(x, y);
     }
 
     public static double WheelTurnFactor(this Car car, Game game) {

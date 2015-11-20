@@ -60,7 +60,8 @@ namespace RussianAICup2015Car.Sources {
       x -= ticks * car.SpeedX * Math.Abs(dir.Y);
       y -= ticks * car.SpeedY * Math.Abs(dir.X);
 
-      return car.GetAngleTo(new PointDouble(centerX,centerY), dir, powerTilt);
+      //TODO: maybe x,y ?
+      return car.GetAngleTo(new PointDouble(centerX, centerY), dir, powerTilt);
     }
   }
 }
