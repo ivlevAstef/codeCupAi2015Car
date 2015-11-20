@@ -22,7 +22,7 @@ namespace RussianAICup2015Car.Sources {
     }
 
     public override void execute(Move move) {
-      double maxSpeed = game.TrackTileSize / 32;//around 25
+      double maxSpeed = game.TrackTileSize / 28;//around 28
       PointInt dirMove = path.FirstWayCell.DirOut;
 
       if (car.Speed() > maxSpeed) {
@@ -57,7 +57,7 @@ namespace RussianAICup2015Car.Sources {
     }
 
     private double magniteToSide(PointInt dir, PointInt normal) {
-      double powerTilt = game.TrackTileSize * 0.1;
+      double powerTilt = game.TrackTileSize * 0.2;
       double sideDistance = (game.TrackTileSize * 0.5) - game.TrackTileMargin - game.CarHeight;
 
       double centerX = (Math.Floor(car.X / game.TrackTileSize) + 0.5) * game.TrackTileSize;

@@ -23,7 +23,7 @@ namespace RussianAICup2015Car.Sources {
     }
 
     public static double SpeedN(this Car car, PointInt dir) {
-      return Math.Sqrt(car.SpeedX * car.SpeedX * dir.X + car.SpeedY * car.SpeedY * dir.Y);
+      return Math.Sqrt(car.SpeedX * car.SpeedX * Math.Abs(dir.X) + car.SpeedY * car.SpeedY * Math.Abs(dir.Y));
     }
 
     public static double Speed2(this Car car) {
@@ -35,6 +35,21 @@ namespace RussianAICup2015Car.Sources {
       double y = car.Y * Math.Abs(dir.Y) + point.Y * Math.Abs(dir.X) + powerTilt * dir.Y;
 
       return car.GetAngleTo(x, y);
+    }
+
+    public static double GetAbsoluteAngleTo(this Car car, double x, double y, double dirX, double dirY) {
+      double absoluteAngleTo = Math.Atan2(y - car.Y, x - car.X);
+      absoluteAngleTo -= Math.Atan2(dirY, dirX);
+
+      while (absoluteAngleTo > Math.PI) {
+        absoluteAngleTo -= 2.0D * Math.PI;
+      }
+
+      while (absoluteAngleTo < -Math.PI) {
+        absoluteAngleTo += 2.0D * Math.PI;
+      }
+
+      return absoluteAngleTo;
     }
   }
 }

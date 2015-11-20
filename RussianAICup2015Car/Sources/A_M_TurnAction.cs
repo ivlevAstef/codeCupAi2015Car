@@ -22,53 +22,49 @@ namespace RussianAICup2015Car.Sources {
     }
 
     public override void execute(Move move) {
-      PointInt dirSelfToNext = path.WayCells[0].DirOut;
-      PointInt dirNextToNextNext = path.WayCells[1].DirOut;
+      PointInt dirMove = path.FirstWayCell.DirOut;
+      PointInt dirEnd = path.ShortWayCells[0].DirOut;
 
-      double idealAngle = car.GetAngleTo(car.X + dirNextToNextNext.X, car.Y + dirNextToNextNext.Y);
-      double nIdealAngle = Math.Abs(Math.Sin(idealAngle));
-      nIdealAngle = (idealAngle < Math.PI / 2) ? nIdealAngle : (2 - nIdealAngle);
-      double speed = car.SpeedX * car.SpeedX + car.SpeedY * car.SpeedY;
-      double nSpeed = speed * nIdealAngle;
+      PointDouble endPoint = GetWaySideEnd(path.FirstWayCell.Pos, dirMove, dirEnd);
 
-      double procent = procentToWay(path.WayCells[1].Pos, dirSelfToNext);
+      double needAngle = car.GetAngleTo(endPoint.X, endPoint.Y);
+      double needWheelTurn = 25 * needAngle / (Math.PI * 0.25);
+      needWheelTurn = Math.Max(-1.0, Math.Min(1.0, needWheelTurn));
 
-      double procentToSpeed = Math.Min(2.0f, nSpeed / (game.TrackTileSize / 80));
-      procent = procent * ((4.0 - procentToSpeed * procentToSpeed) / 2.5);
+      move.WheelTurn = needWheelTurn;
 
-      procent = Math.Min(1.0, Math.Max(0.0, procent));
-      double xMoved = dirSelfToNext.X * procent + dirNextToNextNext.X * (1.0 - procent);
-      double yMoved = dirSelfToNext.Y * procent + dirNextToNextNext.Y * (1.0 - procent);
+      move.EnginePower = 1.0;
 
-      double needAngle = car.GetAngleTo(car.X + xMoved, car.Y + yMoved);
-      move.EnginePower = 1.0f - Math.Min(0.2f, Math.Abs(needAngle / (Math.PI * 0.5)));
+      double normalAngle = car.GetAngleTo(car.X + dirMove.X + dirEnd.X, car.Y + dirMove.Y + dirEnd.Y);
+      double procentToEnd = car.GetDistanceTo(endPoint, dirMove) / game.TrackTileSize;
 
-      move.WheelTurn = 25 * needAngle;
+      double diffAngle = (normalAngle - needAngle);
+      if (diffAngle > 0 && procentToEnd < 0.75 && car.SpeedN(dirMove) * diffAngle * diffAngle > 4) {
+        move.IsBrake = true;
+      }
+
+      if (car.SpeedN(dirMove) > 23) {
+        move.IsBrake = true;
+      }
     }
 
     public override HashSet<ActionType> blockers { get { return new HashSet<ActionType>() { ActionType.InitialFreeze, ActionType.StuckOut }; } }
 
-    private PointDouble convert(PointInt point) {
-      double nextWaypointX = (point.X + 0.5) * game.TrackTileSize;
-      double nextWaypointY = (point.Y + 0.5) * game.TrackTileSize;
+    private PointDouble GetWaySideEnd(PointInt pos, PointInt dir, PointInt normal) {
+      double endSideDistance = game.TrackTileSize * 0.5 - game.TrackTileMargin - game.CarHeight * 0.5;
+
+      PointDouble wayEnd = GetWayEnd(pos, dir);
+
+      double endX = wayEnd.X + normal.X * endSideDistance;
+      double endY = wayEnd.Y + normal.Y * endSideDistance;
+
+      return new PointDouble(endX, endY);
+    }
+
+    private PointDouble GetWayEnd(PointInt wayPos, PointInt dir) {
+      double nextWaypointX = (wayPos.X + 0.5 + dir.X * 0.5) * game.TrackTileSize;
+      double nextWaypointY = (wayPos.Y + 0.5 + dir.Y * 0.5) * game.TrackTileSize;
       return new PointDouble(nextWaypointX, nextWaypointY);
-    }
-
-    private double pixelsToWay(PointInt way, PointInt dir) {
-      Logger.instance.Assert(null != way, "zero way");
-      Logger.instance.Assert(null != game, "zero game");
-
-      PointDouble wayPos = convert(way);
-      wayPos.X = car.X * Math.Abs(dir.Y) + wayPos.X * Math.Abs(dir.X);
-      wayPos.Y = car.Y * Math.Abs(dir.X) + wayPos.Y * Math.Abs(dir.Y);
-      return car.GetDistanceTo(wayPos.X, wayPos.Y);
-    }
-
-    private double procentToWay(PointInt way, PointInt dir) {
-      Logger.instance.Assert(null != way, "zero way");
-      Logger.instance.Assert(null != game, "zero game");
-
-      return pixelsToWay(way, dir) / game.TrackTileSize;
     }
   }
 }

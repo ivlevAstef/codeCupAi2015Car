@@ -79,7 +79,7 @@
     <PostBuildEvent>D:
 cd D:\Projects\RussianAICup\2015\local-runner\
 powershell start-process local-runner.bat
-ping 127.0.0.1 -n 3 &gt; nul</PostBuildEvent>
+ping 127.0.0.1 -n 1 &gt; nul</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>
