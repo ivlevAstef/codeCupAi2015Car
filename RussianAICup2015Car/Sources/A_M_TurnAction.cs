@@ -30,13 +30,19 @@ namespace RussianAICup2015Car.Sources {
 
       Logger.instance.Debug("N angle {0} need angle {1}", normalAngle, needAngle);
 
+      double diffAngle = sign * (normalAngle - needAngle);
+
       if (distanceToEnd < game.CarWidth * 0.5 && sign * normalAngle > 0) {
         double angle = car.GetAngleTo(car.X + dirEnd.X, car.Y + dirEnd.Y);
         move.WheelTurn = car.WheelTurnForAngle(angle, game);
+
+        if (diffAngle > 0 && car.SpeedN(dirMove) * diffAngle > 3) {
+          move.IsBrake = true;
+        }
+
       } else {
         move.WheelTurn = car.WheelTurnForAngle(needAngle, game);
 
-        double diffAngle = sign * (normalAngle - needAngle);
         if (diffAngle > 0 && procentToEnd < 0.5 && car.SpeedN(dirMove) * diffAngle > 4) {
           move.IsBrake = true;
         }

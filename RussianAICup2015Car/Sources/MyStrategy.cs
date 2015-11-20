@@ -18,7 +18,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       //{ ActionType.Around, new A_M_AroundAction()},
       { ActionType.StuckOut, new A_M_StuckOutAction()},
 
-      //{ ActionType.MoveToBonus, new A_MoveToBonusAction()},
+      { ActionType.MoveToBonus, new A_MoveToBonusAction()},
       //{ ActionType.Overtake, new A_OvertakeAction()},
       //{ ActionType.AvoidSideHit, new ()},
       //{ ActionType.AvoidWindShieldHit, new ()},
