@@ -4,11 +4,11 @@ using System.Collections.Generic;
 namespace RussianAICup2015Car.Sources {
   class A_UseNitroAction : A_BaseAction {
     public override bool valid() {
-      return false;
+      return (car.RemainingNitroCooldownTicks <= 0) && path.isStraight();
     }
 
     public override void execute(Move move) {
-
+      move.IsUseNitro = true;
     }
 
     public override HashSet<ActionType> blockers { get { return new HashSet<ActionType>() { ActionType.InitialFreeze }; } }

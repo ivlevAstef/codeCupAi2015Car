@@ -143,6 +143,20 @@ namespace RussianAICup2015Car.Sources {
       for (int i = 1; i < cells.Count; i++) {
         cells[i - 1] = new PathCell(cells[i-1], cells[i].DirIn);
       }
+
+      PathCell lastCell = cells[cells.Count - 1];
+
+      if (2 == lastCell.Dirs.Length) {
+        //TODO: check on final maps for correct.
+        PointInt dirIn = lastCell.DirIn;
+
+        if (lastCell.DirIn.Equals(lastCell.Dirs[0])) {
+          cells[cells.Count - 1]  = new PathCell(lastCell, lastCell.Dirs[1]);
+        } else {
+          cells[cells.Count - 1]  = new PathCell(lastCell, lastCell.Dirs[0]);
+        }
+
+      }
     }
 
     private bool checkToAlternative(World world, int[,] path, PointInt pos, PointInt newPos) {
