@@ -20,14 +20,11 @@ namespace RussianAICup2015Car.Sources {
       move.EnginePower = 1.0;
     }
 
-    public override HashSet<ActionType> blockers { get { return new HashSet<ActionType>() { 
-      ActionType.InitialFreeze,
-      ActionType.Turn,
-      ActionType.PreTurn,
-      ActionType.Snake,
-      ActionType.Around,
-      ActionType.StuckOut,
-    }; } }
+    public override HashSet<ActionType> GetBlocks() {
+      return new HashSet<ActionType>() { 
+        ActionType.Forward,
+      }; 
+    }
 
     private Bonus findBonus() {
       PointInt dir = path.FirstWayCell.DirOut;

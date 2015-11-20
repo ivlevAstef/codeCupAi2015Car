@@ -22,6 +22,7 @@ namespace RussianAICup2015Car.Sources {
 
     public virtual void blockedBy(HashSet<ActionType> actions) { }
 
-    public virtual HashSet<ActionType> blockers { get { return new HashSet<ActionType>(); } }
+
+    public virtual HashSet<ActionType> GetBlocks() { return new HashSet<ActionType>(); }
   }
 }

@@ -53,13 +53,15 @@ namespace RussianAICup2015Car.Sources {
       }
     }
 
-    public override HashSet<ActionType> blockers { get { return new HashSet<ActionType>() { 
-      ActionType.InitialFreeze, 
-      ActionType.Backward,
-      ActionType.StuckOut, 
-      ActionType.Snake,
-      ActionType.Around
-    }; } }
+    public override HashSet<ActionType> GetBlocks() {
+      return new HashSet<ActionType>() { 
+        ActionType.InitialFreeze,
+        ActionType.Forward,
+        ActionType.PreTurn,
+        ActionType.Backward
+    }; 
+    }
+
 
     private double GetSign(PointInt dir1, PointInt dir2) {
       double changedSign = Math.Abs(dir1.X + dir1.Y + dir2.X + dir2.Y) - 1;

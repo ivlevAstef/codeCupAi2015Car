@@ -8,7 +8,16 @@ namespace RussianAICup2015Car.Sources {
     }
 
     public override void execute(Move move) {
-      move.EnginePower = 1.0;
+    }
+
+    public override HashSet<ActionType> GetBlocks() { 
+      return new HashSet<ActionType>() { 
+        ActionType.MoveToBonus,
+        ActionType.StuckOut,
+        ActionType.OilSpill,
+        ActionType.Shooting,
+        ActionType.UseNitro
+      };
     }
   }
 }

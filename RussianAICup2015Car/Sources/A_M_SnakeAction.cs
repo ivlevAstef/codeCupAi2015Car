@@ -31,7 +31,7 @@ namespace RussianAICup2015Car.Sources {
 
       Logger.instance.Debug("Angle: {0} Speed: {1}", magnitedAngle, car.Speed());
 
-      if (Math.Abs(magnitedAngle) > Math.PI / (18 * car.Speed() / 20)) {
+      if (Math.Abs(magnitedAngle) > Math.PI / (18 * car.Speed() / 20) && car.Speed() > 10) {
         move.IsBrake = true;
       }
 
@@ -40,10 +40,16 @@ namespace RussianAICup2015Car.Sources {
       move.WheelTurn = magnitedForce;
     }
 
-    public override HashSet<ActionType> blockers { get { return new HashSet<ActionType>() { 
-      ActionType.InitialFreeze, 
-      ActionType.Backward,
-      ActionType.StuckOut }; } }
+    public override HashSet<ActionType> GetBlocks() {
+      return new HashSet<ActionType>() { 
+        ActionType.Backward,
+        ActionType.Forward,
+        ActionType.Turn,
+        ActionType.Overtake,
+        ActionType.UseNitro, //dynamic
+        ActionType.MoveToBonus, // dynamic
+      };
+    } 
 
     private double magniteToCenter(PointInt dir1, PointInt dir2) {
       double powerTilt = game.TrackTileSize * 0.5;

@@ -47,11 +47,13 @@ namespace RussianAICup2015Car.Sources {
       move.WheelTurn = 0.25 * car.WheelTurnForAngle(finalAngle, game);
     }
 
-    public override HashSet<ActionType> blockers { get { return new HashSet<ActionType>() { 
-      ActionType.InitialFreeze, 
-      ActionType.StuckOut, 
-      ActionType.Backward 
-    }; } }
+    public override HashSet<ActionType> GetBlocks() {
+      return new HashSet<ActionType>() { 
+        ActionType.Forward,
+        ActionType.MoveToBonus,
+        ActionType.Overtake
+      };
+    } 
 
     private PointDouble GetWayEnd(PointInt wayPos, PointInt dir) {
       double nextWaypointX = (wayPos.X + 0.5 + dir.X * 0.5) * game.TrackTileSize;

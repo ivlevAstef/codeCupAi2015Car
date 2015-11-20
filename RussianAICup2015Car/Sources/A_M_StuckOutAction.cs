@@ -4,7 +4,7 @@ using System;
 
 namespace RussianAICup2015Car.Sources {
   class A_M_StuckOutAction : A_BaseAction {
-    private const double maxTicks = 115;
+    private const double maxTicks = 80;
 
     private int ignoreTicks = 0;
     private int zeroSpeedTicks = 0;
@@ -48,7 +48,19 @@ namespace RussianAICup2015Car.Sources {
       outStuckTicks = 0;
     }
 
-    public override HashSet<ActionType> blockers { get { return new HashSet<ActionType>() { ActionType.InitialFreeze }; } }
+    public override HashSet<ActionType> GetBlocks() {
+      return new HashSet<ActionType>() { 
+        ActionType.Turn,
+        ActionType.Snake,
+        ActionType.Around,
+        ActionType.Backward,
+        ActionType.Forward,
+        ActionType.PreTurn,
+        ActionType.MoveToBonus,
+        ActionType.OilSpill,
+        ActionType.UseNitro,
+      };
+    }
 
     private bool speedCheck() {
       if (car.Speed2() < 0.05) {
@@ -82,7 +94,7 @@ namespace RussianAICup2015Car.Sources {
 
       PointInt dir = path.WayCells[0].DirOut;
 
-      double angle = -car.GetAngleTo(car.X + dir.X, car.Y + dir.Y) * timePower;
+      double angle = sign * car.GetAngleTo(car.X + dir.X, car.Y + dir.Y) * timePower;
 
       move.WheelTurn = (25 * angle / Math.PI);
     }

@@ -10,9 +10,7 @@ namespace RussianAICup2015Car.Sources {
 
     public override void execute(Move move) {
       move.IsThrowProjectile = true;
-    }
-
-    public override HashSet<ActionType> blockers { get { return new HashSet<ActionType>() { ActionType.InitialFreeze }; } }
+    }    
 
     private bool enemyAhead() {
       foreach (Car carIter in world.Cars) {

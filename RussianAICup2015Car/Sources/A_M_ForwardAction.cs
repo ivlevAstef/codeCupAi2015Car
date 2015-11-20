@@ -35,16 +35,9 @@ namespace RussianAICup2015Car.Sources {
       move.WheelTurn = magnitedForce;
     }
 
-    public override HashSet<ActionType> blockers { get { return new HashSet<ActionType>() { 
-      ActionType.InitialFreeze, 
-      ActionType.Backward,
-      ActionType.Turn,
-      ActionType.PreTurn,
-      ActionType.Snake,
-      ActionType.Around,
-      ActionType.MoveToBonus, 
-      ActionType.StuckOut }; 
-    } }
+    public override HashSet<ActionType> GetBlocks() {
+      return new HashSet<ActionType>() { };
+    } 
 
     private double magniteToCenter(PointInt dir) {
       double powerTilt = game.TrackTileSize * 3;

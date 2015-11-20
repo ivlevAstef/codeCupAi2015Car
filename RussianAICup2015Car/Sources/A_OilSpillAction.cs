@@ -12,9 +12,6 @@ namespace RussianAICup2015Car.Sources {
       move.IsSpillOil = true;
     }
 
-    public override HashSet<ActionType> blockers { get { return new HashSet<ActionType>() { ActionType.InitialFreeze }; } }
-
-
     private bool turn() {
       return !path.FirstWayCell.DirIn.Equals(path.FirstWayCell.DirOut);
     }

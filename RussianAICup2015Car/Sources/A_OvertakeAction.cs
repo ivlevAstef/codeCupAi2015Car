@@ -11,6 +11,10 @@ namespace RussianAICup2015Car.Sources {
 
     }
 
-    public override HashSet<ActionType> blockers { get { return new HashSet<ActionType>() { ActionType.InitialFreeze }; } }
+    public override HashSet<ActionType> GetBlocks() {
+      return new HashSet<ActionType>() { 
+        ActionType.Forward 
+      }; 
+    }
   }
 }

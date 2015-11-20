@@ -12,7 +12,5 @@ namespace RussianAICup2015Car.Sources {
     public override void execute(Move move) {
       move.IsUseNitro = true;
     }
-
-    public override HashSet<ActionType> blockers { get { return new HashSet<ActionType>() { ActionType.InitialFreeze }; } }
   }
 }
