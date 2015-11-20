@@ -23,6 +23,9 @@ namespace RussianAICup2015Car.Sources {
       move.EnginePower = 1.0;
     }
 
-    public override HashSet<ActionType> blockers { get { return new HashSet<ActionType>() { ActionType.InitialFreeze, ActionType.StuckOut }; } }
+    public override HashSet<ActionType> blockers { get { return new HashSet<ActionType>() { 
+      ActionType.InitialFreeze, 
+      ActionType.Backward,
+      ActionType.StuckOut }; } }
   }
 }

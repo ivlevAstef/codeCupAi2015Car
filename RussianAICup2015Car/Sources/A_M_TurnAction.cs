@@ -20,24 +20,29 @@ namespace RussianAICup2015Car.Sources {
       PointDouble wayEnd = GetWayEnd(path.FirstWayCell.Pos, dirMove);
       PointDouble endPoint = GetWaySideEnd(path.FirstWayCell.Pos, dirMove, dirEnd);
 
+      double sign = GetSign(dirMove, dirEnd);
+
       double needAngle = car.GetAngleTo(endPoint.X, endPoint.Y);
 
       double normalAngle = car.GetAngleTo(car.X + dirMove.X + dirEnd.X, car.Y + dirMove.Y + dirEnd.Y);
       double distanceToEnd = car.GetDistanceTo(wayEnd, dirMove);
       double procentToEnd = distanceToEnd / game.TrackTileSize;
 
-      if (distanceToEnd < game.CarWidth * 0.5 && normalAngle > needAngle) {
-        move.WheelTurn = car.WheelTurnForAngle(normalAngle, game);
+      Logger.instance.Debug("N angle {0} need angle {1}", normalAngle, needAngle);
+
+      if (distanceToEnd < game.CarWidth * 0.5 && sign * normalAngle > 0) {
+        double angle = car.GetAngleTo(car.X + dirEnd.X, car.Y + dirEnd.Y);
+        move.WheelTurn = car.WheelTurnForAngle(angle, game);
       } else {
         move.WheelTurn = car.WheelTurnForAngle(needAngle, game);
 
-        double diffAngle = (normalAngle - needAngle);
+        double diffAngle = sign * (normalAngle - needAngle);
         if (diffAngle > 0 && procentToEnd < 0.5 && car.SpeedN(dirMove) * diffAngle > 4) {
           move.IsBrake = true;
         }
       }
 
-      if (car.SpeedN(dirMove) > 21 + Math.Max(0, car.SpeedN2(dirEnd))) {
+      if (car.SpeedN(dirMove) > 21) {
         move.IsBrake = true;
       } else {
         move.EnginePower = 1.0;
@@ -46,10 +51,19 @@ namespace RussianAICup2015Car.Sources {
 
     public override HashSet<ActionType> blockers { get { return new HashSet<ActionType>() { 
       ActionType.InitialFreeze, 
+      ActionType.Backward,
       ActionType.StuckOut, 
       ActionType.Snake,
       ActionType.Around
     }; } }
+
+    private double GetSign(PointInt dir1, PointInt dir2) {
+      double changedSign = Math.Abs(dir1.X + dir1.Y + dir2.X + dir2.Y) - 1;
+      if (0 == dir2.X) {
+        return changedSign;
+      }
+      return -changedSign;
+    }
 
     private double AngleToWheelTurn(double angle) {
       double scalar = car.SpeedX * Math.Sin(car.Angle) + car.SpeedY * Math.Cos(car.Angle);

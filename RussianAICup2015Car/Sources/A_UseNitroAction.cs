@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace RussianAICup2015Car.Sources {
   class A_UseNitroAction : A_BaseAction {
     public override bool valid() {
-      return (car.RemainingNitroCooldownTicks <= 0) && path.isStraight();
+      return car.RemainingNitroCooldownTicks <= 0 && car.NitroChargeCount > 0 && path.isStraight();
     }
 
     public override void execute(Move move) {
