@@ -28,8 +28,6 @@ namespace RussianAICup2015Car.Sources {
 
       double magnitedAngle = magniteToCenter(dirMove, dirEnd);
 
-      Logger.instance.Debug("Angle: {0} Speed: {1}", magnitedAngle, car.Speed());
-
       if (Math.Abs(magnitedAngle) > Math.PI / (18 * car.Speed() / 20) && car.Speed() > 10) {
         move.IsBrake = true;
       }
