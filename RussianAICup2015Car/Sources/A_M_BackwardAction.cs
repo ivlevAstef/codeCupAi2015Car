@@ -17,7 +17,7 @@ namespace RussianAICup2015Car.Sources {
 
       double angle = car.GetAngleTo(car.X + dir.X, car.Y + dir.Y);
 
-      return Math.Abs(angle) > ((Math.PI / 2) + (Math.PI / 18) );///100 degrees
+      return Math.Abs(angle) > (2 * Math.PI / 3) && car.Speed() < 5;///120 degrees
     }
 
     public override void execute(Move move) {
@@ -67,7 +67,6 @@ namespace RussianAICup2015Car.Sources {
     public override HashSet<ActionType> GetBlocks() { 
       HashSet<ActionType> hashSet = new HashSet<ActionType>() {
         ActionType.Forward,
-        ActionType.PreTurn,
         ActionType.OilSpill,
         ActionType.MoveToBonus
       };

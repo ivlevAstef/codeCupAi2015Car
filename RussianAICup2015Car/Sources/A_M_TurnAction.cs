@@ -51,8 +51,8 @@ namespace RussianAICup2015Car.Sources {
       return new HashSet<ActionType>() { 
         ActionType.InitialFreeze,
         ActionType.Forward,
-        ActionType.PreTurn,
         ActionType.Backward,
+        ActionType.PreTurn,
         ActionType.MoveToBonus
     }; 
     }

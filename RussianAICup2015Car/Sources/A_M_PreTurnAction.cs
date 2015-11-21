@@ -50,6 +50,7 @@ namespace RussianAICup2015Car.Sources {
     public override HashSet<ActionType> GetBlocks() {
       return new HashSet<ActionType>() { 
         ActionType.Forward,
+        ActionType.Backward,
         ActionType.MoveToBonus,
         ActionType.Overtake
       };
