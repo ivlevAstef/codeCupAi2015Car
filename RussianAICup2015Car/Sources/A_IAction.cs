@@ -33,5 +33,6 @@ namespace RussianAICup2015Car.Sources {
     void blockedBy(HashSet<ActionType> actions);
 
     HashSet<ActionType> GetBlocks();
+    HashSet<ActionType> GetDynamicBlocks();
   }
 }

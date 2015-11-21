@@ -38,20 +38,25 @@ namespace RussianAICup2015Car.Sources {
     }
 
     public override HashSet<ActionType> GetBlocks() {
-      HashSet<ActionType> result = new HashSet<ActionType>() { 
+      return new HashSet<ActionType>() { 
         ActionType.Backward,
         ActionType.Forward,
         ActionType.Turn,
         ActionType.Overtake,
         ActionType.MoveToBonus
       };
+    }
 
-      if (Math.Abs(car.AngularSpeed) > 0.01) {
+    public override HashSet<ActionType> GetDynamicBlocks() {
+      HashSet<ActionType> result = new HashSet<ActionType>() { };
+      
+      if (Math.Abs(car.AngularSpeed) > 0.01 ||
+          Math.Abs(magniteToCenter(path.FirstWayCell.DirOut, path.ShortWayCells[0].DirOut)) > Math.PI / 18) {
         result.Add(ActionType.UseNitro);
       }
 
       return result;
-    } 
+    }
 
     private double magniteToCenter(PointInt dir1, PointInt dir2) {
       double powerTilt = game.TrackTileSize * 0.5;

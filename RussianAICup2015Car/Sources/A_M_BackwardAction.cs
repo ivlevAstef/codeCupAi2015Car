@@ -68,6 +68,7 @@ namespace RussianAICup2015Car.Sources {
       HashSet<ActionType> hashSet = new HashSet<ActionType>() {
         ActionType.Forward,
         ActionType.OilSpill,
+        ActionType.UseNitro,
         ActionType.MoveToBonus
       };
 

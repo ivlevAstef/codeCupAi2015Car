@@ -36,19 +36,28 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       }
 
       HashSet<ActionType> validActions = new HashSet<ActionType>();
-      HashSet<ActionType> blockActions = new HashSet<ActionType>();
 
       foreach (KeyValuePair<ActionType, A_IAction> actionInfo in actions) {
         if (actionInfo.Value.valid()) {
           validActions.Add(actionInfo.Key);
-          blockActions.UnionWith(actionInfo.Value.GetBlocks());
         }
+      }
+
+      HashSet<ActionType> blockActions = new HashSet<ActionType>();
+      foreach (ActionType actionType in validActions) {
+        blockActions.UnionWith(actions[actionType].GetBlocks());
       }
 
       move.WheelTurn = 0;
       move.EnginePower = 0;
 
       HashSet<ActionType> actionsCall = new HashSet<ActionType>(validActions);
+      actionsCall.ExceptWith(blockActions);
+
+      foreach (ActionType actionType in actionsCall) {
+        blockActions.UnionWith(actions[actionType].GetDynamicBlocks());
+      }
+
       actionsCall.ExceptWith(blockActions);
 
       foreach (ActionType actionType in actionsCall) {
@@ -62,6 +71,10 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       foreach (ActionType actionType in actionsCall) {
         actions[actionType].blockedBy(blockActions);
       }
+    }
+
+    private void block() {
+
     }
   }
 }

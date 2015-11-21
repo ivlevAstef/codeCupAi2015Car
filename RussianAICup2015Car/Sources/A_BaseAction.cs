@@ -24,5 +24,6 @@ namespace RussianAICup2015Car.Sources {
 
 
     public virtual HashSet<ActionType> GetBlocks() { return new HashSet<ActionType>(); }
+    public virtual HashSet<ActionType> GetDynamicBlocks() { return new HashSet<ActionType>(); }
   }
 }

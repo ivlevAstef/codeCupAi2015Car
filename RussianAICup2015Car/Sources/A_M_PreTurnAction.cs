@@ -52,6 +52,7 @@ namespace RussianAICup2015Car.Sources {
         ActionType.Forward,
         ActionType.Backward,
         ActionType.MoveToBonus,
+        ActionType.UseNitro,
         ActionType.Overtake
       };
     } 
