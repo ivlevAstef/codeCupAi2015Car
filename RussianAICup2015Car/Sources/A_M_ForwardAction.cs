@@ -25,7 +25,14 @@ namespace RussianAICup2015Car.Sources {
     }
 
     public override HashSet<ActionType> GetBlocks() {
-      return new HashSet<ActionType>() { };
+      HashSet<ActionType> result = new HashSet<ActionType>() { 
+      };
+
+      if (path.isStraight()) {
+        result.Add(ActionType.UseNitro);
+      }
+
+      return result;
     } 
 
     private double magniteToCenter(PointInt dir) {
