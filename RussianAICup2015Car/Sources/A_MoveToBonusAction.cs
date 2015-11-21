@@ -48,6 +48,10 @@ namespace RussianAICup2015Car.Sources {
         { BonusType.RepairKit , (int)(150 * (1.0 - car.Durability)) }
       };
 
+      if (car.Speed() < 1) {
+        return null;
+      }
+
       double speed = car.Speed();
       double maxAngle = Math.PI / (18 * Math.Min(0.75, speed / (game.TrackTileSize / 80)));
 
