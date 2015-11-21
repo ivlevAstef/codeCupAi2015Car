@@ -55,10 +55,10 @@ namespace RussianAICup2015Car.Sources {
 
     public static double WheelTurnForAngle(this Car car, double angle, Game game) {
       double angularFactor = car.AngularFactor(game);
+      angularFactor = Math.Abs(angularFactor);
       double angularChanged = car.WheelTurn * angularFactor;
       double angularSpeed = car.AngularSpeed;
 
-      angularFactor = Math.Abs(angularFactor);
       if (Math.Abs(angularFactor) < 1.0e-3) {
         return 0;
       }

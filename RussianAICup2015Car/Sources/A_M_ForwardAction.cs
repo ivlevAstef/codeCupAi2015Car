@@ -7,17 +7,6 @@ namespace RussianAICup2015Car.Sources {
     public override bool valid() {
       Logger.instance.Assert(3 == path.WayCells.Length, "incorrect way cells count.");
 
-      /*PathCell cell = path.ShortWayCells[0];
-      if (null != cell.DirOut && !cell.DirOut.Equals(cell.DirIn)) {
-        return false;
-      }*/
-
-      /*foreach(PathCell cell in path.ShortWayCells) {
-        if (null != cell.DirOut && !cell.DirOut.Equals(cell.DirIn)) {
-          return false;
-        }
-      }*/
-
       return true;
     }
 

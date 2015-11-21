@@ -52,6 +52,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       actionsCall.ExceptWith(blockActions);
 
       foreach (ActionType actionType in actionsCall) {
+        Logger.instance.Debug("Execute action: {0}", actionType);
         actions[actionType].execute(move);
       }
 
