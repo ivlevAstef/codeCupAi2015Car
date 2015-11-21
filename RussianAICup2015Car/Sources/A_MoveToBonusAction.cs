@@ -13,9 +13,20 @@ namespace RussianAICup2015Car.Sources {
     }
 
     public override void execute(Move move) {
-      double angle = car.GetAngleTo(findedBonus);
+      PointInt dirMove = path.FirstWayCell.DirOut;
 
-      move.WheelTurn = 0.2 * car.WheelTurnForAngle(angle, game);
+      double roughAngle = car.GetAngleTo(findedBonus);
+      double sign = Math.Sign(roughAngle);
+
+      double angle = roughAngle;
+      if (roughAngle > Math.PI / 9) {
+        double x = findedBonus.X + sign * dirMove.Y * (findedBonus.Width * 0.5 + car.Width * 0.25);
+        double y = findedBonus.Y - sign * dirMove.X * (findedBonus.Width * 0.5 + car.Width * 0.25);
+
+        angle = car.GetAngleTo(x, y);
+      }
+
+      move.WheelTurn = car.WheelTurnForAngle(angle, game);
 
       move.EnginePower = 1.0;
     }
@@ -38,7 +49,7 @@ namespace RussianAICup2015Car.Sources {
       };
 
       double speed = car.Speed();
-      double maxAngle = Math.PI / (9 * Math.Min(0.75, speed / (game.TrackTileSize / 80)));
+      double maxAngle = Math.PI / (18 * Math.Min(0.75, speed / (game.TrackTileSize / 80)));
 
       Bonus priorityBonus = null;
       foreach (Bonus bonus in world.Bonuses) {

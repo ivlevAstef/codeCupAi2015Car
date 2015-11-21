@@ -44,7 +44,7 @@ namespace RussianAICup2015Car.Sources {
       double procentToEnd = distanceToEnd / game.TrackTileSize;
       double finalAngle = magnitedAngleNegative * procentToEnd + 2 * magnitedAngle * (1.0 - procentToEnd);
 
-      move.WheelTurn = 0.25 * car.WheelTurnForAngle(finalAngle, game);
+      move.WheelTurn = car.WheelTurnForAngle(finalAngle, game);
     }
 
     public override HashSet<ActionType> GetBlocks() {

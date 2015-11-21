@@ -28,22 +28,16 @@ namespace RussianAICup2015Car.Sources {
       double distanceToEnd = car.GetDistanceTo(wayEnd, dirMove);
       double procentToEnd = distanceToEnd / game.TrackTileSize;
 
-      double diffAngle = sign * (normalAngle - needAngle);
-
+      double angle = needAngle;
       if (distanceToEnd < game.CarWidth * 0.5 && sign * normalAngle > 0) {
-        double angle = car.GetAngleTo(car.X + dirEnd.X, car.Y + dirEnd.Y);
-        move.WheelTurn = car.WheelTurnForAngle(angle, game);
+        angle = car.GetAngleTo(car.X + dirEnd.X, car.Y + dirEnd.Y);
+      }
 
-        if (diffAngle > 0 && car.SpeedN(dirMove) * diffAngle > 3) {
-          move.IsBrake = true;
-        }
+      move.WheelTurn = car.WheelTurnForAngle(angle, game);
 
-      } else {
-        move.WheelTurn = car.WheelTurnForAngle(needAngle, game);
-
-        if (diffAngle > 0 && procentToEnd < 0.5 && car.SpeedN(dirMove) * diffAngle > 4) {
-          move.IsBrake = true;
-        }
+      double diffAngle = sign * (normalAngle - angle);
+      if (diffAngle > 0 && procentToEnd < 0.5 && car.SpeedN(dirMove) * diffAngle > 3.5) {
+        move.IsBrake = true;
       }
 
       if (car.SpeedN(dirMove) > 21) {
@@ -58,10 +52,10 @@ namespace RussianAICup2015Car.Sources {
         ActionType.InitialFreeze,
         ActionType.Forward,
         ActionType.PreTurn,
-        ActionType.Backward
+        ActionType.Backward,
+        ActionType.MoveToBonus
     }; 
     }
-
 
     private double GetSign(PointInt dir1, PointInt dir2) {
       double changedSign = Math.Abs(dir1.X + dir1.Y + dir2.X + dir2.Y) - 1;

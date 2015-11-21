@@ -27,7 +27,6 @@ namespace RussianAICup2015Car.Sources {
       PointInt dirEnd = path.ShortWayCells[0].DirOut;
 
       double magnitedAngle = magniteToCenter(dirMove, dirEnd);
-      double magnitedForce = 0.25 * car.WheelTurnForAngle(magnitedAngle, game);
 
       Logger.instance.Debug("Angle: {0} Speed: {1}", magnitedAngle, car.Speed());
 
@@ -37,7 +36,7 @@ namespace RussianAICup2015Car.Sources {
 
       move.EnginePower = 1.0;
 
-      move.WheelTurn = magnitedForce;
+      move.WheelTurn = car.WheelTurnForAngle(magnitedAngle, game);
     }
 
     public override HashSet<ActionType> GetBlocks() {

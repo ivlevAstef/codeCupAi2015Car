@@ -27,7 +27,7 @@ namespace RussianAICup2015Car.Sources {
       }
 
       double magnitedAngle = magniteToCenter(dir);
-      double magnitedForce = 0.5 * car.WheelTurnForAngle(magnitedAngle, game);
+      double magnitedForce = car.WheelTurnForAngle(magnitedAngle, game);
 
       move.WheelTurn = -magnitedForce;
     }

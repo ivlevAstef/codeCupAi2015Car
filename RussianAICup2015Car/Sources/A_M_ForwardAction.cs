@@ -25,7 +25,7 @@ namespace RussianAICup2015Car.Sources {
       move.EnginePower = 1.0;
 
       double magnitedAngle = magniteToCenter(path.FirstWayCell.DirOut);
-      double magnitedForce = 0.75 * car.WheelTurnForAngle(magnitedAngle, game);
+      double magnitedForce = car.WheelTurnForAngle(magnitedAngle, game);
 
       if (Math.Abs(magnitedAngle) > Math.PI / (3 * car.Speed() / 25)) {
         magnitedForce *= 2;
@@ -40,7 +40,7 @@ namespace RussianAICup2015Car.Sources {
     } 
 
     private double magniteToCenter(PointInt dir) {
-      double powerTilt = game.TrackTileSize * 3;
+      double powerTilt = game.TrackTileSize;
 
       double centerX = (Math.Floor(car.X / game.TrackTileSize) + 0.5) * game.TrackTileSize;
       double centerY = (Math.Floor(car.Y / game.TrackTileSize) + 0.5) * game.TrackTileSize;
