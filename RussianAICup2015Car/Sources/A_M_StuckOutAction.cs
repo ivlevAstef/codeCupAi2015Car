@@ -6,7 +6,7 @@ namespace RussianAICup2015Car.Sources {
   class A_M_StuckOutAction : A_BaseAction {
     private const double maxTicks = 80;
 
-    private int ignoreTicks = 0;
+    private int ignoreTicks = 10;
     private int zeroSpeedTicks = 0;
     private int outStuckTicks = 0;
     private int sign = -1;
@@ -42,23 +42,9 @@ namespace RussianAICup2015Car.Sources {
       runOut(move);
     }
 
-    public override void blockedBy(HashSet<ActionType> actions) {
-      ignoreTicks = 10;
-      zeroSpeedTicks = 0;
-      outStuckTicks = 0;
-    }
-
-    public override HashSet<ActionType> GetBlocks() {
-      return new HashSet<ActionType>() { 
-        ActionType.Turn,
-        ActionType.Snake,
-        ActionType.Around,
-        ActionType.Backward,
-        ActionType.Forward,
-        ActionType.PreTurn,
-        ActionType.MoveToBonus,
-        ActionType.OilSpill,
-        ActionType.UseNitro,
+    public override HashSet<ActionType> GetParallelsActions() {
+      return new HashSet<ActionType>() {
+        ActionType.Shooting
       };
     }
 

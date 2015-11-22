@@ -54,16 +54,12 @@ namespace RussianAICup2015Car.Sources {
       move.EnginePower = 1.0;
     }
 
-    public override HashSet<ActionType> GetBlocks() {
-      return new HashSet<ActionType>() { 
-        ActionType.Forward,
-        ActionType.Backward,
-        ActionType.Turn,
-        ActionType.UseNitro,
-        ActionType.MoveToBonus,
-        ActionType.Overtake
-      }; 
-    }
+     public override HashSet<ActionType> GetParallelsActions() {
+      return new HashSet<ActionType>() {
+        ActionType.Shooting,
+        ActionType.OilSpill
+      };
+     }    
 
     private double GetSign(PointInt dir1, PointInt dir2) {
       double changedSign = Math.Abs(dir1.X + dir1.Y + dir2.X + dir2.Y) - 1;

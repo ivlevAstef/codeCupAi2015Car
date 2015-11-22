@@ -22,7 +22,7 @@ namespace RussianAICup2015Car.Sources {
     }
 
     public override void execute(Move move) {
-      double maxSpeed = game.TrackTileSize / 28;//around 28
+      double maxSpeed = game.TrackTileSize / 29;//around 27.5
       PointInt dirMove = path.FirstWayCell.DirOut;
 
       if (car.Speed() > maxSpeed) {
@@ -47,15 +47,11 @@ namespace RussianAICup2015Car.Sources {
       move.WheelTurn = car.WheelTurnForAngle(finalAngle, game);
     }
 
-    public override HashSet<ActionType> GetBlocks() {
-      return new HashSet<ActionType>() { 
-        ActionType.Forward,
-        ActionType.Backward,
-        ActionType.MoveToBonus,
-        ActionType.UseNitro,
-        ActionType.Overtake
+    public override HashSet<ActionType> GetParallelsActions() {
+      return new HashSet<ActionType>() {
+        ActionType.Shooting
       };
-    } 
+    }
 
     private PointDouble GetWayEnd(PointInt wayPos, PointInt dir) {
       double nextWaypointX = (wayPos.X + 0.5 + dir.X * 0.5) * game.TrackTileSize;

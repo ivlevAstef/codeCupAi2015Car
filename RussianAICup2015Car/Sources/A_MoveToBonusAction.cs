@@ -31,10 +31,10 @@ namespace RussianAICup2015Car.Sources {
       move.EnginePower = 1.0;
     }
 
-    public override HashSet<ActionType> GetBlocks() {
-      return new HashSet<ActionType>() { 
-        ActionType.Forward,
-      }; 
+    public override HashSet<ActionType> GetParallelsActions() {
+      return new HashSet<ActionType>() {
+        ActionType.Shooting
+      };
     }
 
     private Bonus findBonus() {

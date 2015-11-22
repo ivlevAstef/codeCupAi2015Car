@@ -28,6 +28,19 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       { ActionType.UseNitro, new A_UseNitroAction()},
     };
 
+    private ActionType[] baseActions = new ActionType[] {
+      ActionType.InitialFreeze,
+
+      ActionType.StuckOut,
+      ActionType.Backward,
+      ActionType.Around,
+      ActionType.Snake,
+      ActionType.Turn,
+      ActionType.PreTurn,
+      ActionType.MoveToBonus,//moved to dont base
+      ActionType.Forward,
+    };
+
     public void Move(Car self, World world, Game game, Move move) {
       path.update(self, world, game);
 
@@ -35,46 +48,30 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
         action.setupEnvironment(self, world, game, path);
       }
 
-      HashSet<ActionType> validActions = new HashSet<ActionType>();
+      A_IAction callAction = null;
 
-      foreach (KeyValuePair<ActionType, A_IAction> actionInfo in actions) {
-        if (actionInfo.Value.valid()) {
-          validActions.Add(actionInfo.Key);
+      foreach (ActionType actionType in baseActions) {
+        if (actions[actionType].valid()) {
+          callAction = actions[actionType];
+          Logger.instance.Debug("Find action: {0} for tick: {1}", actionType, world.Tick);
+          break;
         }
       }
 
-      HashSet<ActionType> blockActions = new HashSet<ActionType>();
-      foreach (ActionType actionType in validActions) {
-        blockActions.UnionWith(actions[actionType].GetBlocks());
+      Logger.instance.Assert(null != callAction, String.Format("Can't find action for current state on tick:{0}", world.Tick));
+
+      if (null == callAction) { //just in case for release.
+        move.WheelTurn = 1.0;
+        return;
       }
 
-      move.WheelTurn = 0;
-      move.EnginePower = 0;
+      callAction.execute(move);
 
-      HashSet<ActionType> actionsCall = new HashSet<ActionType>(validActions);
-      actionsCall.ExceptWith(blockActions);
-
-      foreach (ActionType actionType in actionsCall) {
-        blockActions.UnionWith(actions[actionType].GetDynamicBlocks());
+      foreach (ActionType actionType in callAction.GetParallelsActions()) {
+        if (actions[actionType].valid()) {
+          actions[actionType].execute(move);
+        }
       }
-
-      actionsCall.ExceptWith(blockActions);
-
-      foreach (ActionType actionType in actionsCall) {
-        Logger.instance.Debug("Execute action: {0}", actionType);
-        actions[actionType].execute(move);
-      }
-
-      actionsCall = new HashSet<ActionType>(validActions);
-      actionsCall.IntersectWith(blockActions);
-
-      foreach (ActionType actionType in actionsCall) {
-        actions[actionType].blockedBy(blockActions);
-      }
-    }
-
-    private void block() {
-
     }
   }
 }

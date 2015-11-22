@@ -37,21 +37,14 @@ namespace RussianAICup2015Car.Sources {
       move.WheelTurn = car.WheelTurnForAngle(magnitedAngle, game);
     }
 
-    public override HashSet<ActionType> GetBlocks() {
-      return new HashSet<ActionType>() { 
-        ActionType.Backward,
-        ActionType.Forward,
-        ActionType.Turn,
-        ActionType.Overtake,
-        ActionType.MoveToBonus
+    public override HashSet<ActionType> GetParallelsActions() {
+      HashSet<ActionType> result = new HashSet<ActionType>() {
+        ActionType.OilSpill,
+        ActionType.Shooting
       };
-    }
 
-    public override HashSet<ActionType> GetDynamicBlocks() {
-      HashSet<ActionType> result = new HashSet<ActionType>() { };
-      
-      if (Math.Abs(car.AngularSpeed) > 0.01 ||
-          Math.Abs(magniteToCenter(path.FirstWayCell.DirOut, path.ShortWayCells[0].DirOut)) > Math.PI / 18) {
+      bool smallAngleDeviation = Math.Abs(magniteToCenter(path.FirstWayCell.DirOut, path.ShortWayCells[0].DirOut)) < Math.PI / 18;
+      if (Math.Abs(car.AngularSpeed) < 0.01 && smallAngleDeviation) {
         result.Add(ActionType.UseNitro);
       }
 

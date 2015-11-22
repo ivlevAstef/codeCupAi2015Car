@@ -60,24 +60,11 @@ namespace RussianAICup2015Car.Sources {
       move.WheelTurn = magnitedForce;
     }
 
-    public override void blockedBy(HashSet<ActionType> actions) {
-      movedDir = null;
-    }
-
-    public override HashSet<ActionType> GetBlocks() { 
-      HashSet<ActionType> hashSet = new HashSet<ActionType>() {
-        ActionType.Forward,
-        ActionType.OilSpill,
-        ActionType.UseNitro,
-        ActionType.MoveToBonus
+    public override HashSet<ActionType> GetParallelsActions() {
+      return new HashSet<ActionType>() {
+        ActionType.Shooting
       };
-
-      if (movedSign(path.FirstWayCell.DirOut) < 0) {
-        hashSet.Add(ActionType.StuckOut);
-      }
-
-      return hashSet;
-    }
+    } 
 
     private double magniteToCenter(PointInt dir) {
       double powerTilt = movedSign(dir) * game.TrackTileSize * 1;

@@ -47,20 +47,11 @@ namespace RussianAICup2015Car.Sources {
       }
     }
 
-    public override HashSet<ActionType> GetBlocks() {
-      return new HashSet<ActionType>() { 
-        ActionType.InitialFreeze,
-        ActionType.Forward,
-        ActionType.Backward,
-        ActionType.PreTurn,
-        ActionType.MoveToBonus
-      }; 
-    }
-
-    public override HashSet<ActionType> GetDynamicBlocks() {
-      return new HashSet<ActionType>() { 
-        ActionType.UseNitro,
-      }; 
+    public override HashSet<ActionType> GetParallelsActions() {
+      return new HashSet<ActionType>() {
+        ActionType.Shooting,
+        ActionType.OilSpill,
+      };
     }
 
     private double GetSign(PointInt dir1, PointInt dir2) {

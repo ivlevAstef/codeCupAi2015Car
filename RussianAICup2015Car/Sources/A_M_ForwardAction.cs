@@ -24,20 +24,17 @@ namespace RussianAICup2015Car.Sources {
       move.WheelTurn = magnitedForce;
     }
 
-    public override HashSet<ActionType> GetBlocks() {
-      return new HashSet<ActionType>() { 
+    public override HashSet<ActionType> GetParallelsActions() {
+      HashSet<ActionType> result = new HashSet<ActionType>() {
+        ActionType.Shooting
       };
-    }
 
-    public override HashSet<ActionType> GetDynamicBlocks() { 
-       HashSet<ActionType> result = new HashSet<ActionType>();
+      bool smallAngleDeviation = Math.Abs(magniteToCenter(path.FirstWayCell.DirOut)) < Math.PI / 12;
+      if (path.isStraight() && smallAngleDeviation) {
+        result.Add(ActionType.UseNitro);
+      }
 
-       if (!path.isStraight() ||
-          Math.Abs(magniteToCenter(path.FirstWayCell.DirOut)) > Math.PI / 12) {
-         result.Add(ActionType.UseNitro);
-       }
-
-       return result;
+      return result;
     }
 
     private double magniteToCenter(PointInt dir) {
