@@ -19,11 +19,6 @@ namespace RussianAICup2015Car.Sources {
         return true;
       }
 
-      if (0 == car.Durability) {
-        ignoreTicks = 15;
-        return false;
-      }
-
       if (ignoreTicks > 0) {
         ignoreTicks--;
         zeroSpeedTicks = 0;
@@ -49,7 +44,7 @@ namespace RussianAICup2015Car.Sources {
     }
 
     private bool speedCheck() {
-      if (car.Speed2() < 0.05) {
+      if (car.Speed2() < 0.05 && Math.Abs(car.EnginePower) > 5 * game.CarEnginePowerChangePerTick) {
         zeroSpeedTicks++;
       } else {
         zeroSpeedTicks = 0;

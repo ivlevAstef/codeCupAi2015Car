@@ -9,6 +9,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
 
     private Dictionary<ActionType, A_IAction> actions = new Dictionary<ActionType, A_IAction> {
       { ActionType.InitialFreeze, new A_InitialFreeze()},
+      { ActionType.Death, new A_Death()},
 
       { ActionType.Forward, new A_M_ForwardAction()},
       { ActionType.Backward, new A_M_BackwardAction()},
@@ -30,6 +31,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
 
     private ActionType[] baseActions = new ActionType[] {
       ActionType.InitialFreeze,
+      ActionType.Death,
 
       ActionType.StuckOut,
       ActionType.Backward,

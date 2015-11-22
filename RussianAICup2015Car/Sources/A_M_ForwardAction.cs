@@ -17,7 +17,6 @@ namespace RussianAICup2015Car.Sources {
       double magnitedForce = car.WheelTurnForAngle(magnitedAngle, game);
 
       if (Math.Abs(magnitedAngle) > Math.PI / (3 * car.Speed() / 25)) {
-        magnitedForce *= 2;
         move.IsBrake = true;
       }
 
@@ -43,15 +42,6 @@ namespace RussianAICup2015Car.Sources {
       double centerX = (Math.Floor(car.X / game.TrackTileSize) + 0.5) * game.TrackTileSize;
       double centerY = (Math.Floor(car.Y / game.TrackTileSize) + 0.5) * game.TrackTileSize;
 
-      double x = car.X * Math.Abs(dir.X) + centerX * Math.Abs(dir.Y) + powerTilt * dir.X;
-      double y = car.Y * Math.Abs(dir.Y) + centerY * Math.Abs(dir.X) + powerTilt * dir.Y;
-
-      double ticks = car.GetDistanceTo(x, y) / car.Speed();
-
-      x -= ticks * car.SpeedX * Math.Abs(dir.Y);
-      y -= ticks * car.SpeedY * Math.Abs(dir.X);
-
-      //TODO: maybe x,y ?
       return car.GetAngleTo(new PointDouble(centerX, centerY), dir, powerTilt);
     }
   }

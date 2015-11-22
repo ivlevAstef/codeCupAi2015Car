@@ -4,6 +4,7 @@ using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
 namespace RussianAICup2015Car.Sources {
   public enum ActionType {
     InitialFreeze,
+    Death,
 
     Forward,
     Backward,
