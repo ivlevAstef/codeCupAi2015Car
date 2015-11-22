@@ -101,7 +101,7 @@ namespace RussianAICup2015Car.Sources {
           checkPoint = nextCheckPoint;
         }
 
-        PointInt min = findMinPoint(iter.Pos, iter.DirIn, world, path);
+        PointInt min = findMinPoint(self, iter.Pos, iter.DirIn, world, path);
         if (null == min) {
           break;
         }
@@ -118,7 +118,7 @@ namespace RussianAICup2015Car.Sources {
       return cells.ToArray();
     }
 
-    private PointInt findMinPoint(PointInt from, PointInt dirIn, World world, int [,] path) {
+    private PointInt findMinPoint(Car car, PointInt from, PointInt dirIn, World world, int [,] path) {
       PointInt min = null;
       int minDepth = int.MaxValue;
 
@@ -126,7 +126,7 @@ namespace RussianAICup2015Car.Sources {
         PointInt nextPos = from.Add(dir);
         int depth = (0 == path[nextPos.X, nextPos.Y]) ? -10 : path[nextPos.X, nextPos.Y];//because checkpoint needs all time
 
-        if (dir.Equals(dirIn) && checkToAlternative(world, path, from, nextPos)) {
+        if (dir.Equals(dirIn) && car.Speed() > 15 && checkToAlternative(world, path, from, nextPos)) {
           depth -= 2;
         }
 
