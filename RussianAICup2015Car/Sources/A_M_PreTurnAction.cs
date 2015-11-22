@@ -28,6 +28,8 @@ namespace RussianAICup2015Car.Sources {
         move.IsBrake = true;
       }
 
+      move.EnginePower = 1.0;
+
       PointDouble wayEnd = GetWayEnd(path.FirstWayCell.Pos, dirMove);
       double distanceToEnd = car.GetDistanceTo(wayEnd, dirMove);
       double ticksToEnd = distanceToEnd / car.SpeedN(dirMove);

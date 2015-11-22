@@ -28,7 +28,8 @@ namespace RussianAICup2015Car.Sources {
 
       double magnitedAngle = magniteToCenter(dirMove, dirEnd);
 
-      if (Math.Abs(magnitedAngle) > Math.PI / car.Speed() && car.Speed() > 15) {
+      double speedWithEnginePower = car.Speed() + car.EnginePower * car.EnginePower - 1;
+      if (Math.Abs(magnitedAngle) > Math.PI / speedWithEnginePower && car.Speed() > 13) {
         move.IsBrake = true;
       }
 

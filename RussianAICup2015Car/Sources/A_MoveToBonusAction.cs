@@ -58,7 +58,7 @@ namespace RussianAICup2015Car.Sources {
       Bonus priorityBonus = null;
       foreach (Bonus bonus in world.Bonuses) {
         double distance = car.GetDistanceTo(bonus);
-        if (3 * game.CarWidth > distance || distance > game.TrackTileSize * 2.0) {
+        if (2 * game.CarWidth > distance || distance > game.TrackTileSize * 2.5) {
           continue;
         }
 

@@ -41,12 +41,20 @@ namespace RussianAICup2015Car.Sources {
 
       double sign = GetSign(dirMove, dirEnd);
       double normalAngle = car.GetAngleTo(car.X + dirMove.X + dirEnd.X, car.Y + dirMove.Y + dirEnd.Y);
+
+      if (distanceToEnd < (game.CarWidth * 0.5 + 5 * car.SpeedN(dirMove)) && sign * normalAngle > 0) {
+        angle = car.GetAngleTo(car.X + dirEnd.X, car.Y + dirEnd.Y);
+        normalAngle = angle;
+      }
+
+
       double diffAngle = sign * (normalAngle - angle);
-      if (diffAngle > 0 && procentToEnd < 0.5 && car.SpeedN(dirMove) * diffAngle > 2.0) {
+      if (diffAngle > 0 && car.Speed() * diffAngle > 2.2 / (1 - procentToEnd)) {
         move.IsBrake = true;
       }
 
-      if (car.SpeedN(dirMove) > 20 - (1.0 - procentToEnd) * 5 ) {
+      double speedWithEnginePower = car.Speed() + car.EnginePower * car.EnginePower - 1;
+      if (speedWithEnginePower > 15) {
         move.IsBrake = true;
       }
 

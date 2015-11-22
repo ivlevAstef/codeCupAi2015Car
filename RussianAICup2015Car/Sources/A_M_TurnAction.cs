@@ -37,7 +37,7 @@ namespace RussianAICup2015Car.Sources {
       move.WheelTurn = car.WheelTurnForAngle(angle, game);
 
       double diffAngle = sign * (normalAngle - angle);
-      if (diffAngle > 0 && car.SpeedN(dirMove) * diffAngle > 3.5 * 1.0/ (1 - procentToEnd)) {
+      if (diffAngle > 0 && car.Speed() * diffAngle > 3.5 / (1 - procentToEnd)) {
         move.IsBrake = true;
       }
 
