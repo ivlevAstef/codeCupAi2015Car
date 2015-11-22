@@ -39,7 +39,6 @@ namespace RussianAICup2015Car.Sources {
       double angle = angleMult * endAngle1 + (1.0 - angleMult) * endAngle2;
       move.WheelTurn = car.WheelTurnForAngle(angle, game);
 
-
       double sign = GetSign(dirMove, dirEnd);
       double normalAngle = car.GetAngleTo(car.X + dirMove.X + dirEnd.X, car.Y + dirMove.Y + dirEnd.Y);
       double diffAngle = sign * (normalAngle - angle);

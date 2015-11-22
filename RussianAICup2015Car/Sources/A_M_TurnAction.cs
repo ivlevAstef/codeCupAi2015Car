@@ -29,22 +29,23 @@ namespace RussianAICup2015Car.Sources {
       double procentToEnd = distanceToEnd / game.TrackTileSize;
 
       double angle = needAngle;
-      if (distanceToEnd < game.CarWidth * 0.5 && sign * normalAngle > 0) {
+      if (distanceToEnd < (game.CarWidth * 0.5 + 5 * car.SpeedN(dirMove)) && sign * normalAngle > 0) {
         angle = car.GetAngleTo(car.X + dirEnd.X, car.Y + dirEnd.Y);
+        normalAngle = angle;
       }
 
       move.WheelTurn = car.WheelTurnForAngle(angle, game);
 
       double diffAngle = sign * (normalAngle - angle);
-      if (diffAngle > 0 && procentToEnd < 0.5 && car.SpeedN(dirMove) * diffAngle > 3.5) {
+      if (diffAngle > 0 && car.SpeedN(dirMove) * diffAngle > 3.5 * 1.0/ (1 - procentToEnd)) {
         move.IsBrake = true;
       }
 
       if (car.SpeedN(dirMove) > 21) {
         move.IsBrake = true;
-      } else {
-        move.EnginePower = 1.0;
       }
+
+      move.EnginePower = 1.0;
     }
 
     public override HashSet<ActionType> GetParallelsActions() {

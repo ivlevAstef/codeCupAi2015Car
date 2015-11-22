@@ -72,6 +72,8 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
           actions[actionType].execute(move);
         }
       }
+
+      Logger.instance.Debug("Car Speed: {0:F} Car Angle:{1:F3}", self.Speed(), self.Angle);
     }
   }
 }

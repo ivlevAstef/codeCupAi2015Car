@@ -28,12 +28,11 @@ namespace RussianAICup2015Car.Sources {
 
       double magnitedAngle = magniteToCenter(dirMove, dirEnd);
 
-      if (Math.Abs(magnitedAngle) > Math.PI / (18 * car.Speed() / 20) && car.Speed() > 10) {
+      if (Math.Abs(magnitedAngle) > Math.PI / car.Speed() && car.Speed() > 15) {
         move.IsBrake = true;
       }
 
       move.EnginePower = 1.0;
-
       move.WheelTurn = car.WheelTurnForAngle(magnitedAngle, game);
     }
 
@@ -43,8 +42,8 @@ namespace RussianAICup2015Car.Sources {
         ActionType.Shooting
       };
 
-      bool smallAngleDeviation = Math.Abs(magniteToCenter(path.FirstWayCell.DirOut, path.ShortWayCells[0].DirOut)) < Math.PI / 18;
-      if (Math.Abs(car.AngularSpeed) < 0.01 && smallAngleDeviation) {
+      bool smallAngleDeviation = Math.Abs(magniteToCenter(path.FirstWayCell.DirOut, path.ShortWayCells[0].DirOut)) < Math.PI / 32;
+      if (Math.Abs(car.AngularSpeed) < 0.001 && smallAngleDeviation) {
         result.Add(ActionType.UseNitro);
       }
 
@@ -52,7 +51,7 @@ namespace RussianAICup2015Car.Sources {
     }
 
     private double magniteToCenter(PointInt dir1, PointInt dir2) {
-      double powerTilt = game.TrackTileSize * 0.5;
+      double powerTilt = game.TrackTileSize * 0.45;
       PointDouble dir = new PointDouble((dir1.X + dir2.X) / Math.Sqrt(2), (dir1.Y + dir2.Y) / Math.Sqrt(2));
 
       double centerX = (Math.Floor(car.X / game.TrackTileSize) + 0.5 + 0.5 * dir1.X) * game.TrackTileSize;

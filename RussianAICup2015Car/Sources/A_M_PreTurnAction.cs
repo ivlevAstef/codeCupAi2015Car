@@ -22,10 +22,9 @@ namespace RussianAICup2015Car.Sources {
     }
 
     public override void execute(Move move) {
-      double maxSpeed = game.TrackTileSize / 29;//around 27.5
       PointInt dirMove = path.FirstWayCell.DirOut;
 
-      if (car.Speed() > maxSpeed) {
+      if (car.Speed() > 33 - car.EnginePower * 5  - car.RemainingNitroTicks * 0.03) {
         move.IsBrake = true;
       }
 
@@ -33,16 +32,11 @@ namespace RussianAICup2015Car.Sources {
       double distanceToEnd = car.GetDistanceTo(wayEnd, dirMove);
       double ticksToEnd = distanceToEnd / car.SpeedN(dirMove);
 
-      double stallSpeed = ticksToEnd * game.CarLengthwiseMovementFrictionFactor;
-      double exceesSpeed = Math.Max(0.0, (car.Speed() - stallSpeed) - maxSpeed);
-
-      move.EnginePower = (1.0 - exceesSpeed * exceesSpeed);
-
       double magnitedAngleNegative = magniteToSide(dirMove, GetDirOut().Negative());
       double magnitedAngle = car.GetAngleTo(car.X + dirMove.X, car.Y + dirMove.Y);
 
       double procentToEnd = distanceToEnd / game.TrackTileSize;
-      double finalAngle = magnitedAngleNegative * procentToEnd + 2 * magnitedAngle * (1.0 - procentToEnd);
+      double finalAngle = (magnitedAngleNegative - magnitedAngle) * 0.25 * procentToEnd + magnitedAngle;
 
       move.WheelTurn = car.WheelTurnForAngle(finalAngle, game);
     }
