@@ -9,10 +9,6 @@ namespace RussianAICup2015Car.Sources {
         return false;
       }
 
-      if (!turn()) {
-        return false;
-      }
-
       if (Math.Abs(car.AngularSpeed) < 0.02) {
         return false;
       }
@@ -26,10 +22,6 @@ namespace RussianAICup2015Car.Sources {
 
     public override void execute(Move move) {
       move.IsSpillOil = true;
-    }
-
-    private bool turn() {
-      return !path.FirstWayCell.DirIn.Equals(path.FirstWayCell.DirOut);
     }
 
     private PointDouble oilCenter() {
