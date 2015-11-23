@@ -126,7 +126,7 @@ namespace RussianAICup2015Car.Sources {
         PointInt nextPos = from.Add(dir);
         int depth = (0 == path[nextPos.X, nextPos.Y]) ? -10 : path[nextPos.X, nextPos.Y];//because checkpoint needs all time
 
-        if (dir.Equals(dirIn) && car.Speed() > 15 && checkToAlternative(world, path, from, nextPos)) {
+        if (dir.Equals(dirIn) && car.Speed() > 10 && checkToAlternative(world, path, from, nextPos)) {
           depth -= 2;
         }
 
