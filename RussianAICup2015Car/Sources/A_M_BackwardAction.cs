@@ -9,11 +9,13 @@ namespace RussianAICup2015Car.Sources {
     public override bool valid() {
       Logger.instance.Assert(3 == path.WayCells.Length, "incorrect way cells count.");
 
-      if (null != movedDir) {
+      PointInt dir = path.FirstWayCell.DirOut;
+
+      if (null != movedDir && !dir.Equals(movedDir)) {
         return true;
       }
 
-      PointInt dir = path.FirstWayCell.DirOut;
+      movedDir = null;
 
       double angle = car.GetAngleTo(car.X + dir.X, car.Y + dir.Y);
 
@@ -29,28 +31,28 @@ namespace RussianAICup2015Car.Sources {
 
       PointInt currentDir = path.FirstWayCell.DirOut;
 
+      PointDouble wayEnd = GetWayEnd(path.FirstWayCell.Pos, movedDir);
+      double procentToEnd = car.GetDistanceTo(wayEnd.X, wayEnd.Y) / game.TrackTileSize;
+      bool perpendicular = currentDir.Equals(movedDir.Perpendicular()) || currentDir.Equals(movedDir.Perpendicular().Negative());
+
       double magnitedAngle = 0;
       if (movedSign(movedDir) < 0) {
         move.IsBrake = true;
 
         magnitedAngle = magniteToCenter(movedDir);
       } else {
-        PointDouble wayEnd = GetWayEnd(path.FirstWayCell.Pos, movedDir);
-        double procentToEnd = car.GetDistanceTo(wayEnd.X, wayEnd.Y) / game.TrackTileSize;
-        bool perpendicular = currentDir.Equals(movedDir.Perpendicular()) || currentDir.Equals(movedDir.Perpendicular().Negative());
-
         if (procentToEnd < 0.5 && perpendicular) {
           magnitedAngle = magniteToEnd(movedDir, currentDir.Negative());
           move.EnginePower = -Math.Max(0.1, procentToEnd);
         } else {
           magnitedAngle = 0.25 * magniteToCenter(movedDir);
         }
+      }
 
-        if (procentToEnd < 0.05 && perpendicular) {
-          movedDir = null;
-          move.IsBrake = true;
-          move.EnginePower = 0;
-        }
+      if (procentToEnd < 0.05 && perpendicular) {
+        movedDir = null;
+        move.IsBrake = true;
+        move.EnginePower = 0;
       }
 
       double magnitedForce = car.WheelTurnForAngle(magnitedAngle, game);

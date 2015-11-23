@@ -12,7 +12,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       { ActionType.Death, new A_Death()},
 
       { ActionType.Forward, new A_M_ForwardAction()},
-      { ActionType.Backward, new A_M_BackwardAction()},
+      //{ ActionType.Backward, new A_M_BackwardAction()},
       { ActionType.PreTurn, new A_M_PreTurnAction()},
       { ActionType.Turn, new A_M_TurnAction()},
       { ActionType.Snake, new A_M_SnakeAction()},
