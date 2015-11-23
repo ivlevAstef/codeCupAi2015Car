@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
   public sealed class MyStrategy : IStrategy {
-    private Path path = new Path();
+    private Map path = new Map();
 
     private Dictionary<ActionType, A_IAction> actions = new Dictionary<ActionType, A_IAction> {
       { ActionType.InitialFreeze, new A_InitialFreeze()},

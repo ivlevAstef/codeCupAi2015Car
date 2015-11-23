@@ -25,7 +25,7 @@ namespace RussianAICup2015Car.Sources {
   };
 
   public interface A_IAction {
-    void setupEnvironment(Car car, World world, Game game, Path path);
+    void setupEnvironment(Car car, World world, Game game, Map path);
 
     bool valid();
 

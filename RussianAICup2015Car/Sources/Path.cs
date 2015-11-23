@@ -24,7 +24,7 @@ namespace RussianAICup2015Car.Sources {
     }
   }
 
-  public class Path {
+  public class Map {
     public static PointInt DirLeft = new PointInt(-1, 0);
     public static PointInt DirRight = new PointInt(1, 0);
     public static PointInt DirUp = new PointInt(0, -1);
