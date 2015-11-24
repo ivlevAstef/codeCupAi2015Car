@@ -4,12 +4,25 @@ using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
 
 namespace RussianAICup2015Car.Sources {
   public class Map {
-    public struct Cell {
-      public PointInt Pos;
+    public class Cell {
+      public PointInt Pos { get; set; }
 
-      public PointInt[] Dirs;
-      public Tuple<Cell, int>[] NeighboringCells;//int - Value of shortening the distance to checkpoint. default -1.
+      public PointInt[] Dirs { get; set; }
+      public List<Tuple<Cell, int>> NeighboringCells { get; set; }//int - Value of shortening the distance to checkpoint. default -1.
       //contains only valid cells -> by which you can get to the checkpoint
+
+      public override bool Equals(object obj) {
+        var p = obj as Cell;
+        if (null == p) {
+          return false;
+        }
+
+        return Pos.Equals(p.Pos);
+      }
+
+      public override int GetHashCode() {
+        return Pos.GetHashCode();
+      }
     }
 
     public static PointInt DirLeft = new PointInt(-1, 0);
@@ -20,6 +33,9 @@ namespace RussianAICup2015Car.Sources {
     private Car car = null;
     private World world = null;
     private Game game = null;
+
+    private PointInt posCache = null;
+    private Dictionary<PointInt, int[,]> mapCache = new Dictionary<PointInt, int[,]>();
 
     private static Dictionary<TileType, PointInt[]> directionsByTileType = new Dictionary<TileType, PointInt[]> {
       {TileType.Empty , new PointInt[0]},
@@ -45,46 +61,104 @@ namespace RussianAICup2015Car.Sources {
 
     public Cell cellByMaxDepth(int maxDepth) {
       PointInt current = new PointInt((int)(car.X / game.TrackTileSize), (int)(car.Y / game.TrackTileSize));
-      int[,] map = createMap(current, checkpointByOffset(0));
+      if (null == posCache || !posCache.Equals(current)) {
+        mapCache.Clear();
+        posCache = current;
+      }
 
-      Cell? result = createCell(map, current, 0, maxDepth, maxDepth -2);
-      Logger.instance.Assert(result.HasValue, "Can't create cell");
+      Cell result = createCell(current, 0, maxDepth);
 
-      return result.Value;
+      HashSet<Cell> visited = new HashSet<Cell>();
+      result = simplifiedCell(result, visited);
+
+      return result;
     }
 
-    private Cell? createCell(int[,] map, PointInt pos, int checkPointOffset, int maxDepth, int maxAlternativeDepth) {
-      if (maxDepth <= 0) {
-        return null;
-      }
+    private Cell createCell(PointInt beginPos, int beginCheckPointOffset, int maxDepth) {
+      Cell res = new Cell();
+      res.Pos = beginPos;
 
-      while(pos.Equals(checkpointByOffset(checkPointOffset))) {
-        checkPointOffset++;
-        map = createMap(pos, checkpointByOffset(checkPointOffset));
-      }
+      HashSet<PointInt> visited = new HashSet<PointInt>();
+      Dictionary<Cell, Cell> allCells = new Dictionary<Cell, Cell>();
 
-      Cell result = new Cell();
-      result.Pos = pos;
-      result.Dirs = dirsByPos(pos);
+      Queue<Tuple<Cell,int, int>> stack = new Queue<Tuple<Cell,int, int>>();
+      //cell, checkpoint offset, depth
+      stack.Enqueue(new Tuple<Cell, int, int>(res, beginCheckPointOffset, 0));
+      allCells.Add(res, res);
 
-      List<Tuple<Cell, int>> cells = new List<Tuple<Cell,int>>();
-      foreach (PointInt dir in result.Dirs) {
-        PointInt iterPos = pos + dir;
+      while(stack.Count > 0) {
+        Tuple<Cell,int, int> data = stack.Dequeue();
+        Cell cell = data.Item1;
+        int checkPointOffset = data.Item2;
+        int depth = data.Item3;
 
-        if (map[iterPos.X, iterPos.Y] < map[pos.X, pos.Y] || (maxDepth > maxAlternativeDepth && checkToAlternative(map, pos, iterPos))) {
-          //TODO: alternative check for get.
-          Cell? iterCell = createCell(map, iterPos, checkPointOffset, maxDepth - 1, maxAlternativeDepth);
-          int length = map[iterPos.X, iterPos.Y] - map[pos.X, pos.Y];
+        if (depth >= maxDepth || visited.Contains(cell.Pos)) {
+          continue;
+        }
 
-          if (iterCell.HasValue) {
-            cells.Add(new Tuple<Cell,int>(iterCell.Value, length));
+        visited.Add(cell.Pos);
+
+        while(cell.Pos.Equals(checkpointByOffset(checkPointOffset))) {
+          checkPointOffset++;
+        }
+
+        fillCell(ref cell, checkPointOffset, allCells);
+
+        foreach(Tuple<Cell,int> subData in cell.NeighboringCells) {
+          if (!allCells.ContainsKey(subData.Item1)) {
+            stack.Enqueue(new Tuple<Cell, int, int>(subData.Item1, checkPointOffset, depth + 1));
+            allCells.Add(subData.Item1, subData.Item1);
           }
         }
       }
 
-      result.NeighboringCells = cells.ToArray();
+      return res;
+    }
 
-      return result;
+    private Cell simplifiedCell(Cell cell, HashSet<Cell> visited) {
+      List<Tuple<Cell, int>> neighboring = new List<Tuple<Cell,int>>();
+
+      visited.Add(cell);
+
+      foreach (Tuple<Cell, int> data in cell.NeighboringCells) {
+        if(null != data.Item1.Dirs && null != data.Item1.NeighboringCells) {
+          if (visited.Contains(data.Item1)) {
+            neighboring.Add(new Tuple<Cell, int>(data.Item1, data.Item2));
+          } else {
+            neighboring.Add(new Tuple<Cell, int>(simplifiedCell(data.Item1, visited), data.Item2));
+          }
+        }
+      }
+
+      cell.NeighboringCells = neighboring;
+
+      return cell;
+    }
+
+    private void fillCell(ref Cell cell, int checkPointOffset, Dictionary<Cell, Cell> allCells) {
+      int[,] map = getMap(checkpointByOffset(checkPointOffset));
+      PointInt pos = cell.Pos;
+
+      cell.Dirs = dirsByPos(pos);
+
+      List<Tuple<Cell, int>> cells = new List<Tuple<Cell, int>>();
+      foreach (PointInt dir in cell.Dirs) {
+        PointInt iterPos = pos + dir;
+
+        if (map[iterPos.X, iterPos.Y] < map[pos.X, pos.Y] || checkToAlternative(map, pos, iterPos)) {
+          Cell iterCell = new Cell();
+          iterCell.Pos = iterPos;
+
+          if (allCells.ContainsKey(iterCell)) {
+            iterCell = allCells[iterCell];
+          }
+
+          int length = map[iterPos.X, iterPos.Y] - map[pos.X, pos.Y];
+          cells.Add(new Tuple<Cell, int>(iterCell, length));
+        }
+      }
+
+      cell.NeighboringCells = cells;
     }
 
     private bool checkToAlternative(int[,] map, PointInt currentPos, PointInt alternativePos) {
@@ -101,6 +175,13 @@ namespace RussianAICup2015Car.Sources {
     private PointInt checkpointByOffset(int offset) {
       int checkPointIndex = (car.NextWaypointIndex + offset) % world.Waypoints.Length;
       return new PointInt(world.Waypoints[checkPointIndex][0], world.Waypoints[checkPointIndex][1]);
+    }
+
+    private int[,] getMap(PointInt checkpoint) {
+      if (!mapCache.ContainsKey(checkpoint)) {
+        mapCache[checkpoint] = createMap(posCache, checkpoint);
+      }
+      return mapCache[checkpoint];
     }
 
     private int[,] createMap(PointInt begin, PointInt end) {
