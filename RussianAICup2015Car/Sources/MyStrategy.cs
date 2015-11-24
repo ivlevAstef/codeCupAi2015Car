@@ -5,7 +5,8 @@ using System.Collections.Generic;
 
 namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
   public sealed class MyStrategy : IStrategy {
-    private Map path = new Map();
+    private Map map = new Map();
+    private Path path = new Path();
 
     private Dictionary<ActionType, A_IAction> actions = new Dictionary<ActionType, A_IAction> {
       { ActionType.InitialFreeze, new A_InitialFreeze()},
@@ -43,11 +44,14 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       ActionType.Forward,
     };
 
-    public void Move(Car self, World world, Game game, Move move) {
-      path.update(self, world, game);
+    public void Move(Car car, World world, Game game, Move move) {
+      map.setupEnvironment(car, world, game);
+
+      path.SetupEnvironment(car, world, game, map.cellByMaxDepth(10));
+      path.CalculatePath();
 
       foreach (A_IAction action in actions.Values) {
-        action.setupEnvironment(self, world, game, path);
+        action.setupEnvironment(car, world, game, path);
       }
 
       A_IAction callAction = null;
@@ -75,7 +79,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
         }
       }
 
-      Logger.instance.Debug("Car Speed: {0:F} Car Angle:{1:F3}", self.Speed(), self.Angle);
+      Logger.instance.Debug("Car Speed: {0:F} Car Angle:{1:F3}", car.Speed(), car.Angle);
     }
   }
 }

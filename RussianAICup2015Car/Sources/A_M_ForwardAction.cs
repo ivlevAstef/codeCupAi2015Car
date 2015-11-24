@@ -5,7 +5,7 @@ using System;
 namespace RussianAICup2015Car.Sources {
   class A_M_ForwardAction : A_BaseAction {
     public override bool valid() {
-      Logger.instance.Assert(3 == path.WayCells.Length, "incorrect way cells count.");
+      Logger.instance.Assert(3 <= path.Count, "incorrect way cells count.");
 
       return true;
     }
@@ -13,7 +13,7 @@ namespace RussianAICup2015Car.Sources {
     public override void execute(Move move) {
       move.EnginePower = 1.0;
 
-      double magnitedAngle = magniteToCenter(path.FirstWayCell.DirOut);
+      double magnitedAngle = magniteToCenter(path[0].DirOut);
       double magnitedForce = car.WheelTurnForAngle(magnitedAngle, game);
 
       if (Math.Abs(magnitedAngle) > Math.PI / (3 * car.Speed() / 25)) {
@@ -28,12 +28,25 @@ namespace RussianAICup2015Car.Sources {
         ActionType.Shooting
       };
 
-      bool smallAngleDeviation = Math.Abs(magniteToCenter(path.FirstWayCell.DirOut)) < Math.PI / 12;
-      if (path.isStraight() && smallAngleDeviation) {
+      bool smallAngleDeviation = Math.Abs(magniteToCenter(path[0].DirOut)) < Math.PI / 12;
+      if (isStraight() && smallAngleDeviation) {
         result.Add(ActionType.UseNitro);
       }
 
       return result;
+    }
+
+    private bool isStraight() {
+      int straightCount = 0;
+      for (int i = 0; i < Math.Min(5, path.Count); i++) {
+        if (path[i].DirIn.Equals(path[i].DirOut)) {
+          straightCount++;
+        } else {
+          break;
+        }
+      }
+
+      return straightCount >= 5;
     }
 
     private double magniteToCenter(PointInt dir) {

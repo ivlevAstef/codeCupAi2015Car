@@ -5,20 +5,20 @@ using System;
 namespace RussianAICup2015Car.Sources {
   class A_M_TurnAction : A_BaseAction {
     public override bool valid() {
-      Logger.instance.Assert(3 == path.WayCells.Length, "incorrect way cells count.");
+      Logger.instance.Assert(3 <= path.Count, "incorrect way cells count.");
 
-      PointInt dirIn = path.WayCells[1].DirIn;
-      PointInt dirOut = path.WayCells[1].DirOut;
+      PointInt dirIn = path[1].DirIn;
+      PointInt dirOut = path[1].DirOut;
 
       return dirIn.Equals(dirOut.Perpendicular()) || dirIn.Equals(dirOut.Perpendicular().Negative()); 
     }
 
     public override void execute(Move move) {
-      PointInt dirMove = path.FirstWayCell.DirOut;
-      PointInt dirEnd = path.ShortWayCells[0].DirOut;
+      PointInt dirMove = path[0].DirOut;
+      PointInt dirEnd = path[1].DirOut;
 
-      PointDouble wayEnd = GetWayEnd(path.FirstWayCell.Pos, dirMove);
-      PointDouble endPoint = GetWaySideEnd(path.FirstWayCell.Pos, dirMove, dirEnd);
+      PointDouble wayEnd = GetWayEnd(path[0].Pos, dirMove);
+      PointDouble endPoint = GetWaySideEnd(path[0].Pos, dirMove, dirEnd);
 
       double sign = GetSign(dirMove, dirEnd);
 

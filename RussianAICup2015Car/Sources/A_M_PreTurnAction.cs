@@ -5,14 +5,14 @@ using System;
 namespace RussianAICup2015Car.Sources {
   class A_M_PreTurnAction : A_BaseAction {
     public override bool valid() {
-      Logger.instance.Assert(3 == path.WayCells.Length, "incorrect way cells count.");
+      Logger.instance.Assert(3 <= path.Count, "incorrect way cells count.");
 
-      if (!path.ShortWayCells[0].DirIn.Equals(path.ShortWayCells[0].DirOut)) {
+      if (!path[1].DirIn.Equals(path[1].DirOut)) {
         return false;
       }
 
-      PointInt dirIn = path.ShortWayCells[1].DirIn;
-      PointInt dirOut = path.ShortWayCells[1].DirOut;
+      PointInt dirIn = path[2].DirIn;
+      PointInt dirOut = path[2].DirOut;
 
       if (null == dirOut) {
         return true;
@@ -22,7 +22,7 @@ namespace RussianAICup2015Car.Sources {
     }
 
     public override void execute(Move move) {
-      PointInt dirMove = path.FirstWayCell.DirOut;
+      PointInt dirMove = path[0].DirOut;
 
       if (car.Speed() > 33 - car.EnginePower * 5  - car.RemainingNitroTicks * 0.03) {
         move.IsBrake = true;
@@ -30,7 +30,7 @@ namespace RussianAICup2015Car.Sources {
 
       move.EnginePower = 1.0;
 
-      PointDouble wayEnd = GetWayEnd(path.FirstWayCell.Pos, dirMove);
+      PointDouble wayEnd = GetWayEnd(path[0].Pos, dirMove);
       double distanceToEnd = car.GetDistanceTo(wayEnd, dirMove);
       double ticksToEnd = distanceToEnd / car.SpeedN(dirMove);
 
@@ -69,14 +69,14 @@ namespace RussianAICup2015Car.Sources {
     }
 
     private PointInt GetDirOut() {
-      PointInt dirOut = path.ShortWayCells[1].DirOut;
+      PointInt dirOut = path[2].DirOut;
 
       if (null == dirOut) {
-        PointInt dirIn = path.ShortWayCells[1].DirIn;
+        PointInt dirIn = path[2].DirIn;
         dirOut = new PointInt(0);
-        foreach (PointInt dir in path.ShortWayCells[1].Dirs) {
+        foreach (PointInt dir in path[2].DirOuts) {
           if (!dir.Equals(dirIn) && !dir.Equals(dirIn.Negative())) {
-            dirOut = dirOut.Add(dir);
+            dirOut = dirOut + dir;
           }
         }
         //for crossroad return zero point.

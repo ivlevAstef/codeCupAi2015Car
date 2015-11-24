@@ -7,9 +7,9 @@ namespace RussianAICup2015Car.Sources {
     private PointInt movedDir = null;
 
     public override bool valid() {
-      Logger.instance.Assert(3 == path.WayCells.Length, "incorrect way cells count.");
+      Logger.instance.Assert(3 <= path.Count, "incorrect way cells count.");
 
-      PointInt dir = path.FirstWayCell.DirOut;
+      PointInt dir = path[0].DirOut;
 
       if (null != movedDir && !dir.Equals(movedDir)) {
         return true;
@@ -26,12 +26,12 @@ namespace RussianAICup2015Car.Sources {
       move.EnginePower = -1.0;
 
       if (null == movedDir) {
-        movedDir = path.FirstWayCell.DirOut;
+        movedDir = path[0].DirOut;
       }
 
-      PointInt currentDir = path.FirstWayCell.DirOut;
+      PointInt currentDir = path[0].DirOut;
 
-      PointDouble wayEnd = GetWayEnd(path.FirstWayCell.Pos, movedDir);
+      PointDouble wayEnd = GetWayEnd(path[0].Pos, movedDir);
       double procentToEnd = car.GetDistanceTo(wayEnd.X, wayEnd.Y) / game.TrackTileSize;
       bool perpendicular = currentDir.Equals(movedDir.Perpendicular()) || currentDir.Equals(movedDir.Perpendicular().Negative());
 

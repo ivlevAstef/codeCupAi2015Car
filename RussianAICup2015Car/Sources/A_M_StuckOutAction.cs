@@ -12,6 +12,8 @@ namespace RussianAICup2015Car.Sources {
     private int sign = -1;
 
     public override bool valid() {
+      Logger.instance.Assert(3 <= path.Count, "incorrect way cells count.");
+
       if (outStuckTicks > 0) {
         if (15 < outStuckTicks && outStuckTicks < maxTicks * 0.5 && speedCheck()) {
           sign *= -1;
@@ -73,7 +75,7 @@ namespace RussianAICup2015Car.Sources {
       double timePower = Math.Sin((Math.PI * 0.5) * (double)(maxTicks - outStuckTicks) / maxTicks);
       move.EnginePower = sign * timePower;
 
-      PointInt dir = path.WayCells[0].DirOut;
+      PointInt dir = path[0].DirOut;
 
       double angle = sign * car.GetAngleTo(car.X + dir.X, car.Y + dir.Y) * timePower;
 

@@ -7,13 +7,15 @@ namespace RussianAICup2015Car.Sources {
     private Bonus findedBonus = null;
 
     public override bool valid() {
+      Logger.instance.Assert(3 <= path.Count, "incorrect way cells count.");
+
       findedBonus = findBonus();
 
       return null != findedBonus;
     }
 
     public override void execute(Move move) {
-      PointInt dirMove = path.FirstWayCell.DirOut;
+      PointInt dirMove = path[0].DirOut;
 
       double roughAngle = car.GetAngleTo(findedBonus);
       double sign = Math.Sign(roughAngle);
@@ -38,7 +40,7 @@ namespace RussianAICup2015Car.Sources {
     }
 
     private Bonus findBonus() {
-      PointInt dir = path.FirstWayCell.DirOut;
+      PointInt dir = path[0].DirOut;
 
       Dictionary<BonusType, int> priority = new Dictionary<BonusType, int> {
         { BonusType.AmmoCrate , Math.Min(10, 70 - 10 * car.ProjectileCount) },
@@ -69,7 +71,7 @@ namespace RussianAICup2015Car.Sources {
 
         PointInt selfTile = tilePos(car.X, car.Y);
         PointInt bonusTile = tilePos(bonus.X, bonus.Y);
-        if (!selfTile.Equals(bonusTile) && !selfTile.Add(dir).Equals(bonusTile)) {
+        if (!selfTile.Equals(bonusTile) && !(selfTile + dir).Equals(bonusTile)) {
           continue;
         }
 

@@ -6,8 +6,8 @@ namespace RussianAICup2015Car.Sources {
     private PointInt lastPos = null;
 
     public override bool valid() {
-      bool newTile = null != lastPos && !lastPos.Equals(path.FirstWayCell.Pos);
-      lastPos = path.FirstWayCell.Pos;
+      bool newTile = null != lastPos && !lastPos.Equals(path[0].Pos);
+      lastPos = path[0].Pos;
 
       if (car.Speed() > 30) {
         return false;

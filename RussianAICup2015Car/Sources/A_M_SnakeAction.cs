@@ -5,13 +5,13 @@ using System;
 namespace RussianAICup2015Car.Sources {
   class A_M_SnakeAction : A_BaseAction {
     public override bool valid() {
-      Logger.instance.Assert(3 == path.WayCells.Length, "incorrect way cells count.");
+      Logger.instance.Assert(3 <= path.Count, "incorrect way cells count.");
 
-      PointInt posIn = path.WayCells[1].Pos;
-      PointInt posOut = path.WayCells[2].Pos;
+      PointInt posIn = path[1].Pos;
+      PointInt posOut = path[2].Pos;
 
-      PointInt dirIn = path.WayCells[1].DirIn;
-      PointInt dirOut = path.WayCells[2].DirOut;
+      PointInt dirIn = path[1].DirIn;
+      PointInt dirOut = path[2].DirOut;
 
       if (null == dirOut || dirOut.Equals(new PointInt(0))) {
         return false;
@@ -23,8 +23,8 @@ namespace RussianAICup2015Car.Sources {
     }
 
     public override void execute(Move move) {
-      PointInt dirMove = path.FirstWayCell.DirOut;
-      PointInt dirEnd = path.ShortWayCells[0].DirOut;
+      PointInt dirMove = path[0].DirOut;
+      PointInt dirEnd = path[1].DirOut;
 
       double magnitedAngle = magniteToCenter(dirMove, dirEnd);
 
@@ -43,7 +43,7 @@ namespace RussianAICup2015Car.Sources {
         ActionType.Shooting
       };
 
-      bool smallAngleDeviation = Math.Abs(magniteToCenter(path.FirstWayCell.DirOut, path.ShortWayCells[0].DirOut)) < Math.PI / 32;
+      bool smallAngleDeviation = Math.Abs(magniteToCenter(path[0].DirOut, path[1].DirOut)) < Math.PI / 32;
       if (Math.Abs(car.AngularSpeed) < 0.001 && smallAngleDeviation) {
         result.Add(ActionType.UseNitro);
       }

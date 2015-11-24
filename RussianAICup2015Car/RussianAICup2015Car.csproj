@@ -58,7 +58,8 @@
     <Compile Include="Sources\A_OilSpillAction.cs" />
     <Compile Include="Sources\OutStuck.cs" />
     <Compile Include="Sources\A_OvertakeAction.cs" />
-    <Compile Include="Sources\Path.cs" />
+    <Compile Include="Sources\M_Map.cs" />
+    <Compile Include="Sources\M_Path.cs" />
     <Compile Include="Sources\Point.cs" />
     <Compile Include="Sources\A_ShootingAction.cs" />
     <Compile Include="Sources\A_M_SnakeAction.cs" />
