@@ -10,18 +10,42 @@ namespace RussianAICup2015Car.Sources {
       public PointInt[] Dirs { get; set; }
       public List<Tuple<Cell, int>> NeighboringCells { get; set; }//int - Value of shortening the distance to checkpoint. default -1.
       //contains only valid cells -> by which you can get to the checkpoint
+    }
+
+    private class CellKey {
+      public PointInt Pos;
+      public int CheckPoint;
+
+      public CellKey(PointInt pos, int checkPoint) {
+        this.Pos = pos;
+        this.CheckPoint = checkPoint;
+      }
 
       public override bool Equals(object obj) {
-        var p = obj as Cell;
+        var p = obj as CellKey;
         if (null == p) {
           return false;
         }
 
-        return Pos.Equals(p.Pos);
+        return Pos.Equals(p.Pos) && CheckPoint.Equals(p.CheckPoint);
       }
 
       public override int GetHashCode() {
-        return Pos.GetHashCode();
+        return Pos.GetHashCode() ^ CheckPoint.GetHashCode();
+      }
+    }
+
+    private class PrivateCellData {
+      public Cell Cell;
+      public int CheckPointOffset;
+      public int Depth;
+      public bool Alternative;
+
+      public PrivateCellData(Cell cell, int checkPoint, int depth, bool alternative) {
+        this.Cell = cell;
+        this.CheckPointOffset = checkPoint;
+        this.Depth = depth;
+        this.Alternative = alternative;
       }
     }
 
@@ -78,36 +102,30 @@ namespace RussianAICup2015Car.Sources {
       Cell res = new Cell();
       res.Pos = beginPos;
 
-      HashSet<PointInt> visited = new HashSet<PointInt>();
-      Dictionary<Cell, Cell> allCells = new Dictionary<Cell, Cell>();
+      Dictionary<CellKey, Cell> allCells = new Dictionary<CellKey, Cell>();
 
-      Queue<Tuple<Cell,int, int>> stack = new Queue<Tuple<Cell,int, int>>();
-      //cell, checkpoint offset, depth
-      stack.Enqueue(new Tuple<Cell, int, int>(res, beginCheckPointOffset, 0));
-      allCells.Add(res, res);
+      Queue<PrivateCellData> stack = new Queue<PrivateCellData>();
+      stack.Enqueue(new PrivateCellData(res, beginCheckPointOffset, 0, false));
+      allCells.Add(new CellKey(beginPos, beginCheckPointOffset), res);
 
       while(stack.Count > 0) {
-        Tuple<Cell,int, int> data = stack.Dequeue();
-        Cell cell = data.Item1;
-        int checkPointOffset = data.Item2;
-        int depth = data.Item3;
+        PrivateCellData data = stack.Dequeue();
 
-        if (depth >= maxDepth || visited.Contains(cell.Pos)) {
+        if (data.Depth >= maxDepth) {
           continue;
         }
 
-        visited.Add(cell.Pos);
-
-        while(cell.Pos.Equals(checkpointByOffset(checkPointOffset))) {
-          checkPointOffset++;
+        while (data.Cell.Pos.Equals(checkpointByOffset(data.CheckPointOffset))) {
+          data.CheckPointOffset++;
         }
 
-        fillCell(ref cell, checkPointOffset, allCells);
+        fillCell(ref data.Cell, data.CheckPointOffset, allCells, !data.Alternative);
 
-        foreach(Tuple<Cell,int> subData in cell.NeighboringCells) {
-          if (!allCells.ContainsKey(subData.Item1)) {
-            stack.Enqueue(new Tuple<Cell, int, int>(subData.Item1, checkPointOffset, depth + 1));
-            allCells.Add(subData.Item1, subData.Item1);
+        foreach(Tuple<Cell,int> subData in data.Cell.NeighboringCells) {
+          CellKey key = new CellKey(subData.Item1.Pos, data.CheckPointOffset);
+          if (!allCells.ContainsKey(key)) {
+            stack.Enqueue(new PrivateCellData(subData.Item1, data.CheckPointOffset, data.Depth + 1, subData.Item2 > 0));
+            allCells.Add(key, subData.Item1);
           }
         }
       }
@@ -135,7 +153,7 @@ namespace RussianAICup2015Car.Sources {
       return cell;
     }
 
-    private void fillCell(ref Cell cell, int checkPointOffset, Dictionary<Cell, Cell> allCells) {
+    private void fillCell(ref Cell cell, int checkPointOffset, Dictionary<CellKey, Cell> allCells, bool useAlternative) {
       int[,] map = getMap(checkpointByOffset(checkPointOffset));
       PointInt pos = cell.Pos;
 
@@ -145,12 +163,15 @@ namespace RussianAICup2015Car.Sources {
       foreach (PointInt dir in cell.Dirs) {
         PointInt iterPos = pos + dir;
 
-        if (map[iterPos.X, iterPos.Y] < map[pos.X, pos.Y] || checkToAlternative(map, pos, iterPos)) {
-          Cell iterCell = new Cell();
-          iterCell.Pos = iterPos;
+        if (map[iterPos.X, iterPos.Y] < map[pos.X, pos.Y] || (useAlternative && checkToAlternative(map, pos, iterPos))) {
+          CellKey key = new CellKey(iterPos, checkPointOffset);
 
-          if (allCells.ContainsKey(iterCell)) {
-            iterCell = allCells[iterCell];
+          Cell iterCell = null;
+          if (allCells.ContainsKey(key)) {
+            iterCell = allCells[key];
+          } else {
+            iterCell = new Cell();
+            iterCell.Pos = iterPos;
           }
 
           int length = map[iterPos.X, iterPos.Y] - map[pos.X, pos.Y];

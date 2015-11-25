@@ -17,7 +17,6 @@ namespace RussianAICup2015Car.Sources {
     private Game game = null;
     private Map.Cell cell = new Map.Cell();
 
-    private PointInt pathPos = null;
     private Cell[] path = null;
 
     public void SetupEnvironment(Car car, World world, Game game, Map.Cell cell) {
@@ -28,16 +27,11 @@ namespace RussianAICup2015Car.Sources {
     }
 
     public void CalculatePath() {
-      if (null == pathPos || !pathPos.Equals(currentPos())) {
-        HashSet<PointInt> visited = new HashSet<PointInt>();
-        Tuple<List<Cell>, double> path = calculatePath(cell, currentDir(), visited);
-        Logger.instance.Assert(null != path.Item1, "Can't find path.");
+      List<Cell> newPath = mergePath(cell, 0);
+      Logger.instance.Assert(null != newPath, "Can't find path.");
 
-        this.path = path.Item1.ToArray();
-        Logger.instance.Assert(3 <= this.path.Length, "Can't find full path.");
-
-        pathPos = currentPos();
-      }
+      this.path = newPath.ToArray();
+      Logger.instance.Assert(3 <= this.path.Length, "Can't find full path.");
     }
 
     public int Count { get { return path.Length; } }
@@ -53,39 +47,34 @@ namespace RussianAICup2015Car.Sources {
     }
 
     private PointInt currentDir(bool use45 = false) {
-      PointInt carPos = currentPos();
-      PointInt firstWayPoint = new PointInt(world.Waypoints[0][0], world.Waypoints[0][1]);
+      double x = Math.Cos(car.Angle);
+      double y = Math.Sin(car.Angle);
 
-      double speed = Math.Abs(car.SpeedX) + Math.Abs(car.SpeedY);
-
-      if (speed < 1 && carPos.Equals(firstWayPoint)) {
-        return startDirection(world);
-      }
-
-      bool has45 = Math.Abs(Math.Abs(car.SpeedX) - Math.Abs(car.SpeedY)) < speed / 4;
+      bool has45 = Math.Abs(x - y) < 0.1;
       if (use45 && has45) {
-        return new PointInt(Math.Sign(car.SpeedX), Math.Sign(car.SpeedX));
+        return new PointInt(Math.Sign(x), Math.Sign(y));
       }
 
-      if (Math.Abs(car.SpeedX) > Math.Abs(car.SpeedY)) {
-        return new PointInt(Math.Sign(car.SpeedX), 0);
+      if (Math.Abs(x) > Math.Abs(y)) {
+        return new PointInt(Math.Sign(x), 0);
       } else {
-        return new PointInt(0, Math.Sign(car.SpeedY));
+        return new PointInt(0, Math.Sign(y));
       }
     }
 
-    private PointInt startDirection(World world) {
-      switch (world.StartingDirection) {
-      case Direction.Left:
-        return Map.DirLeft;
-      case Direction.Right:
-        return Map.DirRight;
-      case Direction.Up:
-        return Map.DirUp;
-      case Direction.Down:
-        return Map.DirDown;
+    private List<Cell> mergePath(Map.Cell cell, int depth) {
+      if (null != this.path && depth > 0 && this.path.Length > depth + 1) {
+        foreach(Tuple<Map.Cell,int> neighboring in cell.NeighboringCells) {
+          if(this.path[depth + 1].Pos.Equals(neighboring.Item1.Pos)) {
+            List<Cell> newPath = mergePath(neighboring.Item1, depth - 1);
+            newPath.Insert(0, this.path[depth]);
+            return newPath;
+          }
+        }
       }
-      return new PointInt(0);
+
+      HashSet<PointInt> visited = new HashSet<PointInt>();
+      return calculatePath(cell, currentDir(), visited).Item1;
     }
 
     private Tuple<List<Cell>, double> calculatePath(Map.Cell cell, PointInt DirIn, HashSet<PointInt> visited) {
@@ -141,7 +130,7 @@ namespace RussianAICup2015Car.Sources {
       foreach (Bonus bonus in world.Bonuses) {
         PointInt pos = new PointInt((int)(bonus.X/game.TrackTileSize), (int)(bonus.Y/game.TrackTileSize));
         if (pos.Equals(cell)) {
-          priority += 2.0;
+          priority += 1.0;
         }
       }
 
@@ -151,8 +140,8 @@ namespace RussianAICup2015Car.Sources {
     private double cellPriority(PointInt dir, PointInt cell, PointInt from, int length) {
       double priority = (-length) - 1;
 
-      if (isNextThreePoints(from) && dir.Equals(cell - from)) {
-        priority += car.Speed() / 5;
+      if (dir.Equals(cell - from) && length > 0) {
+        priority += 2;// car.Speed() / 5;
       }
 
       return priority;
