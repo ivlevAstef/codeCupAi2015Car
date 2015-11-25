@@ -35,7 +35,7 @@ namespace RussianAICup2015Car.Sources {
       double ticksToEnd = distanceToEnd / car.SpeedN(dirMove);
 
       double magnitedAngleNegative = magniteToSide(dirMove, GetDirOut().Negative());
-      double magnitedAngle = car.GetAngleTo(car.X + dirMove.X, car.Y + dirMove.Y);
+      double magnitedAngle = magniteToSide(dirMove, new PointInt(0));
 
       double procentToEnd = distanceToEnd / game.TrackTileSize;
       double finalAngle = (magnitedAngleNegative - magnitedAngle) * 0.25 * procentToEnd + magnitedAngle;
