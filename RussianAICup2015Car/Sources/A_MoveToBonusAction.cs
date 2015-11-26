@@ -15,18 +15,21 @@ namespace RussianAICup2015Car.Sources {
     }
 
     public override void execute(Move move) {
-      PointInt dirMove = path[0].DirOut;
+      Vector dirMove = new Vector(path[0].DirOut.X, path[0].DirOut.Y);
+      Vector center = new Vector((path[0].Pos.X + 0.5), (path[0].Pos.Y + 0.5)) * game.TrackTileSize;
 
-      double roughAngle = car.GetAngleTo(findedBonus);
-      double sign = Math.Sign(roughAngle);
+      double dirAngle = Math.Atan2(dirMove.Y, dirMove.X);
 
-      double angle = roughAngle;
-      if (Math.Abs(roughAngle) > Math.PI / 32) {
-        double x = findedBonus.X + sign * dirMove.Y * (findedBonus.Height * 0.5 + car.Height * 0.5);
-        double y = findedBonus.Y - sign * dirMove.X * (findedBonus.Height * 0.5 + car.Height * 0.5);
+      double centerX = car.X * Math.Abs(dirMove.X) + center.X * Math.Abs(dirMove.Y);
+      double centerY = car.Y * Math.Abs(dirMove.Y) + center.Y * Math.Abs(dirMove.X);
 
-        angle = car.GetAngleTo(x, y);
-      }
+      double centerAngle = new Vector(centerX, centerY).GetAngleTo(findedBonus.X, findedBonus.Y, dirAngle);
+      double sign = Math.Sign(centerAngle);
+
+      double x = findedBonus.X + sign * dirMove.Y * (findedBonus.Height * 0.25 + car.Height * 0.5);
+      double y = findedBonus.Y - sign * dirMove.X * (findedBonus.Height * 0.25 + car.Height * 0.5);
+
+      double angle = car.GetAngleTo(x, y);
 
       move.WheelTurn = car.WheelTurnForAngle(angle, game);
 

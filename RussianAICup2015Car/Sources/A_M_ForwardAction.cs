@@ -19,8 +19,8 @@ namespace RussianAICup2015Car.Sources {
       double negativeSpeed = speed.Dot(perpendicular) - speedNormal.Dot(perpendicular);
 
       if (negativeSpeed > 0 && !path[0].DirOut.Equals(path[0].DirIn)) {
-        double dx = dir.X - perpendicular.X * negativeSpeed;
-        double dy = dir.Y - perpendicular.Y * negativeSpeed;
+        double dx = dir.X / negativeSpeed - perpendicular.X * negativeSpeed;
+        double dy = dir.Y / negativeSpeed - perpendicular.Y * negativeSpeed;
         double angle = car.GetAngleTo(car.X + dx, car.Y + dy);
         move.WheelTurn = car.WheelTurnForAngle(angle, game);
       } else {

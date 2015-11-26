@@ -112,5 +112,24 @@ namespace RussianAICup2015Car.Sources {
       double len = Math.Sqrt(X * X + Y * Y);
       return new Vector(X / len, Y / len);
     }
+
+    public double GetAngleTo(double x, double y) {
+      return GetAngleTo(x, y, 0);
+    }
+
+    public double GetAngleTo(double x, double y, double angle) {
+      double absoluteAngle = Math.Atan2(y - this.Y, x - this.X);
+      double relativeAngle = absoluteAngle - angle;
+
+      while (relativeAngle > Math.PI) {
+        relativeAngle -= 2.0D * Math.PI;
+      }
+
+      while (relativeAngle < -Math.PI) {
+        relativeAngle += 2.0D * Math.PI;
+      }
+
+      return relativeAngle;
+    }
   }
 }
