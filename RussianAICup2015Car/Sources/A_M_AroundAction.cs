@@ -30,21 +30,20 @@ namespace RussianAICup2015Car.Sources {
         move.WheelTurn = car.WheelTurnForAngle(angleEnd, game);
         dir = new Vector(dirEnd.X, dirEnd.Y);
       } else {
-        Vector endPoint = GetWaySideEnd(path[0].Pos, dirMove, dirEnd);
-        Vector endPointReverse = GetWaySideEnd(path[0].Pos, dirMove, dirEnd.Negative());
-
-        double angle = car.GetAngleTo(endPoint.X, endPoint.Y);
-        if(isEndAtAngle(angle)) {
+        if(isEndAt(20)) {
+          Vector endPoint = GetWaySideEnd(path[0].Pos, dirMove, dirEnd);
+          double angle = car.GetAngleTo(endPoint.X, endPoint.Y);
           move.WheelTurn = car.WheelTurnForAngle(angle, game);
         } else {
-          angle = car.GetAngleTo(endPointReverse.X, endPointReverse.Y);
+          Vector endPointReverse = GetWaySideEnd(path[0].Pos, dirMove, dirEnd.Negative());
+          double angle = car.GetAngleTo(endPointReverse.X, endPointReverse.Y);
           move.WheelTurn = car.WheelTurnForAngle(angle, game);
         }
         dir = new Vector(dirMove.X + dirEnd.X, dirMove.Y + dirEnd.Y);
       }
 
-      if (Constant.isExceedMaxTurnSpeed(car, dir.Perpendicular(), 0.75)) {
-        move.EnginePower = Constant.MaxTurnSpeed(car, 0.75) / car.Speed();
+      if (Constant.isExceedMaxTurnSpeed(car, dir.Perpendicular(), 1.2)) {
+        move.EnginePower = Constant.MaxTurnSpeed(car, 1.2) / car.Speed();
         move.IsBrake = true;
       } else {
         move.EnginePower = 1.0;

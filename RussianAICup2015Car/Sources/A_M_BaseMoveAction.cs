@@ -24,6 +24,10 @@ namespace RussianAICup2015Car.Sources {
     }
 
     protected bool isEndAt(double ticks) {
+      if (car.Speed() < 5) {
+        return false;
+      }
+
       PointInt dirOut = path[0].DirOut;
       Vector dir = new Vector(dirOut.X, dirOut.Y);
 

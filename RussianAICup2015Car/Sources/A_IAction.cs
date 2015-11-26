@@ -9,6 +9,7 @@ namespace RussianAICup2015Car.Sources {
     Forward,
     Backward,
     PreTurn, //moved car to opposite side border turn
+    SnakePreEnd,
     Turn,//90 degrees
     Snake,//45 degrees
     Around,//180 degrees

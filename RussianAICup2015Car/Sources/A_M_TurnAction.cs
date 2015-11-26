@@ -31,8 +31,8 @@ namespace RussianAICup2015Car.Sources {
         dir = new Vector(dirMove.X + dirEnd.X, dirMove.Y + dirEnd.Y);
       }
 
-      if (Constant.isExceedMaxTurnSpeed(car, dir.Perpendicular(), 0.5)) {
-        move.EnginePower = Constant.MaxTurnSpeed(car, 0.5) / car.Speed();
+      if (Constant.isExceedMaxTurnSpeed(car, dir.Perpendicular(), 0.6)) {
+        move.EnginePower = Constant.MaxTurnSpeed(car, 0.6) / car.Speed();
         move.IsBrake = true;
       } else {
         move.EnginePower = 1.0;

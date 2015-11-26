@@ -42,7 +42,8 @@ namespace RussianAICup2015Car.Sources {
     public override HashSet<ActionType> GetParallelsActions() {
       HashSet<ActionType> result = new HashSet<ActionType>() {
         ActionType.OilSpill,
-        ActionType.Shooting
+        ActionType.Shooting,
+        ActionType.SnakePreEnd
       };
 
       bool smallAngleDeviation = Math.Abs(magniteToCenter(path[0].DirOut, path[1].DirOut)) < Math.PI / 32;

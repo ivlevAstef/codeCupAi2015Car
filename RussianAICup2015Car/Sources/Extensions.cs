@@ -61,6 +61,11 @@ namespace RussianAICup2015Car.Sources {
       const double dt = 1;
 
       double angularFactor = Math.Abs(car.AngularFactor(game));
+
+      if (angularFactor < 1.0e-5) {
+        return 0;
+      }
+
       double aFrictionMult = Math.Pow(1 - game.CarRotationFrictionFactor, dt);
       double angularFriction = game.CarRotationFrictionFactor * dt;
 
@@ -96,6 +101,11 @@ namespace RussianAICup2015Car.Sources {
       const double dt = 1;
 
       double angularFactor = Math.Abs(car.AngularFactor(game));
+
+      if (angularFactor < 1.0e-5) {
+        return 0;
+      }
+
       double aFrictionMult = Math.Pow(1 - game.CarRotationFrictionFactor, dt);
       double angularFriction = game.CarRotationFrictionFactor * dt;
 
