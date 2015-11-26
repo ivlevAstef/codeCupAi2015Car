@@ -12,11 +12,31 @@ namespace RussianAICup2015Car.Sources {
       public PointInt[] DirOuts;
     };
 
+    private class CellTransition {
+      public Cell Cell {get; set;}
+      public CellTransition Next { get; set; }
+      public double CellPriority { get; set; }
+      public double TransitionPriority { get; set; }
+
+      public double NextPriority {
+        get {
+          return (null != Next) ? Next.Priority : 0;
+        }
+      }
+
+      public double Priority {
+        get {
+          return CellPriority + NextPriority + TransitionPriority;
+        }
+      }
+    }
+
     private Car car = null;
     private World world = null;
     private Game game = null;
     private Map.Cell cell = null;
 
+    private CellTransition transition = null;
     private Cell[] path = null;
     private Cell lastCell = null;
 
@@ -28,23 +48,26 @@ namespace RussianAICup2015Car.Sources {
     }
 
     public void CalculatePath() {
-      if (null != path && !path[0].Pos.Equals(cell.Pos)) {
-        lastCell = path[0];
+      if (null != transition && !transition.Cell.Pos.Equals(cell.Pos)) {
+        lastCell = transition.Cell;
+        transition = null;
+        /*for (CellTransition iter = transition; iter != null; iter = iter.Next) {
+          iter.CellPriority = 0;
+        }*/
       }
 
       HashSet<Map.Cell> visited = new HashSet<Map.Cell>();
-      List<Cell> newPath = null;
       if (null != lastCell) {
         PointInt dir = cell.Pos - lastCell.Pos;
-        newPath = calculatePath(lastCell, cell, dir, visited).Item1;
+        transition = calculatePath(lastCell, cell, dir, visited);
       } else {
-        newPath = calculatePath(null, cell, currentDir(), visited).Item1;
+        transition = calculatePath(null, cell, currentDir(), visited);
       }
 
-      Logger.instance.Assert(null != newPath, "Can't find path.");
+      Logger.instance.Assert(null != transition, "Can't find path.");
 
-      this.path = newPath.ToArray();
-      Logger.instance.Assert(3 <= this.path.Length, "Can't find full path.");
+      path = createPathFromTransition(transition).ToArray();
+      Logger.instance.Assert(3 <= path.Length, "Can't find full path.");
     }
 
     public int Count { get { return path.Length; } }
@@ -55,14 +78,23 @@ namespace RussianAICup2015Car.Sources {
       return path[offset];
     }
 
+    private List<Cell> createPathFromTransition(CellTransition transition) {
+      List<Cell> result = new List<Cell>();
+      result.Add(transition.Cell);
+      if (null != transition.Next) {
+        result.AddRange(createPathFromTransition(transition.Next));
+      }
+      return result;
+    }
+
     private PointInt currentPos() {
       return new PointInt((int)(car.X / game.TrackTileSize), (int)(car.Y / game.TrackTileSize));
     }
 
     private PointInt currentDir() {
       //TODO: supported get real angle for wheelTurn = 0
-      double x = Math.Cos(car.Angle + car.AngularSpeed);
-      double y = Math.Sin(car.Angle + car.AngularSpeed);
+      double x = Math.Cos(car.Angle + car.AngularSpeed * (car.WheelTurn / game.CarWheelTurnChangePerTick));
+      double y = Math.Sin(car.Angle + car.AngularSpeed * (car.WheelTurn / game.CarWheelTurnChangePerTick));
 
       if (Math.Abs(x) > Math.Abs(y)) {
         return new PointInt(Math.Sign(x), 0);
@@ -71,7 +103,7 @@ namespace RussianAICup2015Car.Sources {
       }
     }
 
-    private Tuple<List<Cell>, double> calculatePath(Cell lastCell, Map.Cell cell, PointInt DirIn, HashSet<Map.Cell> visited) {
+    private CellTransition calculatePath(Cell lastCell, Map.Cell cell, PointInt DirIn, HashSet<Map.Cell> visited) {
       if (visited.Contains(cell)) {
         return null;
       }
@@ -82,28 +114,36 @@ namespace RussianAICup2015Car.Sources {
       resultCell.Pos = cell.Pos;
       resultCell.DirIn = DirIn;
 
-      Tuple<List<Cell>, double> max = null;
-      PointInt maxDir = null;
+      CellTransition max = null;
 
       foreach(Tuple<Map.Cell,int> neighboring in cell.NeighboringCells) {
         PointInt dir = neighboring.Item1.Pos - cell.Pos;
         resultCell.DirOut = dir;
 
-        Tuple<List<Cell>, double> path = calculatePath(resultCell, neighboring.Item1, dir, visited);
-        if (null != path && path.Item1.Count > 0) {
-          double priority = path.Item2;
+        CellTransition transition = calculatePath(resultCell, neighboring.Item1, dir, visited);
+        if (null != transition) {
+          CellTransition last = lastTransition(lastCell, resultCell, this.transition);
+
+          double lastPriority = double.MinValue;
+          double currentPriority = double.MinValue;
+          if (null != last) {
+            lastPriority = last.TransitionPriority;
+          }  
           if (null != lastCell) {
-            priority += cellTransitionPriority(lastCell, resultCell, neighboring.Item2, isStraight);
+            currentPriority = cellTransitionPriority(lastCell, resultCell, neighboring.Item2, isStraight) + movePriority(resultCell, isStraight);
+          } 
+          
+          if(null != last || null != lastCell) {
+            transition.TransitionPriority = Math.Max(lastPriority, currentPriority);
+          } else {
+            transition.TransitionPriority = 0;
           }
 
-          if (null == max || priority > max.Item2) {
-            max = new Tuple<List<Cell>, double>(path.Item1, priority);
-            maxDir = dir;
+          if (null == max || transition.Priority > max.Priority) {
+            max = transition;
           }
         }
       }
-
-      resultCell.DirOut = maxDir;
 
       List<PointInt> dirOuts = new List<PointInt>();
       foreach(PointInt dir in cell.Dirs) {
@@ -113,18 +153,48 @@ namespace RussianAICup2015Car.Sources {
       }
       resultCell.DirOuts = dirOuts.ToArray();
 
-      double resultPriority = cellPriority(resultCell);
-
-      List<Cell> resultPath = new List<Cell>();
-      resultPath.Add(resultCell);
       if (null != max) {
-        resultPath.AddRange(max.Item1);
-        resultPriority += max.Item2;
+        resultCell.DirOut = max.Cell.Pos - cell.Pos;
       }
+
+      CellTransition result = new CellTransition();
+      result.Cell = resultCell;
+      result.CellPriority = cellPriority(resultCell);
+      result.Next = max;
 
       visited.Remove(cell);
 
-      return new Tuple<List<Cell>, double>(resultPath, resultPriority);
+      return result;
+    }
+
+    private bool equalsCellTransition(Cell cell, CellTransition transition) {
+      return null != cell && null != transition && 
+         cell.Pos.Equals(transition.Cell.Pos) &&
+         cell.DirIn.Equals(transition.Cell.DirIn) &&
+         cell.DirOut.Equals(transition.Cell.DirOut);
+    }
+
+    private CellTransition lastTransition(Cell lastCell, Cell cell, CellTransition transition) {
+      if (null == transition) {
+        return null;
+      }
+
+      if (equalsCellTransition(lastCell, transition) && equalsCellTransition(cell, transition.Next)) {
+        return transition;
+      }
+
+      return lastTransition(lastCell, cell, transition.Next);
+    }
+
+    private double movePriority(Cell cell, bool isStraight) {
+      if (cell.DirIn.Equals(cell.DirOut)) {
+        if (cell.Pos.Equals(currentPos()) && smallAngle()) {
+          return car.SpeedN(cell.DirOut) / 10;
+        } else if (isStraight && pointStraight(cell.Pos)) {
+          return 0.5;
+        }
+      }
+      return 0;
     }
 
     private double cellPriority(Cell cell) {
@@ -142,16 +212,6 @@ namespace RussianAICup2015Car.Sources {
 
     private double cellTransitionPriority(Cell lastCell, Cell cell, int length, bool isStraight) {
       double priority = ((-length) - 1)*0.5;
-
-      if (cell.DirIn.Equals(cell.DirOut) && cell.DirIn.Equals(currentDir())) {
-        if (isStraight && pointStraight(cell.Pos)) {
-          priority += 0.55;
-        }
-
-        if (cell.Pos.Equals(currentPos()) && smallAngle()) {
-          priority += car.Speed() / 10;
-        }
-      }
 
       priority += tilePriority(lastCell, cell);
 
@@ -193,16 +253,16 @@ namespace RussianAICup2015Car.Sources {
     }
 
     private double tilePriority(PointInt dirIn, PointInt dirOut, PointInt nextDirIn, PointInt nextDirOut) {
+      if (dirIn.Negative().Equals(dirOut) || nextDirIn.Negative().Equals(nextDirOut)) {
+        return -10;
+      }
+
       if (null == nextDirOut || dirIn.Equals(dirOut) || nextDirIn.Equals(nextDirOut)) {
         return 0;
       }
 
-      if (dirIn.Equals(dirOut.Negative())) {
-        return -5;
-      }
-
       if (dirIn.Equals(nextDirOut.Negative()) && dirOut.Equals(nextDirIn)) {//around
-        return -2;
+        return -5;
       } else if (dirIn.Equals(nextDirOut) && dirOut.Equals(nextDirIn)) {//snake
         return 0.45;
       }
