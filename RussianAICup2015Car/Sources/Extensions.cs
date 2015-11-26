@@ -60,7 +60,7 @@ namespace RussianAICup2015Car.Sources {
     public static double WheelTurnForAngle(this Car car, double angleDt, Game game) {
       const double dt = 1;
 
-      double angularFactor = car.AngularFactor(game);
+      double angularFactor = Math.Abs(car.AngularFactor(game));
       double aFrictionMult = Math.Pow(1 - game.CarRotationFrictionFactor, dt);
       double angularFriction = game.CarRotationFrictionFactor * dt;
 
@@ -95,7 +95,7 @@ namespace RussianAICup2015Car.Sources {
     public static int TicksForAngle(this Car car, double angleDt, Game game) {
       const double dt = 1;
 
-      double angularFactor = car.AngularFactor(game);
+      double angularFactor = Math.Abs(car.AngularFactor(game));
       double aFrictionMult = Math.Pow(1 - game.CarRotationFrictionFactor, dt);
       double angularFriction = game.CarRotationFrictionFactor * dt;
 

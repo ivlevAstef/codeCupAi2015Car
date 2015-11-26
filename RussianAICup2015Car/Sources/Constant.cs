@@ -3,9 +3,11 @@ using System;
 
 namespace RussianAICup2015Car.Sources {
   class Constant {
-    //0 < angle < 1.0 for 0 to 180 degrees
     public static double MaxTurnSpeed(Car car, double angle = 0.5) {
-      return 20 - (angle * 12) - Math.Min(5, car.RemainingNitroTicks * 0.2);
+      double enginePower = 8 * Math.Max(0.0, Math.Abs(car.EnginePower) - 1.0);
+      double oilOnWheel = (car.RemainingOiledTicks > 0) ? 7 : 0;
+
+      return 20 - Math.Min(13, (angle * 12) + enginePower + oilOnWheel);
     }
 
     public static bool isExceedMaxTurnSpeed(Car car, Vector dir, double angle = 0.5) {

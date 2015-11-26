@@ -35,6 +35,7 @@ namespace RussianAICup2015Car.Sources {
 
     public override HashSet<ActionType> GetParallelsActions() {
       return new HashSet<ActionType>() {
+        ActionType.PreTurn,
         ActionType.Shooting
       };
     }

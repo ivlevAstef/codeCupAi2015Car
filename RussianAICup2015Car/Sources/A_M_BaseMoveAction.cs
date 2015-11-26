@@ -35,7 +35,7 @@ namespace RussianAICup2015Car.Sources {
     }
 
     protected bool isEndAtAngle(double angleDt) {
-      return isEndAt(car.TicksForAngle(angleDt, game)/2);
+      return isEndAt(car.TicksForAngle(angleDt, game) * 0.4);
     }
   }
 }
