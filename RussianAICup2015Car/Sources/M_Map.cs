@@ -223,14 +223,25 @@ namespace RussianAICup2015Car.Sources {
           continue;
         }
 
-        if (pos.Equals(end) || TileType.Unknown == world.TilesXY[pos.X][pos.Y]) {
-          result[pos.X, pos.Y] = Math.Abs(pos.X - end.X) + Math.Abs(pos.Y - end.Y);
+        if (pos.Equals(end)) {
+          result[pos.X, pos.Y] = 0;
           backStack.Enqueue(pos);
         }
 
         visited[pos.X, pos.Y] = true;
+
+        bool allUnknown = true;
         foreach (PointInt dir in dirsByPos(pos)) {
-          stack.Enqueue(pos + dir);
+          PointInt iterPos = pos + dir;
+          if (!visited[iterPos.X, iterPos.Y]) {
+            allUnknown &= (TileType.Unknown == world.TilesXY[iterPos.X][iterPos.Y]);
+            stack.Enqueue(iterPos);
+          }
+        }
+
+        if (allUnknown) {
+          result[pos.X, pos.Y] = Math.Abs(pos.X - end.X) + Math.Abs(pos.Y - end.Y);
+          backStack.Enqueue(pos);
         }
       }
 
