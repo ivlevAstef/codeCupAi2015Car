@@ -21,9 +21,9 @@ namespace RussianAICup2015Car.Sources {
       double sign = Math.Sign(roughAngle);
 
       double angle = roughAngle;
-      if (roughAngle > Math.PI / 9) {
-        double x = findedBonus.X + sign * dirMove.Y * (findedBonus.Width * 0.5 + car.Width * 0.25);
-        double y = findedBonus.Y - sign * dirMove.X * (findedBonus.Width * 0.5 + car.Width * 0.25);
+      if (Math.Abs(roughAngle) > Math.PI / 18) {
+        double x = findedBonus.X + sign * dirMove.Y * (findedBonus.Height * 0.5 + car.Height * 0.45);
+        double y = findedBonus.Y - sign * dirMove.X * (findedBonus.Height * 0.5 + car.Height * 0.45);
 
         angle = car.GetAngleTo(x, y);
       }
@@ -55,16 +55,16 @@ namespace RussianAICup2015Car.Sources {
       }
 
       double speed = car.Speed();
-      double maxAngle = Math.PI / (18 * Math.Min(0.75, speed / (game.TrackTileSize / 80)));
+      double maxAngle = Math.PI / (9 * Math.Min(0.75, speed / (game.TrackTileSize / 80)));
 
       Bonus priorityBonus = null;
       foreach (Bonus bonus in world.Bonuses) {
         double distance = car.GetDistanceTo(bonus);
-        if (2 * game.CarWidth > distance || distance > game.TrackTileSize * 2.5) {
+        if (distance > game.TrackTileSize * 4.0) {
           continue;
         }
 
-        double angle = car.GetAngleTo(bonus);
+        double angle = car.GetAbsoluteAngleTo(bonus.X, bonus.Y, dir.X, dir.Y);
         if (Math.Abs(angle) > maxAngle) {
           continue;
         }

@@ -51,9 +51,6 @@ namespace RussianAICup2015Car.Sources {
       if (null != transition && !transition.Cell.Pos.Equals(cell.Pos)) {
         lastCell = transition.Cell;
         transition = null;
-        /*for (CellTransition iter = transition; iter != null; iter = iter.Next) {
-          iter.CellPriority = 0;
-        }*/
       }
 
       HashSet<Map.Cell> visited = new HashSet<Map.Cell>();

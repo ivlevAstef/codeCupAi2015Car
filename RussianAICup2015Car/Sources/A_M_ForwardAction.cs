@@ -13,7 +13,7 @@ namespace RussianAICup2015Car.Sources {
     public override void execute(Move move) {
       move.EnginePower = 1.0;
 
-      double magnitedAngle = magniteToCenter(path[0].DirOut);
+      double magnitedAngle = magniteToSide();
       double magnitedForce = car.WheelTurnForAngle(magnitedAngle, game);
 
       if (Math.Abs(magnitedAngle) > Math.PI / (3 * car.Speed() / 25)) {
@@ -25,10 +25,11 @@ namespace RussianAICup2015Car.Sources {
 
     public override HashSet<ActionType> GetParallelsActions() {
       HashSet<ActionType> result = new HashSet<ActionType>() {
+        ActionType.PreTurn,
         ActionType.Shooting
       };
 
-      bool smallAngleDeviation = Math.Abs(magniteToCenter(path[0].DirOut)) < Math.PI / 12;
+      bool smallAngleDeviation = Math.Abs(magniteToSide()) < Math.PI / 12;
       if (isStraight() && smallAngleDeviation) {
         result.Add(ActionType.UseNitro);
       }
@@ -48,14 +49,37 @@ namespace RussianAICup2015Car.Sources {
 
       return straightCount >= 5;
     }
+    private double magniteToSide() {
+      PointInt pos = path[0].Pos;
+      PointInt dir = path[0].DirOut;
+      PointInt normal = new PointInt(0);
 
-    private double magniteToCenter(PointInt dir) {
-      double powerTilt = game.TrackTileSize;
+      for (int i = 1; i < Math.Min(8, path.Count); i++) {
+        if (null == path[i].DirOut) {
+          break;
+        }
 
-      double centerX = (Math.Floor(car.X / game.TrackTileSize) + 0.5) * game.TrackTileSize;
-      double centerY = (Math.Floor(car.Y / game.TrackTileSize) + 0.5) * game.TrackTileSize;
+        if (!path[i].DirIn.Equals(path[i].DirOut)) {
+          normal = path[i].DirOut;
+          break;
+        }
+        pos = path[i].Pos;
+        dir = path[i].DirIn;
+      }
 
-      return car.GetAngleTo(new PointDouble(centerX, centerY), dir, powerTilt);
+      return magniteToSide(pos, dir, normal.Negative());
+    }
+
+    private double magniteToSide(PointInt pos, PointInt dir, PointInt normal) {
+      double sideDistance = (game.TrackTileSize * 0.5) - game.TrackTileMargin - game.CarHeight * 0.55;
+
+      double centerX = (pos.X +0.5) * game.TrackTileSize;
+      double centerY = (pos.Y +0.5) * game.TrackTileSize;
+
+      double sideX = centerX + normal.X * sideDistance;
+      double sideY = centerY + normal.Y * sideDistance;
+
+      return car.GetAngleTo(sideX, sideY);
     }
   }
 }
