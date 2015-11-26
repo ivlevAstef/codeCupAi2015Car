@@ -24,22 +24,22 @@ namespace RussianAICup2015Car.Sources {
       move.IsSpillOil = true;
     }
 
-    private PointDouble oilCenter() {
+    private Vector oilCenter() {
       double centerX = (Math.Floor(car.X / game.TrackTileSize) + 0.5) * game.TrackTileSize;
       double centerY = (Math.Floor(car.Y / game.TrackTileSize) + 0.5) * game.TrackTileSize;
       double backsideX = -Math.Cos(car.Angle) * (car.Width * 0.5 + game.OilSlickInitialRange);
       double backsideY = -Math.Sin(car.Angle) * (car.Width * 0.5 + game.OilSlickInitialRange);
 
-      return new PointDouble(centerX + backsideX, centerY + backsideY);
+      return new Vector(centerX + backsideX, centerY + backsideY);
     }
 
     private bool centering() {
-      PointDouble center = oilCenter();
+      Vector center = oilCenter();
       return car.GetDistanceTo(center.X, center.Y) < 4 * game.OilSlickRadius;
     }
 
     private bool isFindAroundOils() {
-      PointDouble center = oilCenter();
+      Vector center = oilCenter();
 
       foreach(OilSlick oil in world.OilSlicks) {
         if (oil.GetDistanceTo(center.X, center.Y) < game.TrackTileSize * 0.75) {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System;
 
 namespace RussianAICup2015Car.Sources {
-  class A_M_SnakeAction : A_BaseAction {
+  class A_M_SnakeAction : A_M_BaseMoveAction {
     public override bool valid() {
       Logger.instance.Assert(3 <= path.Count, "incorrect way cells count.");
 
@@ -28,12 +28,14 @@ namespace RussianAICup2015Car.Sources {
 
       double magnitedAngle = magniteToCenter(dirMove, dirEnd);
 
-      double speedWithEnginePower = car.Speed() + car.EnginePower * car.EnginePower - 1;
-      if (Math.Abs(magnitedAngle) > Math.PI / speedWithEnginePower && car.Speed() > 13) {
+      Vector dir = new Vector(dirMove.X + dirEnd.X, dirMove.Y + dirEnd.Y);
+      if (Constant.isExceedMaxTurnSpeed(car, dir.Perpendicular(), 0.75)) {
+        move.EnginePower = Constant.MaxTurnSpeed(car, 0.75) / car.Speed();
         move.IsBrake = true;
+      } else {
+        move.EnginePower = 1.0;
       }
 
-      move.EnginePower = 1.0;
       move.WheelTurn = car.WheelTurnForAngle(magnitedAngle, game);
     }
 
@@ -53,32 +55,12 @@ namespace RussianAICup2015Car.Sources {
 
     private double magniteToCenter(PointInt dir1, PointInt dir2) {
       double powerTilt = game.TrackTileSize * 0.45;
-      PointDouble dir = new PointDouble((dir1.X + dir2.X) / Math.Sqrt(2), (dir1.Y + dir2.Y) / Math.Sqrt(2));
+      Vector dir = new Vector((dir1.X + dir2.X) / Math.Sqrt(2), (dir1.Y + dir2.Y) / Math.Sqrt(2));
 
       double centerX = (Math.Floor(car.X / game.TrackTileSize) + 0.5 + 0.5 * dir1.X) * game.TrackTileSize;
       double centerY = (Math.Floor(car.Y / game.TrackTileSize) + 0.5 + 0.5 * dir1.Y) * game.TrackTileSize;
 
-      return car.GetAngleTo(new PointDouble(centerX, centerY), dir, powerTilt);
-    }
-
-    private double GetSign(PointInt dir1, PointInt dir2) {
-      double changedSign = Math.Abs(dir1.X + dir1.Y + dir2.X + dir2.Y) - 1;
-      if (0 == dir2.X) {
-        return changedSign;
-      }
-      return -changedSign;
-    }
-
-    private double AngleToWheelTurn(double angle) {
-      double scalar = car.SpeedX * Math.Sin(car.Angle) + car.SpeedY * Math.Cos(car.Angle);
-
-      return angle / (game.CarAngularSpeedFactor * Math.Abs(scalar));
-    }
-
-    private PointDouble GetWayEnd(PointInt wayPos, PointInt dir) {
-      double nextWaypointX = (wayPos.X + 0.5 + dir.X * 0.5) * game.TrackTileSize;
-      double nextWaypointY = (wayPos.Y + 0.5 + dir.Y * 0.5) * game.TrackTileSize;
-      return new PointDouble(nextWaypointX, nextWaypointY);
+      return car.GetAngleTo(new Vector(centerX, centerY), dir, powerTilt);
     }
   }
 }

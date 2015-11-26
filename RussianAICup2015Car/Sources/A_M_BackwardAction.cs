@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System;
 
 namespace RussianAICup2015Car.Sources {
-  class A_M_BackwardAction : A_BaseAction {
+  class A_M_BackwardAction : A_M_BaseMoveAction {
     private PointInt movedDir = null;
 
     public override bool valid() {
@@ -31,7 +31,7 @@ namespace RussianAICup2015Car.Sources {
 
       PointInt currentDir = path[0].DirOut;
 
-      PointDouble wayEnd = GetWayEnd(path[0].Pos, movedDir);
+      Vector wayEnd = GetWayEnd(path[0].Pos, movedDir);
       double procentToEnd = car.GetDistanceTo(wayEnd.X, wayEnd.Y) / game.TrackTileSize;
       bool perpendicular = currentDir.Equals(movedDir.Perpendicular()) || currentDir.Equals(movedDir.Perpendicular().Negative());
 
@@ -74,12 +74,12 @@ namespace RussianAICup2015Car.Sources {
       double centerX = (Math.Floor(car.X / game.TrackTileSize) + 0.5) * game.TrackTileSize;
       double centerY = (Math.Floor(car.Y / game.TrackTileSize) + 0.5) * game.TrackTileSize;
 
-      return car.GetAngleTo(new PointDouble(centerX, centerY), dir, powerTilt);
+      return car.GetAngleTo(new Vector(centerX, centerY), dir, powerTilt);
     }
 
     private double magniteToEnd(PointInt dir, PointInt normal) {
       PointInt pos = new PointInt((int)(car.X / game.TrackTileSize), (int)(car.Y / game.TrackTileSize));
-      PointDouble endPoint = GetWaySideEnd(pos, dir, normal);
+      Vector endPoint = GetWaySideEnd(pos, dir, normal);
 
       return car.GetAngleTo(endPoint.X, endPoint.Y);
     }
@@ -91,24 +91,6 @@ namespace RussianAICup2015Car.Sources {
       }
 
       return Math.Sign(speed);
-    }
-
-    private PointDouble GetWayEnd(PointInt wayPos, PointInt dir) {
-      double nextWaypointX = (wayPos.X + 0.5 + dir.X * 0.5) * game.TrackTileSize;
-      double nextWaypointY = (wayPos.Y + 0.5 + dir.Y * 0.5) * game.TrackTileSize;
-      return new PointDouble(nextWaypointX, nextWaypointY);
-    }
-
-    private PointDouble GetWaySideEnd(PointInt pos, PointInt dir, PointInt normal) {
-      double sideDistance = game.TrackTileMargin + game.CarHeight * 0.5;
-      double endSideDistance = game.TrackTileSize * 0.5 - sideDistance;
-
-      PointDouble wayEnd = GetWayEnd(pos, dir);
-
-      double endX = wayEnd.X + normal.X * endSideDistance + dir.X * sideDistance;
-      double endY = wayEnd.Y + normal.Y * endSideDistance + dir.Y * sideDistance;
-
-      return new PointDouble(endX, endY);
     }
   }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System;
 
 namespace RussianAICup2015Car.Sources {
-  class A_M_StuckOutAction : A_BaseAction {
+  class A_M_StuckOutAction : A_M_BaseMoveAction {
     private const double maxTicks = 80;
 
     private int ignoreTicks = 10;

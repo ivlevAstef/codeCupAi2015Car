@@ -21,9 +21,9 @@ namespace RussianAICup2015Car.Sources {
       double sign = Math.Sign(roughAngle);
 
       double angle = roughAngle;
-      if (Math.Abs(roughAngle) > Math.PI / 18) {
-        double x = findedBonus.X + sign * dirMove.Y * (findedBonus.Height * 0.5 + car.Height * 0.45);
-        double y = findedBonus.Y - sign * dirMove.X * (findedBonus.Height * 0.5 + car.Height * 0.45);
+      if (Math.Abs(roughAngle) > Math.PI / 32) {
+        double x = findedBonus.X + sign * dirMove.Y * (findedBonus.Height * 0.5 + car.Height * 0.5);
+        double y = findedBonus.Y - sign * dirMove.X * (findedBonus.Height * 0.5 + car.Height * 0.5);
 
         angle = car.GetAngleTo(x, y);
       }

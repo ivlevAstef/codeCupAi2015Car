@@ -42,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Runner.cs" />
+    <Compile Include="Sources\A_M_BaseMoveAction.cs" />
     <Compile Include="Sources\A_Death.cs" />
     <Compile Include="Sources\A_InitialFreeze.cs" />
     <Compile Include="Sources\A_M_AroundAction.cs" />
@@ -50,6 +51,7 @@
     <Compile Include="Sources\A_M_ForwardAction.cs" />
     <Compile Include="Sources\A_IAction.cs" />
     <Compile Include="Sources\A_M_PreTurnAction.cs" />
+    <Compile Include="Sources\Constant.cs" />
     <Compile Include="Sources\Extensions.cs" />
     <Compile Include="Sources\Logger.cs" />
     <Compile Include="Sources\A_MoveToBonusAction.cs" />

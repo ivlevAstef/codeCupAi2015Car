@@ -7,7 +7,7 @@ namespace RussianAICup2015Car.Sources {
     private int zeroSpeedTick = 0;
 
     private int outStuckTicks = 0;
-    private PointDouble outStuckPos = null;
+    private Vector outStuckPos = null;
 
     public void update(Car self) {
       if (0 == self.Durability) {
@@ -30,7 +30,7 @@ namespace RussianAICup2015Car.Sources {
 
       if (zeroSpeedTick > 5 && null == outStuckPos) {
         outStuckTicks = 0;
-        outStuckPos = new PointDouble(self.X, self.Y);
+        outStuckPos = new Vector(self.X, self.Y);
       }
     }
 

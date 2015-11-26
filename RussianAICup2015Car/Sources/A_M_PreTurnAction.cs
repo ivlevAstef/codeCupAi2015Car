@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System;
 
 namespace RussianAICup2015Car.Sources {
-  class A_M_PreTurnAction : A_BaseAction {
+  class A_M_PreTurnAction : A_M_BaseMoveAction {
     public override bool valid() {
       Logger.instance.Assert(3 <= path.Count, "incorrect way cells count.");
 
@@ -22,15 +22,21 @@ namespace RussianAICup2015Car.Sources {
     }
 
     public override void execute(Move move) {
-      PointInt dirMove = path[0].DirOut;
+      PointInt dirMove = path[2].DirIn;
+      PointInt dirOut = path[2].DirOut;
+      Vector dir = new Vector(dirMove.X + dirOut.X, dirMove.Y + dirOut.Y);
 
-      if (car.Speed() > 32 - car.EnginePower * 5 - car.RemainingNitroTicks * 0.05) {
+      if (Constant.isExceedMaxTurnSpeed(car, dir.Perpendicular(), 0.3)) {
+        move.EnginePower = Constant.MaxTurnSpeed(car, 0.3) / car.Speed();
         move.IsBrake = true;
+      } else {
+        move.EnginePower = 1.0;
       }
 
-      double magnitedAngle = car.GetAngleTo(car.X+dirMove.X, car.Y+dirMove.Y);
-
-      move.WheelTurn = car.WheelTurnForAngle(magnitedAngle, game);
+      double magnitedAngle = car.GetAngleTo(car.X + dirMove.X, car.Y + dirMove.Y);
+      if (isEndAtAngle(magnitedAngle)) {
+        move.WheelTurn = car.WheelTurnForAngle(magnitedAngle, game);
+      }
     }
   }
 }
