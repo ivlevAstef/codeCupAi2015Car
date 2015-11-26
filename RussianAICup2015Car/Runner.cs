@@ -53,7 +53,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
                     remoteProcessClient.WriteMovesMessage(moves);
                 }
             } catch (Exception e) {
-              e.ToString();
+              System.Diagnostics.Debug.WriteLine("Exception: {0}", e);
             } finally {
                 remoteProcessClient.Close();
             }

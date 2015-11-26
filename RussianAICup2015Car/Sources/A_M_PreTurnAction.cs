@@ -15,7 +15,7 @@ namespace RussianAICup2015Car.Sources {
       PointInt dirOut = path[2].DirOut;
 
       if (null == dirOut) {
-        return true;
+        return false;
       }
 
       return dirIn.Equals(dirOut.Perpendicular()) || dirIn.Equals(dirOut.Perpendicular().Negative()); 
