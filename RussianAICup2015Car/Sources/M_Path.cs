@@ -204,6 +204,24 @@ namespace RussianAICup2015Car.Sources {
         }
       }
 
+      int countAccidentCarInCell = 0;
+      foreach (Car car in world.Cars) {
+        if (car.IsTeammate) {
+          continue;
+        }
+
+        PointInt carPos = new PointInt((int)(car.X / game.TrackTileSize), (int)(car.Y / game.TrackTileSize));
+        if (!carPos.Equals(cell.Pos)) {
+          continue;
+        }
+
+        if (car.Speed() < 1) {
+          countAccidentCarInCell++;
+        }
+      }
+
+      priority -= countAccidentCarInCell * countAccidentCarInCell;
+
       return priority;
     }
 
