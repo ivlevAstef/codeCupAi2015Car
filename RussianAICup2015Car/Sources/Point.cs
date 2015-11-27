@@ -63,6 +63,10 @@ namespace RussianAICup2015Car.Sources {
     public Vector(double x, double y) : base(x, y) {}
     public Vector(Vector p) : base(p) {}
 
+    public static Vector sincos(double angle) {
+      return new Vector(Math.Cos(angle), Math.Sin(angle)).Normalize();
+    }
+
     public override bool Equals(object obj) {
       var p = obj as Vector;
       if (null == p) {
@@ -75,6 +79,8 @@ namespace RussianAICup2015Car.Sources {
     public override int GetHashCode() {
       return (X + 100 * Y).GetHashCode();
     }
+
+    public double Length { get { return Math.Sqrt(X * X + Y * Y); } }
 
     public static Vector operator +(Vector p1, Vector p2) {
       return new Vector(p1.X + p2.X, p1.Y + p2.Y);
@@ -113,11 +119,11 @@ namespace RussianAICup2015Car.Sources {
       return new Vector(X / len, Y / len);
     }
 
-    public double GetAngleTo(double x, double y) {
-      return GetAngleTo(x, y, 0);
+    public double GetAngleTo(Vector v, double angle = 0) {
+      return GetAngleTo(v.X, v.Y, angle);
     }
 
-    public double GetAngleTo(double x, double y, double angle) {
+    public double GetAngleTo(double x, double y, double angle = 0) {
       double absoluteAngle = Math.Atan2(y - this.Y, x - this.X);
       double relativeAngle = absoluteAngle - angle;
 
@@ -130,6 +136,16 @@ namespace RussianAICup2015Car.Sources {
       }
 
       return relativeAngle;
+    }
+
+    public double GetDistanceTo(Vector v) {
+      return GetDistanceTo(v.X, v.Y);
+    }
+
+    public double GetDistanceTo(double x, double y) {
+      double xRange = x - X;
+      double yRange = y - Y;
+      return Math.Sqrt(xRange * xRange + yRange * yRange);
     }
   }
 }

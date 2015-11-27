@@ -33,9 +33,10 @@ namespace RussianAICup2015Car.Sources {
 
       Vector wayEnd = GetWayEnd(path[0].Pos, dirOut);
 
-      Vector posT = car.MoveToIteration(game, (int)ticks).Item1;
+      PhysicCar physicCar = new PhysicCar(car, game);
+      physicCar.Iteration((int)ticks);
 
-      return (posT - wayEnd).Dot(dir) > 0;
+      return (physicCar.Pos - wayEnd).Dot(dir) > 0;
     }
 
     protected bool isEndAtAngle(double angleDt) {

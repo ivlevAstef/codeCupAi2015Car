@@ -154,53 +154,5 @@ namespace RussianAICup2015Car.Sources {
 
       return absoluteAngleTo;
     }
-
-    public static double Accel(this Car car, Game game, double dt) {
-      switch (car.Type) {
-      case CarType.Buggy:
-        return game.BuggyEngineForwardPower / game.BuggyMass * dt;
-      case CarType.Jeep:
-        return game.JeepEngineForwardPower / game.JeepMass * dt;
-      }
-      return 0;
-    }
-
-    //pos, spd, angle
-    public static Tuple<Vector, Vector, double> MoveToIteration(this Car car, Game game, int t) {
-      const double dt = 1;
-
-      double carAccel = car.Accel(game, dt);
-      double frictionMult = Math.Pow(1 - game.CarMovementAirFrictionFactor, dt);
-      double lenghtFriction = game.CarLengthwiseMovementFrictionFactor * dt;
-      double crossFriction = game.CarCrosswiseMovementFrictionFactor * dt;
-
-      double carAngularFactor = game.CarAngularSpeedFactor;
-      double aFrictionMult = Math.Pow(1 - game.CarRotationFrictionFactor, dt);
-      double angularFriction = game.CarRotationFrictionFactor * dt;
-
-      double baseAngularSpeed = car.WheelTurn * car.AngularFactor(game);
-      double angularSpeed = car.AngularSpeed;
-
-      angularSpeed -= Extensions.Limit(angularSpeed - baseAngularSpeed, angularFriction);
-
-      double angle = car.Angle;
-      Vector dir = new Vector(Math.Cos(angle), Math.Sin(angle));
-      Vector accel = new Vector(car.EnginePower * carAccel * dir.X, car.EnginePower * carAccel * dir.Y);
-
-      Vector pos = new Vector(car.X, car.Y);
-      Vector spd = new Vector(car.SpeedX, car.SpeedY);
-      for (int i = 0; i < t; i++) {
-        pos = pos + spd * dt;
-        spd = (spd + accel) * frictionMult;
-        spd = spd + dir * Extensions.Limit(spd.Dot(dir), lenghtFriction) + dir.Perpendicular() * Extensions.Limit(spd.Cross(dir), crossFriction);
-
-        angle += angularSpeed * dt;
-        dir = new Vector(Math.Cos(angle), Math.Sin(angle));
-        angularSpeed = baseAngularSpeed - (angularSpeed - baseAngularSpeed) * aFrictionMult;
-        baseAngularSpeed = car.WheelTurn * car.AngularFactor(game);
-      }
-
-      return new Tuple<Vector, Vector, double>(pos, spd, angle);
-    }
   }
 }
