@@ -31,7 +31,7 @@ namespace RussianAICup2015Car.Sources {
       double magnitedAngle = magniteToCenter(dirMove, dirEnd);
 
       Vector dir = new Vector(dirMove.X + dirEnd.X, dirMove.Y + dirEnd.Y);
-      if (Constant.isExceedMaxTurnSpeed(car, dir.Perpendicular(), 0.55)) {
+      if (Constant.isExceedMaxTurnSpeed(car, dir.Perpendicular(), 0.6)) {
         move.EnginePower = Constant.MaxTurnSpeed(car, 0.85) / car.Speed();
         move.IsBrake = true;
       } else {

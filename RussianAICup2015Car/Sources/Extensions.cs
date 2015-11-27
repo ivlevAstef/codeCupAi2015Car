@@ -98,6 +98,20 @@ namespace RussianAICup2015Car.Sources {
     }
 
     public static int TicksForAngle(this Car car, double angleDt, Game game) {
+      PhysicCar physicCar = new PhysicCar(car, game);
+      physicCar.setWheelTurn(Math.Sign(angleDt));
+
+      double finalAngle = car.Angle + angleDt;
+      int ticks = 0;
+      for (ticks = 0; ticks < 50; ticks++) {
+        physicCar.Iteration(1);
+        if (Math.Abs(physicCar.Angle - finalAngle) <= Math.PI/90) {
+          break;
+        }
+      }
+
+      return ticks;
+      /*
       const double dt = 1;
 
       double angularFactor = Math.Abs(car.AngularFactor(game));
@@ -137,7 +151,21 @@ namespace RussianAICup2015Car.Sources {
       }
 
 
-      return ticks - (int)Math.Abs(wheelTurn / game.CarWheelTurnChangePerTick);
+      return ticks - (int)Math.Abs(wheelTurn / game.CarWheelTurnChangePerTick);*/
+    }
+
+    public static double AngleForZeroWheelTurn(this Car car, Game game) {
+      PhysicCar physicCar = new PhysicCar(car, game);
+      physicCar.setWheelTurn(0);
+
+      for (int i = 0; i < 25; i++) {
+        physicCar.Iteration(2);
+        if (Math.Abs(physicCar.WheelTurn) <= 1.0e-3) {
+          break;
+        }
+      }
+
+      return physicCar.Angle;
     }
 
     public static double GetAbsoluteAngleTo(this Car car, double x, double y, double dirX, double dirY) {

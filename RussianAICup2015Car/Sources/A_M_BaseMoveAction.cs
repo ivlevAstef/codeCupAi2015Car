@@ -24,6 +24,8 @@ namespace RussianAICup2015Car.Sources {
     }
 
     protected bool isEndAt(double ticks) {
+      double sideDistance = game.TrackTileMargin + game.CarHeight * 1.0;
+
       if (car.Speed() < 5) {
         return false;
       }
@@ -32,6 +34,7 @@ namespace RussianAICup2015Car.Sources {
       Vector dir = new Vector(dirOut.X, dirOut.Y);
 
       Vector wayEnd = GetWayEnd(path[0].Pos, dirOut);
+      wayEnd = wayEnd + new Vector(dirOut.X * sideDistance, dirOut.Y * sideDistance);
 
       PhysicCar physicCar = new PhysicCar(car, game);
       physicCar.Iteration((int)ticks);
@@ -39,8 +42,44 @@ namespace RussianAICup2015Car.Sources {
       return (physicCar.Pos - wayEnd).Dot(dir) > 0;
     }
 
-    protected bool isEndAtAngle(double angleDt, double mult = 0.4) {
-      return isEndAt(car.TicksForAngle(angleDt, game) * mult);
+    protected bool isEndAtAngle(double angleDt) {
+      double sideDistance = game.TrackTileMargin + game.CarHeight * 1.0;
+      double endSideDistance = game.TrackTileSize * 0.5 - (game.TrackTileMargin + game.CarHeight * 0.5);
+
+      if (car.Speed() < 5) {
+        return false;
+      }
+
+      PointInt dirOut = path[0].DirOut;
+      Vector dir = new Vector(dirOut.X, dirOut.Y).Normalize();
+
+      Vector wayEnd = GetWayEnd(path[0].Pos, dirOut);
+      wayEnd = wayEnd + dir * sideDistance;
+
+      PhysicCar physicCar = new PhysicCar(car, game);
+      physicCar.setWheelTurn(Math.Sign(angleDt));
+
+      double finalAngle = car.Angle + angleDt;
+      int ticks = 0;
+      for (ticks = 0; ticks < 50; ticks++) {
+        physicCar.Iteration(1);
+        if (Math.Abs(physicCar.Angle - finalAngle) <= Math.PI / 90) {
+          return false;
+        }
+
+        Vector distance = physicCar.Pos - wayEnd;
+
+        if (Math.Abs(distance.Dot(dir.Perpendicular())) > endSideDistance) {
+          return false;
+        }
+
+        if (distance.Dot(dir) > 0) {
+          return true;
+        }
+
+      }
+
+      return false;
     }
   }
 }

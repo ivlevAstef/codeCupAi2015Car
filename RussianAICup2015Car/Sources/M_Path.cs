@@ -186,7 +186,7 @@ namespace RussianAICup2015Car.Sources {
     private double movePriority(Cell cell, bool isStraight) {
       if (cell.DirIn.Equals(cell.DirOut)) {
         if (cell.Pos.Equals(currentPos()) && smallAngle()) {
-          return car.SpeedN(cell.DirOut) / 10;
+          return car.SpeedN(cell.DirOut) / 25;
         } else if (isStraight && pointStraight(cell.Pos)) {
           return 0.5;
         }
@@ -234,7 +234,7 @@ namespace RussianAICup2015Car.Sources {
     }
 
     private bool smallAngle() {
-      double angle = Math.Abs(car.Angle) % (Math.PI / 2);
+      double angle = Math.Abs(car.AngleForZeroWheelTurn(game)) % (Math.PI / 2);
       double angleReverse = Math.Abs(Math.PI / 2  - angle) % (Math.PI / 2);
 
       return Math.Min(angle, angleReverse) < Math.PI / 9;
