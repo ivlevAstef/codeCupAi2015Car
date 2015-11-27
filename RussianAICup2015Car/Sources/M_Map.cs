@@ -231,15 +231,17 @@ namespace RussianAICup2015Car.Sources {
         visited[pos.X, pos.Y] = true;
 
         bool allUnknown = true;
+        bool found = false;
         foreach (PointInt dir in dirsByPos(pos)) {
           PointInt iterPos = pos + dir;
           if (!visited[iterPos.X, iterPos.Y]) {
             allUnknown &= (TileType.Unknown == world.TilesXY[iterPos.X][iterPos.Y]);
+            found = true;
             stack.Enqueue(iterPos);
           }
         }
 
-        if (allUnknown) {
+        if (allUnknown && found) {
           result[pos.X, pos.Y] = Math.Abs(pos.X - end.X) + Math.Abs(pos.Y - end.Y);
           backStack.Enqueue(pos);
         }
