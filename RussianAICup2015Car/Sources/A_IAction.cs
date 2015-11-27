@@ -32,6 +32,6 @@ namespace RussianAICup2015Car.Sources {
 
     void execute(Move move);
 
-    HashSet<ActionType> GetParallelsActions();
+    List<ActionType> GetParallelsActions();
   }
 }

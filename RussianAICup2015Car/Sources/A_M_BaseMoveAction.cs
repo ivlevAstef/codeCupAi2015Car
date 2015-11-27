@@ -39,8 +39,8 @@ namespace RussianAICup2015Car.Sources {
       return (physicCar.Pos - wayEnd).Dot(dir) > 0;
     }
 
-    protected bool isEndAtAngle(double angleDt) {
-      return isEndAt(car.TicksForAngle(angleDt, game) * 0.4);
+    protected bool isEndAtAngle(double angleDt, double mult = 0.4) {
+      return isEndAt(car.TicksForAngle(angleDt, game) * mult);
     }
   }
 }

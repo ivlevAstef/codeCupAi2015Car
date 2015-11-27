@@ -31,16 +31,16 @@ namespace RussianAICup2015Car.Sources {
         dir = new Vector(dirMove.X + dirEnd.X, dirMove.Y + dirEnd.Y);
       }
 
-      if (Constant.isExceedMaxTurnSpeed(car, dir.Perpendicular(), 0.6)) {
-        move.EnginePower = Constant.MaxTurnSpeed(car, 0.6) / car.Speed();
+      if (Constant.isExceedMaxTurnSpeed(car, dir.Perpendicular(), 0.55)) {
+        move.EnginePower = Constant.MaxTurnSpeed(car, 0.8) / car.Speed();
         move.IsBrake = true;
       } else {
         move.EnginePower = 1.0;
       }
     }
 
-    public override HashSet<ActionType> GetParallelsActions() {
-      return new HashSet<ActionType>() {
+    public override List<ActionType> GetParallelsActions() {
+      return new List<ActionType>() {
         ActionType.Shooting,
         ActionType.OilSpill,
       };

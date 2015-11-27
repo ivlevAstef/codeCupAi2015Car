@@ -4,6 +4,8 @@ using System;
 
 namespace RussianAICup2015Car.Sources {
   class A_M_SnakeAction : A_M_BaseMoveAction {
+    private int goodTicks = 0;
+
     public override bool valid() {
       Logger.instance.Assert(3 <= path.Count, "incorrect way cells count.");
 
@@ -29,8 +31,8 @@ namespace RussianAICup2015Car.Sources {
       double magnitedAngle = magniteToCenter(dirMove, dirEnd);
 
       Vector dir = new Vector(dirMove.X + dirEnd.X, dirMove.Y + dirEnd.Y);
-      if (Constant.isExceedMaxTurnSpeed(car, dir.Perpendicular(), 0.75)) {
-        move.EnginePower = Constant.MaxTurnSpeed(car, 0.75) / car.Speed();
+      if (Constant.isExceedMaxTurnSpeed(car, dir.Perpendicular(), 0.55)) {
+        move.EnginePower = Constant.MaxTurnSpeed(car, 0.85) / car.Speed();
         move.IsBrake = true;
       } else {
         move.EnginePower = 1.0;
@@ -39,16 +41,24 @@ namespace RussianAICup2015Car.Sources {
       move.WheelTurn = car.WheelTurnForAngle(magnitedAngle, game);
     }
 
-    public override HashSet<ActionType> GetParallelsActions() {
-      HashSet<ActionType> result = new HashSet<ActionType>() {
+    public override List<ActionType> GetParallelsActions() {
+      List<ActionType> result = new List<ActionType>() {
         ActionType.OilSpill,
         ActionType.Shooting,
         ActionType.SnakePreEnd
       };
 
-      bool smallAngleDeviation = Math.Abs(magniteToCenter(path[0].DirOut, path[1].DirOut)) < Math.PI / 32;
-      if (Math.Abs(car.AngularSpeed) < 0.001 && smallAngleDeviation) {
-        result.Add(ActionType.UseNitro);
+      PointInt dirMove = path[0].DirOut;
+      PointInt dirEnd = path[1].DirOut;
+
+      Vector dir = new Vector(dirMove.X + dirEnd.X, dirMove.Y + dirEnd.Y);
+      if (!Constant.isExceedMaxTurnSpeed(car, dir.Perpendicular(), 1.2)) {
+        goodTicks++;
+        if (goodTicks > 10) {
+          result.Add(ActionType.UseNitro);
+        }
+      } else {
+        goodTicks = 0;
       }
 
       return result;

@@ -62,8 +62,8 @@ namespace RussianAICup2015Car.Sources {
       move.WheelTurn = magnitedForce;
     }
 
-    public override HashSet<ActionType> GetParallelsActions() {
-      return new HashSet<ActionType>() {
+    public override List<ActionType> GetParallelsActions() {
+      return new List<ActionType>() {
         ActionType.Shooting
       };
     } 

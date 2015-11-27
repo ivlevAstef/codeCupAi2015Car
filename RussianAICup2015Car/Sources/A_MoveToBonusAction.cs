@@ -36,8 +36,8 @@ namespace RussianAICup2015Car.Sources {
       move.EnginePower = 1.0;
     }
 
-    public override HashSet<ActionType> GetParallelsActions() {
-      return new HashSet<ActionType>() {
+    public override List<ActionType> GetParallelsActions() {
+      return new List<ActionType>() {
         ActionType.PreTurn,
         ActionType.Shooting
       };

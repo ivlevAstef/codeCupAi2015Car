@@ -50,11 +50,11 @@ namespace RussianAICup2015Car.Sources {
       }
     }
 
-     public override HashSet<ActionType> GetParallelsActions() {
-      return new HashSet<ActionType>() {
+    public override List<ActionType> GetParallelsActions() {
+      return new List<ActionType>() {
         ActionType.Shooting,
         ActionType.OilSpill
       };
-     }
+    }
   }
 }

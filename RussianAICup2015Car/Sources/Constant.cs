@@ -4,7 +4,7 @@ using System;
 namespace RussianAICup2015Car.Sources {
   class Constant {
     public static double MaxTurnSpeed(Car car, double angle = 0.5) {
-      double enginePower = 8 * Math.Max(0.0, Math.Abs(car.EnginePower) - 1.0);
+      double enginePower = 4 * Math.Max(0.0, Math.Abs(car.EnginePower) - 1.0);
       double oilOnWheel = (car.RemainingOiledTicks > 0) ? 7 : 0;
 
       return 20 - Math.Min(13, (angle * 12) + enginePower + oilOnWheel);

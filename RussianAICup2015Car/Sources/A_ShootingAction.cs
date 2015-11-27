@@ -39,8 +39,9 @@ namespace RussianAICup2015Car.Sources {
 
       //for one 30 for two 15 other 0. 
       int ticks = maxTicks - 15 * Math.Max(0, 3 - car.RemainingProjectileCooldownTicks);
+      ticks = Math.Max((int)(1.5 * game.TrackTileSize / game.WasherInitialSpeed), ticks);
 
-      for (int i = 0; i < maxTicks; i++) {
+      for (int i = 0; i < ticks; i++) {
         physicCar.Iteration(1);
         washerPos = washerPos + washerSpd;
 

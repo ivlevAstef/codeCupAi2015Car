@@ -21,6 +21,6 @@ namespace RussianAICup2015Car.Sources {
     public abstract void execute(Move move);
 
 
-    public virtual HashSet<ActionType> GetParallelsActions() { return new HashSet<ActionType>(); }
+    public virtual List<ActionType> GetParallelsActions() { return new List<ActionType>(); }
   }
 }
