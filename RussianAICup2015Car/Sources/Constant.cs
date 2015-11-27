@@ -7,7 +7,7 @@ namespace RussianAICup2015Car.Sources {
       double enginePower = 4 * Math.Max(0.0, Math.Abs(car.EnginePower) - 1.0);
       double oilOnWheel = (car.RemainingOiledTicks > 0) ? 7 : 0;
 
-      return 20 - Math.Min(13, (angle * 12) + enginePower + oilOnWheel);
+      return 20 - Math.Min(15, (angle * 12) + enginePower + oilOnWheel);
     }
 
     public static bool isExceedMaxTurnSpeed(Car car, Vector dir, double angle = 0.5) {

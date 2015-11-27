@@ -24,7 +24,7 @@ namespace RussianAICup2015Car.Sources {
     }
 
     protected bool isEndAt(double ticks) {
-      double sideDistance = game.TrackTileMargin + game.CarHeight * 1.0;
+      double sideDistance = game.TrackTileMargin + game.CarHeight * 0.75;
 
       if (car.Speed() < 5) {
         return false;
