@@ -5,7 +5,7 @@ using System;
 namespace RussianAICup2015Car.Sources {
   class A_ShootingAction : A_BaseAction {
     public override bool valid() {
-      return checkEnemiesIntersect() && car.RemainingProjectileCooldownTicks <= 0 && car.ProjectileCount > 0;
+      return car.RemainingProjectileCooldownTicks <= 0 && car.ProjectileCount > 0 && checkEnemiesIntersect();
     }
 
     public override void execute(Move move) {
