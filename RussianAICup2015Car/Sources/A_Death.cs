@@ -8,6 +8,8 @@ namespace RussianAICup2015Car.Sources {
     }
 
     public override void execute(Move move) {
+      move.IsBrake = true;
+      move.WheelTurn = 0;
     }
   }
 }
