@@ -97,13 +97,17 @@ namespace RussianAICup2015Car.Sources {
     }
 
     private void init() {
-      idealWheelTurn = wheelTurn = car.WheelTurn;
-      idealEnginePower = enginePower = car.EnginePower;
+      wheelTurn = car.WheelTurn;
+      setWheelTurn(wheelTurn);
+      enginePower = car.EnginePower;
+      setEnginePower(enginePower);
 
       pos = new Vector(car.X, car.Y);
       spd = new Vector(car.SpeedX, car.SpeedY);
       angle = car.Angle;
       angleSpeed = car.AngularSpeed;
+
+      nitroTicks = car.RemainingNitroTicks;
     }
 
     private double signLimitChange(double need, double value, double add) {
