@@ -35,11 +35,15 @@ namespace RussianAICup2015Car.Sources {
     }
 
     private bool hasEnemyOnWasherLine(Car enemy) {
-      PhysicCar physicCar = new PhysicCar(enemy, game);
-
       Vector washerPos = new Vector(car.X, car.Y);
       Vector washerDir = Vector.sincos(car.Angle);
       Vector washerSpd = washerDir * game.WasherInitialSpeed;
+
+      if ((new Vector(enemy.X,enemy.Y) - washerPos).Dot(washerDir) < 0) {//back car
+        return false;
+      }
+
+      PhysicCar physicCar = new PhysicCar(enemy, game);
 
       double radius = Math.Min(car.Width, car.Height) * 0.25 + game.WasherRadius;
 
