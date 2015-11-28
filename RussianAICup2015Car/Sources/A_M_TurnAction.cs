@@ -23,10 +23,9 @@ namespace RussianAICup2015Car.Sources {
       if (MoveEndType.Success == moveEndType) {
         move.WheelTurn = car.WheelTurnForAngle(angle, game);
       } else if (MoveEndType.SideCrash == moveEndType) {
-        Vector endPoint = GetWaySideEnd(path[0].Pos, dirMove, dirEnd.Negative());
-
+        Vector endPoint = GetWayEnd(path[0].Pos, dirMove);
         angle = car.GetAngleTo(endPoint.X, endPoint.Y);
-        move.WheelTurn = car.WheelTurnForAngle(angle, game);
+        move.WheelTurn = car.WheelTurnForAngle(angle*0.5, game);
       } else {
         Vector endPoint = GetWaySideEnd(path[0].Pos, dirMove, dirEnd);
 

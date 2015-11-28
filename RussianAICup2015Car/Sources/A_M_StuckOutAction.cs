@@ -73,7 +73,7 @@ namespace RussianAICup2015Car.Sources {
       }
 
       double timePower = Math.Sin((Math.PI * 0.5) * (double)(maxTicks - outStuckTicks) / maxTicks);
-      timePower = Math.Min(0.15, timePower) - 0.15;
+      timePower = 1.1 * timePower - 0.1;
       move.EnginePower = sign * timePower;
 
       PointInt dir = path[0].DirOut;

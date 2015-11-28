@@ -182,8 +182,8 @@ namespace RussianAICup2015Car.Sources {
 
       PhysicCar physicCarLeft = new PhysicCar(car, game);
       PhysicCar physicCarRight = new PhysicCar(car, game);
-      physicCarLeft.setWheelTurn(-1.0);
-      physicCarRight.setWheelTurn(1.0);
+      physicCarLeft.setWheelTurn(-0.9);
+      physicCarRight.setWheelTurn(0.9);
 
       int ticks = 0;
       for (ticks = 0; ticks < 50; ticks++) {
@@ -228,7 +228,7 @@ namespace RussianAICup2015Car.Sources {
     private double movePriority(Cell cell, bool isStraight) {
       if (cell.DirIn.Equals(cell.DirOut)) {
         if (cell.Pos.Equals(currentPos())) {
-          return carCanRotate ? 0 : 1.5;
+          return carCanRotate ? 0 : 1.0;
         } else if (isStraight && pointStraight(cell.Pos)) {
           return 0.5;
         }

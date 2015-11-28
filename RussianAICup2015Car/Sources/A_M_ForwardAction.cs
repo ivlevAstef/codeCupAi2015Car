@@ -47,7 +47,7 @@ namespace RussianAICup2015Car.Sources {
 
     private bool isStraight() {
       int straightCount = 0;
-      for (int i = 0; i < Math.Min(5, path.Count); i++) {
+      for (int i = 0; i < Math.Min(4, path.Count); i++) {
         if (path[i].DirIn.Equals(path[i].DirOut)) {
           straightCount++;
         } else {
@@ -55,7 +55,7 @@ namespace RussianAICup2015Car.Sources {
         }
       }
 
-      return straightCount >= 5;
+      return straightCount >= 4;
     }
     private double magniteToSide() {
       PointInt pos = path[0].Pos;

@@ -59,7 +59,7 @@ namespace RussianAICup2015Car.Sources {
       Vector dir = new Vector(dirOut.X, dirOut.Y).Normalize();
 
       Vector wayEnd = GetWayEnd(path[0].Pos, dirOut);
-      wayEnd = wayEnd + dir * sideDistance;
+      Vector wayEndFinal = wayEnd + dir * sideDistance;
 
       PhysicCar physicCar = new PhysicCar(car, game);
       physicCar.setWheelTurn(Math.Sign(angleDt));
@@ -72,13 +72,27 @@ namespace RussianAICup2015Car.Sources {
           return MoveEndType.NotArrival;
         }
 
-        Vector distance = wayEnd - physicCar.Pos;
+        double needTicksToTurn = 100 * (finalAngle - physicCar.Angle);
+        if (Math.Abs(physicCar.AngularSpeed) > 1.0e-7) {
+          needTicksToTurn = (finalAngle - physicCar.Angle) / Math.Abs(physicCar.AngularSpeed);
+        }
+        double needTicksToZero = Math.Abs(physicCar.WheelTurn / game.CarWheelTurnChangePerTick);
 
-        if (Math.Abs(distance.Dot(dir.Perpendicular())) > endSideDistance) {
+        physicCar.setWheelTurn(needTicksToTurn * needTicksToZero);
+
+        Vector distance = wayEnd - physicCar.Pos;
+        if (distance.Dot(dir) < 0) {
+          physicCar.setWheelTurn(0.0);
+        }
+
+
+        Vector distanceFinal = wayEndFinal - physicCar.Pos;
+
+        if (Math.Abs(distanceFinal.Dot(dir.Perpendicular())) > endSideDistance) {
           return MoveEndType.SideCrash;
         }
 
-        if (distance.Dot(dir) < 0) {
+        if (distanceFinal.Dot(dir) < 0) {
           return MoveEndType.Success;
         }
 
