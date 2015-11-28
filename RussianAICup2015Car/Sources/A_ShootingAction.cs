@@ -5,20 +5,28 @@ using System;
 namespace RussianAICup2015Car.Sources {
   class A_ShootingAction : A_BaseAction {
     public override bool valid() {
-      return car.RemainingProjectileCooldownTicks <= 0 && car.ProjectileCount > 0 && checkEnemiesIntersect();
+      if (0 < car.RemainingProjectileCooldownTicks || car.ProjectileCount <= 0) {
+        return false;
+      }
+
+      if (CarType.Buggy == car.Type) {
+        return hasEnemyOnWasherLine();
+      }
+
+      return false;
     }
 
     public override void execute(Move move) {
       move.IsThrowProjectile = true;
     }    
 
-    private bool checkEnemiesIntersect() {
+    private bool hasEnemyOnWasherLine() {
       foreach (Car carIter in world.Cars) {
         if (carIter.IsTeammate || carIter.IsFinishedTrack || carIter.Durability <= 1.0e-9) {
           continue;
         }
 
-        if (checkIntersect(carIter)) {
+        if (hasEnemyOnWasherLine(carIter)) {
           return true;
         }
       }
@@ -26,16 +34,17 @@ namespace RussianAICup2015Car.Sources {
       return false;
     }
 
-    private bool checkIntersect(Car enemy) {
+    private bool hasEnemyOnWasherLine(Car enemy) {
       PhysicCar physicCar = new PhysicCar(enemy, game);
 
       Vector washerPos = new Vector(car.X, car.Y);
-      Vector washerSpd = Vector.sincos(car.Angle) * game.WasherInitialSpeed;
+      Vector washerDir = Vector.sincos(car.Angle);
+      Vector washerSpd = washerDir * game.WasherInitialSpeed;
 
-      double radius = Math.Min(car.Width, car.Height) * 0.5 + game.WasherRadius;
+      double radius = Math.Min(car.Width, car.Height) * 0.25 + game.WasherRadius;
 
-      int maxTrackDistance = Math.Min(8, (world.Height + world.Width)/2);
-      int maxTicks = (int)(game.TrackTileSize * maxTrackDistance / game.WasherInitialSpeed);
+      double maxDistance = Math.Max(car.Width, car.Height) / Math.Sin(game.SideWasherAngle);
+      int maxTicks = (int)(maxDistance / game.WasherInitialSpeed);
 
       //for one 30 for two 15 other 0. 
       int ticks = maxTicks - 15 * Math.Max(0, 3 - car.RemainingProjectileCooldownTicks);
@@ -45,8 +54,16 @@ namespace RussianAICup2015Car.Sources {
         physicCar.Iteration(1);
         washerPos = washerPos + washerSpd;
 
-        if (physicCar.Pos.GetDistanceTo(washerPos) < radius) {
-          return true;
+        double distanceByDir = (physicCar.Pos - washerPos).Dot(washerDir);
+        double fullDistance = physicCar.Pos.GetDistanceTo(washerPos);
+        if (distanceByDir < 0/*over flight*/ && fullDistance > -distanceByDir/*save sqrt*/) {
+          double distance = Math.Sqrt(Math.Pow(fullDistance, 2) - Math.Pow(distanceByDir,2));
+
+          if (distance < radius) {
+            return true;
+          }
+
+          return false;
         }
       }
 
