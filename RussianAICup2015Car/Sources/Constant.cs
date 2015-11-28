@@ -10,15 +10,15 @@ namespace RussianAICup2015Car.Sources {
       return 20 - Math.Min(15, (angle * 12) + enginePower + oilOnWheel);
     }
 
-    public static bool isExceedMaxTurnSpeed(Car car, Vector dir, double angle = 0.5) {
+    public static double ExceedMaxTurnSpeed(Car car, Vector dir, double angle = 0.5) {
       dir = dir.Normalize();
       double len = dir.Dot(new Vector(car.SpeedX, car.SpeedY));
 
-      return Math.Abs(len) > MaxTurnSpeed(car, angle);
+      return Math.Abs(len) - MaxTurnSpeed(car, angle);
     }
 
-    public static bool isExceedMaxTurnSpeed(Car car, PointInt dir, double angle = 0.5) {
-      return isExceedMaxTurnSpeed(car, new Vector(dir.X, dir.Y), angle);
+    public static double ExceedMaxTurnSpeed(Car car, PointInt dir, double angle = 0.5) {
+      return ExceedMaxTurnSpeed(car, new Vector(dir.X, dir.Y), angle);
     }
   }
 }

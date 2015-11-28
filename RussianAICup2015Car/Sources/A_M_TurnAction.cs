@@ -17,23 +17,42 @@ namespace RussianAICup2015Car.Sources {
       PointInt dirMove = path[0].DirOut;
       PointInt dirEnd = path[1].DirOut;
 
-      Vector dir = null;
-
       double angle = car.GetAngleTo(car.X + dirEnd.X, car.Y + dirEnd.Y);
-       if (isEndAtAngle(angle)) {
+      MoveEndType moveEndType = isEndAtAngle(angle);
+
+      if (MoveEndType.Success == moveEndType) {
         move.WheelTurn = car.WheelTurnForAngle(angle, game);
-        dir = new Vector(dirEnd.X, dirEnd.Y);
+      } else if (MoveEndType.SideCrash == moveEndType) {
+        Vector endPoint = GetWaySideEnd(path[0].Pos, dirMove, dirEnd.Negative());
+
+        angle = car.GetAngleTo(endPoint.X, endPoint.Y);
+        move.WheelTurn = car.WheelTurnForAngle(angle, game);
       } else {
         Vector endPoint = GetWaySideEnd(path[0].Pos, dirMove, dirEnd);
 
         angle = car.GetAngleTo(endPoint.X, endPoint.Y);
         move.WheelTurn = car.WheelTurnForAngle(angle, game);
-        dir = new Vector(dirMove.X + dirEnd.X, dirMove.Y + dirEnd.Y);
       }
 
-      if (Constant.isExceedMaxTurnSpeed(car, dir.Perpendicular(), 0.55)) {
-        move.EnginePower = Constant.MaxTurnSpeed(car, 0.8) / car.Speed();
-        move.IsBrake = true;
+      double distanceToEnd = (GetWayEnd(path[0].Pos, dirMove) - new Vector(car.X, car.Y)).Dot(new Vector(dirMove.X, dirMove.Y));
+      double speedConstant = 5 * distanceToEnd / game.TrackTileSize;
+
+      double exceed = 0;
+      Vector dir = null;
+      if (MoveEndType.Success == moveEndType) {
+        dir = new Vector(dirEnd.X, dirEnd.Y);
+        exceed = Constant.ExceedMaxTurnSpeed(car, dir.Perpendicular(), 0.5);
+      } else if(MoveEndType.SideCrash == moveEndType) {
+        dir = new Vector(dirEnd.X, dirEnd.Y);
+        exceed = Constant.ExceedMaxTurnSpeed(car, dir.Perpendicular(), 0.9);
+      } else {
+        dir = new Vector(dirMove.X + dirEnd.X, dirMove.Y + dirEnd.Y);
+        exceed = Constant.ExceedMaxTurnSpeed(car, dir.Perpendicular(), 0.55);
+      }
+
+      if (exceed > speedConstant) {
+        move.EnginePower = Constant.MaxTurnSpeed(car, 0.9) / car.Speed();
+        move.IsBrake = exceed > speedConstant + 1;
       } else {
         move.EnginePower = 1.0;
       }

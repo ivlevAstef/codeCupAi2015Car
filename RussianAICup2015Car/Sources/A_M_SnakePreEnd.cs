@@ -34,7 +34,7 @@ namespace RussianAICup2015Car.Sources {
       PointInt dirOut = path[1 + offset].DirOut;
       Vector dir = new Vector(dirOut.X, dirOut.Y);
 
-      if (Constant.isExceedMaxTurnSpeed(car, dir.Perpendicular(), 0.25)) {
+      if (Constant.ExceedMaxTurnSpeed(car, dir.Perpendicular(), 0.25) > 0) {
         move.EnginePower = Constant.MaxTurnSpeed(car, 0.5) / car.Speed();
         move.IsBrake = true;
       } else {

@@ -4,6 +4,11 @@ using System;
 
 namespace RussianAICup2015Car.Sources {
   public abstract class A_M_BaseMoveAction : A_BaseAction {
+    public enum MoveEndType {
+      Success,
+      NotArrival,
+      SideCrash
+    }
 
     protected Vector GetWaySideEnd(PointInt pos, PointInt dir, PointInt normal) {
       double sideDistance = game.TrackTileMargin + game.CarHeight * 0.5;
@@ -42,12 +47,12 @@ namespace RussianAICup2015Car.Sources {
       return (physicCar.Pos - wayEnd).Dot(dir) > 0;
     }
 
-    protected bool isEndAtAngle(double angleDt) {
-      double sideDistance = game.TrackTileMargin + game.CarHeight * 1.0;
+    protected MoveEndType isEndAtAngle(double angleDt) {
+      double sideDistance = game.TrackTileMargin + game.CarHeight * 0.75;
       double endSideDistance = game.TrackTileSize * 0.5 - (game.TrackTileMargin + game.CarHeight * 0.5);
 
       if (car.Speed() < 5) {
-        return false;
+        return MoveEndType.NotArrival;
       }
 
       PointInt dirOut = path[0].DirOut;
@@ -64,22 +69,22 @@ namespace RussianAICup2015Car.Sources {
       for (ticks = 0; ticks < 50; ticks++) {
         physicCar.Iteration(1);
         if (Math.Abs(physicCar.Angle - finalAngle) <= Math.PI / 90) {
-          return false;
+          return MoveEndType.NotArrival;
         }
 
         Vector distance = physicCar.Pos - wayEnd;
 
         if (Math.Abs(distance.Dot(dir.Perpendicular())) > endSideDistance) {
-          return false;
+          return MoveEndType.SideCrash;
         }
 
         if (distance.Dot(dir) > 0) {
-          return true;
+          return MoveEndType.Success;
         }
 
       }
 
-      return false;
+      return MoveEndType.NotArrival;
     }
   }
 }

@@ -31,9 +31,11 @@ namespace RussianAICup2015Car.Sources {
       double magnitedAngle = magniteToCenter(dirMove, dirEnd);
 
       Vector dir = new Vector(dirMove.X + dirEnd.X, dirMove.Y + dirEnd.Y);
-      if (Constant.isExceedMaxTurnSpeed(car, dir.Perpendicular(), 0.6)) {
+      double exceed = Constant.ExceedMaxTurnSpeed(car, dir.Perpendicular(), 0.6);
+
+      if (exceed > 0) {
         move.EnginePower = Constant.MaxTurnSpeed(car, 0.85) / car.Speed();
-        move.IsBrake = true;
+        move.IsBrake = exceed > 1;
       } else {
         move.EnginePower = 1.0;
       }
@@ -52,7 +54,7 @@ namespace RussianAICup2015Car.Sources {
       PointInt dirEnd = path[1].DirOut;
 
       Vector dir = new Vector(dirMove.X + dirEnd.X, dirMove.Y + dirEnd.Y);
-      if (!Constant.isExceedMaxTurnSpeed(car, dir.Perpendicular(), 1.2)) {
+      if (Constant.ExceedMaxTurnSpeed(car, dir.Perpendicular(), 1.2) < -0.5) {
         goodTicks++;
         if (goodTicks > 10) {
           result.Add(ActionType.UseNitro);
