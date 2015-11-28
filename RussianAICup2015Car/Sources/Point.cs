@@ -52,8 +52,16 @@ namespace RussianAICup2015Car.Sources {
       return new PointInt(-X, -Y);
     }
 
-    public PointInt Perpendicular() {
+    public PointInt PerpendicularLeft() {
       return new PointInt(Y, -X);
+    }
+
+    public PointInt PerpendicularRight() {
+      return new PointInt(-Y, X);
+    }
+
+    public PointInt Perpendicular() {
+      return PerpendicularRight();
     }
   }
 
@@ -110,8 +118,16 @@ namespace RussianAICup2015Car.Sources {
       return new Vector(-X, -Y);
     }
 
-    public Vector Perpendicular() {
+    public Vector PerpendicularLeft() {
       return new Vector(Y, -X);
+    }
+
+    public Vector PerpendicularRight() {
+      return new Vector(-Y, X);
+    }
+
+    public Vector Perpendicular() {
+      return PerpendicularRight();
     }
 
     public Vector Normalize() {

@@ -27,7 +27,7 @@ namespace RussianAICup2015Car.Sources {
 
       PointInt dir = new PointInt(posOut.X - posIn.X, posOut.Y - posIn.Y);
 
-      return dirIn.Equals(dirOut) && (dir.Equals(dirIn.Perpendicular()) || dir.Equals(dirIn.Perpendicular().Negative()));
+      return dirIn.Equals(dirOut) && (dir.Equals(dirIn.PerpendicularLeft()) || dir.Equals(dirIn.PerpendicularRight()));
     }
 
     public override void execute(Move move) {

@@ -9,19 +9,8 @@ namespace RussianAICup2015Car.Sources {
     public override bool valid() {
       Logger.instance.Assert(3 <= path.Count, "incorrect way cells count.");
 
-      PointInt posIn = path[1].Pos;
-      PointInt posOut = path[2].Pos;
 
-      PointInt dirIn = path[1].DirIn;
-      PointInt dirOut = path[2].DirOut;
-
-      if (null == dirOut || dirOut.Equals(new PointInt(0))) {
-        return false;
-      }
-
-      PointInt dir = new PointInt(posOut.X - posIn.X, posOut.Y - posIn.Y);
-
-      return dirIn.Equals(dirOut) && (dir.Equals(dirIn.Perpendicular()) || dir.Equals(dirIn.Perpendicular().Negative()));
+      return validSnakeWithOffset(0);
     }
 
     public override void execute(Move move) {
@@ -35,7 +24,7 @@ namespace RussianAICup2015Car.Sources {
 
       if (exceed > 0) {
         move.EnginePower = Constant.MaxTurnSpeed(car, 0.85) / car.Speed();
-        move.IsBrake = exceed > 0;
+        move.IsBrake = true;
       } else {
         move.EnginePower = 1.0;
       }
@@ -54,9 +43,10 @@ namespace RussianAICup2015Car.Sources {
       PointInt dirEnd = path[1].DirOut;
 
       Vector dir = new Vector(dirMove.X + dirEnd.X, dirMove.Y + dirEnd.Y);
-      if (Constant.ExceedMaxTurnSpeed(car, dir.Perpendicular(), 1.2) < -0.5) {
+      if (Constant.ExceedMaxTurnSpeed(car, dir.Perpendicular(), 1.2) < -3 &&
+          validSnakeWithOffset(1) && validSnakeWithOffset(2)) {
         goodTicks++;
-        if (goodTicks > 10) {
+        if (goodTicks > 5) {
           result.Add(ActionType.UseNitro);
         }
       } else {
@@ -66,9 +56,29 @@ namespace RussianAICup2015Car.Sources {
       return result;
     }
 
+    private bool validSnakeWithOffset(int offset) {
+      if (3 + offset >= path.Count) {
+        return true;
+      }
+
+      PointInt posIn = path[1 + offset].Pos;
+      PointInt posOut = path[2 + offset].Pos;
+
+      PointInt dirIn = path[1 + offset].DirIn;
+      PointInt dirOut = path[2 + offset].DirOut;
+
+      if (null == dirOut || dirOut.Equals(new PointInt(0))) {
+        return false;
+      }
+
+      PointInt dir = new PointInt(posOut.X - posIn.X, posOut.Y - posIn.Y);
+
+      return dirIn.Equals(dirOut) && (dir.Equals(dirIn.PerpendicularLeft()) || dir.Equals(dirIn.PerpendicularRight()));
+    }
+
     private double magniteToCenter(PointInt dir1, PointInt dir2) {
       double powerTilt = game.TrackTileSize * 0.45;
-      Vector dir = new Vector((dir1.X + dir2.X) / Math.Sqrt(2), (dir1.Y + dir2.Y) / Math.Sqrt(2));
+      Vector dir = new Vector(dir1.X + dir2.X, dir1.Y + dir2.Y).Normalize();
 
       double centerX = (Math.Floor(car.X / game.TrackTileSize) + 0.5 + 0.5 * dir1.X) * game.TrackTileSize;
       double centerY = (Math.Floor(car.Y / game.TrackTileSize) + 0.5 + 0.5 * dir1.Y) * game.TrackTileSize;

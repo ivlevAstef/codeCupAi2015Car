@@ -11,27 +11,13 @@ namespace RussianAICup2015Car.Sources {
 
       findedBonus = findBonus();
 
-      return null != findedBonus;
+      return null != findedBonus && angleToBonus(findedBonus) < Math.PI / 9;
     }
 
     public override void execute(Move move) {
-      Vector dirMove = new Vector(path[0].DirOut.X, path[0].DirOut.Y);
-      Vector center = new Vector((path[0].Pos.X + 0.5), (path[0].Pos.Y + 0.5)) * game.TrackTileSize;
+      Logger.instance.Assert(null != findedBonus, "Didn't find bonus.");
 
-      double dirAngle = Math.Atan2(dirMove.Y, dirMove.X);
-
-      double centerX = car.X * Math.Abs(dirMove.X) + center.X * Math.Abs(dirMove.Y);
-      double centerY = car.Y * Math.Abs(dirMove.Y) + center.Y * Math.Abs(dirMove.X);
-
-      double centerAngle = new Vector(centerX, centerY).GetAngleTo(findedBonus.X, findedBonus.Y, dirAngle);
-      double sign = Math.Sign(centerAngle);
-
-      double x = findedBonus.X + sign * dirMove.Y * (findedBonus.Height * 0.25 + car.Height * 0.5);
-      double y = findedBonus.Y - sign * dirMove.X * (findedBonus.Height * 0.25 + car.Height * 0.5);
-
-      double angle = car.GetAngleTo(x, y);
-
-      move.WheelTurn = car.WheelTurnForAngle(angle, game);
+      move.WheelTurn = car.WheelTurnForAngle(angleToBonus(findedBonus), game);
 
       move.EnginePower = 1.0;
     }
@@ -41,6 +27,24 @@ namespace RussianAICup2015Car.Sources {
         ActionType.PreTurn,
         ActionType.Shooting
       };
+    }
+
+    private double angleToBonus(Bonus bonus) {
+      Vector dirMove = new Vector(path[0].DirOut.X, path[0].DirOut.Y);
+      Vector center = new Vector((path[0].Pos.X + 0.5), (path[0].Pos.Y + 0.5)) * game.TrackTileSize;
+
+      double dirAngle = Math.Atan2(dirMove.Y, dirMove.X);
+
+      double centerX = car.X * Math.Abs(dirMove.X) + center.X * Math.Abs(dirMove.Y);
+      double centerY = car.Y * Math.Abs(dirMove.Y) + center.Y * Math.Abs(dirMove.X);
+
+      double centerAngle = new Vector(centerX, centerY).GetAngleTo(bonus.X, bonus.Y, dirAngle);
+      double sign = Math.Sign(centerAngle);
+
+      double x = bonus.X + sign * dirMove.Y * (bonus.Height * 0.25 + car.Height * 0.5);
+      double y = bonus.Y - sign * dirMove.X * (bonus.Height * 0.25 + car.Height * 0.5);
+
+      return car.GetAngleTo(x, y);
     }
 
     private Bonus findBonus() {

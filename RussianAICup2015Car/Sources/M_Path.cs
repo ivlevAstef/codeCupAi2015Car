@@ -40,6 +40,8 @@ namespace RussianAICup2015Car.Sources {
     private Cell[] path = null;
     private Cell lastCell = null;
 
+    private bool carCanRotate = false;
+
     public void SetupEnvironment(Car car, World world, Game game, Map.Cell cell) {
       this.car = car;
       this.world = world;
@@ -51,13 +53,15 @@ namespace RussianAICup2015Car.Sources {
       if (null != transition && !transition.Cell.Pos.Equals(cell.Pos)) {
         lastCell = transition.Cell;
         transition = null;
-      }
+      } 
 
       HashSet<Map.Cell> visited = new HashSet<Map.Cell>();
       if (null != lastCell) {
         PointInt dir = cell.Pos - lastCell.Pos;
+        carCanRotate = canRotate(dir);
         transition = calculatePath(lastCell, cell, dir, visited);
       } else {
+        carCanRotate = canRotate(currentDir());
         transition = calculatePath(null, cell, currentDir(), visited);
       }
 
@@ -164,6 +168,44 @@ namespace RussianAICup2015Car.Sources {
       return result;
     }
 
+    private bool canRotate(PointInt dirMove) {
+      double sideDistance = game.TrackTileMargin + game.CarHeight * 0.55;
+      double endDistance = game.TrackTileSize * 0.5;
+
+      Vector dir = new Vector(dirMove.X, dirMove.Y);
+
+      PointInt carTilePos = new PointInt((int)(car.X / game.TrackTileSize), (int)(car.Y / game.TrackTileSize));
+      Vector wayEnd = new Vector(carTilePos.X + (1 + dirMove.X) * 0.5, carTilePos.Y + (1 + dirMove.Y) * 0.5) * game.TrackTileSize;      
+
+      Vector dirLeft = dir.PerpendicularLeft();
+      Vector dirRight = dir.PerpendicularRight();
+
+      PhysicCar physicCarLeft = new PhysicCar(car, game);
+      PhysicCar physicCarRight = new PhysicCar(car, game);
+      physicCarLeft.setWheelTurn(-1.0);
+      physicCarRight.setWheelTurn(1.0);
+
+      int ticks = 0;
+      for (ticks = 0; ticks < 50; ticks++) {
+        physicCarLeft.Iteration(1);
+        physicCarRight.Iteration(1);
+
+        Vector distanceLeft = wayEnd - physicCarLeft.Pos;
+        Vector distanceRight = wayEnd - physicCarRight.Pos;
+
+        if ((Math.Abs(distanceLeft.Dot(dirLeft)) > endDistance && distanceLeft.Dot(dir) < sideDistance) ||
+            (Math.Abs(distanceRight.Dot(dirRight)) > endDistance && distanceRight.Dot(dir) < sideDistance)) {
+          return true;
+        }
+
+        if (distanceLeft.Dot(dir) < sideDistance && distanceRight.Dot(dir) < sideDistance) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+
     private bool equalsCellTransition(Cell cell, CellTransition transition) {
       return null != cell && null != transition && 
          cell.Pos.Equals(transition.Cell.Pos) &&
@@ -185,8 +227,8 @@ namespace RussianAICup2015Car.Sources {
 
     private double movePriority(Cell cell, bool isStraight) {
       if (cell.DirIn.Equals(cell.DirOut)) {
-        if (cell.Pos.Equals(currentPos()) && smallAngle()) {
-          return car.SpeedN(cell.DirOut) / 25;
+        if (cell.Pos.Equals(currentPos())) {
+          return carCanRotate ? 0 : 1.5;
         } else if (isStraight && pointStraight(cell.Pos)) {
           return 0.5;
         }
@@ -200,7 +242,7 @@ namespace RussianAICup2015Car.Sources {
       foreach (Bonus bonus in world.Bonuses) {
         PointInt pos = new PointInt((int)(bonus.X/game.TrackTileSize), (int)(bonus.Y/game.TrackTileSize));
         if (pos.Equals(cell.Pos)) {
-          priority += 0.2;
+          priority += 0.35;
         }
       }
 

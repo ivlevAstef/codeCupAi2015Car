@@ -72,13 +72,13 @@ namespace RussianAICup2015Car.Sources {
           return MoveEndType.NotArrival;
         }
 
-        Vector distance = physicCar.Pos - wayEnd;
+        Vector distance = wayEnd - physicCar.Pos;
 
         if (Math.Abs(distance.Dot(dir.Perpendicular())) > endSideDistance) {
           return MoveEndType.SideCrash;
         }
 
-        if (distance.Dot(dir) > 0) {
+        if (distance.Dot(dir) < 0) {
           return MoveEndType.Success;
         }
 

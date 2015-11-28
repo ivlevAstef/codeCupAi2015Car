@@ -83,7 +83,7 @@ namespace RussianAICup2015Car.Sources {
 
         pos = pos + spd * dt;
         spd = (spd + accel) * frictionMove;
-        spd = spd - (dir * limit(spd.Dot(dir), frictionLenght) + dir.Perpendicular() * limit(spd.Cross(dir), frictionCross));
+        spd = spd - dir * limit(spd.Dot(dir), frictionLenght) + dir.Perpendicular() * limit(spd.Cross(dir), frictionCross);
 
         double baseAngleSpeed = wheelTurn * game.CarAngularSpeedFactor * spd.Dot(dir);
 
