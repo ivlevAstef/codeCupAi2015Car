@@ -17,7 +17,14 @@ namespace RussianAICup2015Car.Sources {
       PointInt dirMove = path[0].DirOut;
       PointInt dirEnd = path[1].DirOut;
 
-      double angle = car.GetAngleTo(car.X + dirEnd.X, car.Y + dirEnd.Y);
+      Vector endPoint = GetWayEnd(path[1].Pos, dirEnd);
+
+      Move needMove = car.moveTo(game, endPoint, new Vector(dirMove.X, dirMove.Y), new Vector(dirEnd.X, dirEnd.Y));
+      move.IsBrake = needMove.IsBrake;
+      move.EnginePower = needMove.EnginePower;
+      move.WheelTurn = needMove.WheelTurn;
+
+      /*double angle = car.GetAngleTo(car.X + dirEnd.X, car.Y + dirEnd.Y);
       MoveEndType moveEndType = isEndAtAngle(angle);
 
       if (MoveEndType.Success == moveEndType) {
@@ -54,7 +61,7 @@ namespace RussianAICup2015Car.Sources {
         move.IsBrake = exceed > speedConstant + 1;
       } else {
         move.EnginePower = 1.0;
-      }
+      }*/
     }
 
     public override List<ActionType> GetParallelsActions() {

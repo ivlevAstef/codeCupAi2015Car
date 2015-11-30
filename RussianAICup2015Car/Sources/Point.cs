@@ -141,17 +141,7 @@ namespace RussianAICup2015Car.Sources {
 
     public double GetAngleTo(double x, double y, double angle = 0) {
       double absoluteAngle = Math.Atan2(y - this.Y, x - this.X);
-      double relativeAngle = absoluteAngle - angle;
-
-      while (relativeAngle > Math.PI) {
-        relativeAngle -= 2.0D * Math.PI;
-      }
-
-      while (relativeAngle < -Math.PI) {
-        relativeAngle += 2.0D * Math.PI;
-      }
-
-      return relativeAngle;
+      return absoluteAngle.AngleDeviation(angle);
     }
 
     public double GetDistanceTo(Vector v) {

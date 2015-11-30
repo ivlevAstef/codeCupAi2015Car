@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
 
 namespace RussianAICup2015Car.Sources {
-  class PhysicCar {
+  public class PhysicCar {
     private const double dt = 1;
 
     public double WheelTurn { get { return wheelTurn; } }
@@ -11,6 +11,7 @@ namespace RussianAICup2015Car.Sources {
 
     public Vector Pos { get { return pos; } }
     public Vector Speed { get { return spd; } }
+    public Vector Dir { get { return dir; } }
     public double Angle { get { return angle; } }
     public double AngularSpeed { get { return angleSpeed; } }
 
@@ -27,6 +28,7 @@ namespace RussianAICup2015Car.Sources {
 
     private Vector pos;
     private Vector spd;
+    private Vector dir;
     private double angle;
     private double angleSpeed;
 
@@ -55,6 +57,21 @@ namespace RussianAICup2015Car.Sources {
       init();
     }
 
+    public PhysicCar(PhysicCar physicCar) : this(physicCar.car, physicCar.game) {
+      wheelTurn = physicCar.wheelTurn;
+      idealWheelTurn = physicCar.idealWheelTurn;
+      enginePower = physicCar.enginePower;
+      idealEnginePower = physicCar.idealEnginePower;
+
+      pos = physicCar.pos;
+      spd = physicCar.spd;
+      angle = physicCar.angle;
+      dir = physicCar.dir;
+      angleSpeed = physicCar.angleSpeed;
+      nitroTicks = physicCar.nitroTicks;
+      brake = physicCar.brake;
+    }
+
     public void setWheelTurn(double newWheelTurn) {
       idealWheelTurn = limit(newWheelTurn, 1);
     }
@@ -73,26 +90,28 @@ namespace RussianAICup2015Car.Sources {
 
     public void Iteration(int ticks) {
       for (int i = 0; i < ticks / dt; i++) {
+        wheelTurn = signLimitChange(idealWheelTurn, wheelTurn, game.CarWheelTurnChangePerTick);
+        enginePower = signLimitChange(idealEnginePower, enginePower, game.CarEnginePowerChangePerTick);
+
         if (nitroTicks > 0) {
           enginePower = 2;
           nitroTicks--;
         }
 
-        Vector dir = Vector.sincos(angle);
+        double baseAngleSpeed = wheelTurn * game.CarAngularSpeedFactor * spd.Dot(dir);
+
+        angle += angleSpeed * dt;
+        angle = angle.AngleNormalize();
+        angleSpeed = baseAngleSpeed + (angleSpeed - baseAngleSpeed) * frictionAngle;
+        angleSpeed -= limit(angleSpeed - baseAngleSpeed, frictionMaxAngleSpeed);
+
+        dir = Vector.sincos(angle);
+
         Vector accel = dir * (enginePower * brake * carAccel);
 
         pos = pos + spd * dt;
         spd = (spd + accel) * frictionMove;
-        spd = spd - dir * limit(spd.Dot(dir), frictionLenght) + dir.Perpendicular() * limit(spd.Cross(dir), frictionCross);
-
-        double baseAngleSpeed = wheelTurn * game.CarAngularSpeedFactor * spd.Dot(dir);
-
-        angle += angleSpeed * dt;
-        angleSpeed = baseAngleSpeed - (angleSpeed - baseAngleSpeed) * frictionAngle;
-        angleSpeed -= limit(angleSpeed - baseAngleSpeed, frictionMaxAngleSpeed);
-
-        wheelTurn = signLimitChange(idealWheelTurn, wheelTurn, game.CarWheelTurnChangePerTick);
-        enginePower = signLimitChange(idealEnginePower, enginePower, game.CarEnginePowerChangePerTick);
+        spd = spd - dir * limit(spd.Dot(dir), frictionLenght) - dir.PerpendicularLeft() * limit(spd.Cross(dir), frictionCross);
       }
     }
 
@@ -105,6 +124,7 @@ namespace RussianAICup2015Car.Sources {
       pos = new Vector(car.X, car.Y);
       spd = new Vector(car.SpeedX, car.SpeedY);
       angle = car.Angle;
+      dir = Vector.sincos(angle);
       angleSpeed = car.AngularSpeed;
 
       nitroTicks = car.RemainingNitroTicks;

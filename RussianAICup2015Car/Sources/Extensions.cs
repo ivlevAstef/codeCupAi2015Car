@@ -12,6 +12,29 @@ namespace RussianAICup2015Car.Sources {
       return destination;
     }
 
+    public static Vector CenterTile(this Car car, Game game) {
+      double x = Math.Floor(car.X / game.TrackTileSize);
+      double y = Math.Floor(car.Y / game.TrackTileSize);
+
+      return new Vector(x + 0.5, y + 0.5) * game.TrackTileSize;
+    }
+
+
+    public static double AngleNormalize(this double angle) {
+      while (angle > Math.PI) {
+        angle -= 2.0D * Math.PI;
+      }
+
+      while (angle < -Math.PI) {
+        angle += 2.0D * Math.PI;
+      }
+
+      return angle;
+    }
+    public static double AngleDeviation(this double angle1, double angle2) {
+      return (angle1 - angle2).AngleNormalize();
+    }
+
     public static double Limit(double v, double limit) {
       return Math.Max(-limit, Math.Min(v, limit));
     }
