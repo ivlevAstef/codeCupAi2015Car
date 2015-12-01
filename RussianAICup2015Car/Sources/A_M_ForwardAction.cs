@@ -11,24 +11,18 @@ namespace RussianAICup2015Car.Sources {
     }
 
     public override void execute(Move move) {
-      /*Vector dir = new Vector(path[0].DirOut.X, path[0].DirOut.Y);
-      Vector perpendicular = new Vector(path[0].DirIn.X, path[0].DirIn.Y);
+      PointInt dirMove = path[0].DirOut;
+      PointInt dirEnd = path[1].DirOut;
 
-       Vector speed = new Vector(car.SpeedX, car.SpeedY).Normalize();
-       Vector speedNormal = new Vector(Math.Cos(car.Angle), Math.Sin(car.Angle)).Normalize();
-       double negativeSpeed = speed.Dot(perpendicular) - speedNormal.Dot(perpendicular);
+      Vector endPos = EndSidePos();
 
-       if (negativeSpeed > 0 && !path[0].DirOut.Equals(path[0].DirIn)) {
-         double dx = dir.X / negativeSpeed - perpendicular.X * negativeSpeed;
-         double dy = dir.Y / negativeSpeed - perpendicular.Y * negativeSpeed;
-         double angle = car.GetAngleTo(car.X + dx, car.Y + dy);
-         move.WheelTurn = car.WheelTurnForAngle(angle, game);
-       } else {*/
-        double angle = magniteToSide();
-        move.WheelTurn = car.WheelTurnForAngle(angle, game);
-      //}
+      PhysicMoveCalculator calculator = new PhysicMoveCalculator();
+      calculator.setupEnvironment(car, map, game);
 
-      move.EnginePower = 1.0;
+      Move needMove = calculator.calculateMove(endPos, new Vector(dirMove.X, dirMove.Y), new Vector(dirEnd.X, dirEnd.Y));
+      move.IsBrake = needMove.IsBrake;
+      move.EnginePower = needMove.EnginePower;
+      move.WheelTurn = needMove.WheelTurn;
     }
 
     public override List<ActionType> GetParallelsActions() {
@@ -37,8 +31,7 @@ namespace RussianAICup2015Car.Sources {
         ActionType.Shooting
       };
 
-      bool smallAngleDeviation = Math.Abs(magniteToSide()) < Math.PI / 12;
-      if (isStraight() && smallAngleDeviation) {
+      if (isStraight()) {
         result.Add(ActionType.UseNitro);
       }
 
@@ -57,7 +50,7 @@ namespace RussianAICup2015Car.Sources {
 
       return straightCount >= 4;
     }
-    private double magniteToSide() {
+    private Vector EndSidePos() {
       PointInt pos = path[0].Pos;
       PointInt dir = path[0].DirOut;
       PointInt normal = new PointInt(0);
@@ -75,10 +68,10 @@ namespace RussianAICup2015Car.Sources {
         dir = path[i].DirIn;
       }
 
-      return magniteToSide(pos, dir, normal.Negative());
+      return EndSidePos(pos, dir, normal.Negative());
     }
 
-    private double magniteToSide(PointInt pos, PointInt dir, PointInt normal) {
+    private Vector EndSidePos(PointInt pos, PointInt dir, PointInt normal) {
       double sideDistance = (game.TrackTileSize * 0.5) - game.TrackTileMargin - game.CarHeight * 0.55;
 
       double centerX = (pos.X +0.5) * game.TrackTileSize;
@@ -87,7 +80,7 @@ namespace RussianAICup2015Car.Sources {
       double sideX = centerX + normal.X * sideDistance;
       double sideY = centerY + normal.Y * sideDistance;
 
-      return car.GetAngleTo(sideX, sideY);
+      return new Vector(sideX, sideY);
     }
   }
 }

@@ -149,6 +149,20 @@ namespace RussianAICup2015Car.Sources {
       return physicCar.Angle;
     }
 
+    public static double GetAbsoluteAngleTo(this Car car, double x, double y) {
+      double absoluteAngleTo = Math.Atan2(y - car.Y, x - car.X);
+
+      while (absoluteAngleTo > Math.PI) {
+        absoluteAngleTo -= 2.0D * Math.PI;
+      }
+
+      while (absoluteAngleTo < -Math.PI) {
+        absoluteAngleTo += 2.0D * Math.PI;
+      }
+
+      return absoluteAngleTo;
+    }
+
     public static double GetAbsoluteAngleTo(this Car car, double x, double y, double dirX, double dirY) {
       double absoluteAngleTo = Math.Atan2(y - car.Y, x - car.X);
       absoluteAngleTo -= Math.Atan2(dirY, dirX);

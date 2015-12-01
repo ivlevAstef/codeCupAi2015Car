@@ -17,9 +17,18 @@ namespace RussianAICup2015Car.Sources {
     public override void execute(Move move) {
       Logger.instance.Assert(null != findedBonus, "Didn't find bonus.");
 
-      move.WheelTurn = car.WheelTurnForAngle(angleToBonus(findedBonus), game);
+      PointInt dirMove = path[0].DirOut;
 
-      move.EnginePower = 1.0;
+      Vector endPos = new Vector(findedBonus.X, findedBonus.Y);
+
+      PhysicMoveCalculator calculator = new PhysicMoveCalculator();
+      calculator.setupEnvironment(car, map, game);
+
+      Vector dir = new Vector(dirMove.X, dirMove.Y);
+
+      Move needMove = calculator.calculateMove(endPos, new Vector(dirMove.X, dirMove.Y), dir, true);
+      move.EnginePower = needMove.EnginePower;
+      move.WheelTurn = needMove.WheelTurn;
     }
 
     public override List<ActionType> GetParallelsActions() {

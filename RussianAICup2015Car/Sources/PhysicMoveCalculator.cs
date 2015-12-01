@@ -25,15 +25,12 @@ namespace RussianAICup2015Car.Sources {
       oneLineWidth = (game.TrackTileSize - 2 * game.TrackTileMargin) / 4;
     }
 
-    public Move calculateMove(Vector idealPos, Vector dirMove, Vector idealDir) {
+    public Move calculateMove(Vector idealPos, Vector dirMove, Vector idealDir, bool magnifiedPos = false) {
       Dictionary<MovedEvent, PhysicCar> events = calculateEvents(idealPos, dirMove, idealDir);
 
       Move result = new Move();
       result.EnginePower = 1.0;
       result.WheelTurn = WheelTurnForEndZeroWheelTurn(car, game, Math.Atan2(dirMove.Y, dirMove.X));
-
-      double idealAngle = Math.Atan2(idealDir.Y, idealDir.X);
-      //Vector dirMovePerpendicular = dirMove.Perpendicular() * Math.Sign(dirMove.Perpendicular().Dot(idealDir));
 
       if (events.ContainsKey(MovedEvent.PassageLine)) {
         Vector posSpeedReach = events.ContainsKey(MovedEvent.SpeedReach) ? events[MovedEvent.SpeedReach].Pos : null;
@@ -42,6 +39,7 @@ namespace RussianAICup2015Car.Sources {
           result.IsBrake = car.Speed() > 8;
         }
 
+        double idealAngle = magnifiedPos ? car.GetAbsoluteAngleTo(idealPos.X, idealPos.Y) : Math.Atan2(idealDir.Y, idealDir.X);
         result.WheelTurn = WheelTurnForEndZeroWheelTurn(car, game, idealAngle);
       }
 

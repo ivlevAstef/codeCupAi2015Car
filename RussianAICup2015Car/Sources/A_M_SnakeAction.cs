@@ -4,8 +4,6 @@ using System;
 
 namespace RussianAICup2015Car.Sources {
   class A_M_SnakeAction : A_M_BaseMoveAction {
-    private int goodTicks = 0;
-
     public override bool valid() {
       Logger.instance.Assert(3 <= path.Count, "incorrect way cells count.");
 
@@ -35,18 +33,8 @@ namespace RussianAICup2015Car.Sources {
         ActionType.SnakePreEnd
       };
 
-      PointInt dirMove = path[0].DirOut;
-      PointInt dirEnd = path[1].DirOut;
-
-      Vector dir = new Vector(dirMove.X + dirEnd.X, dirMove.Y + dirEnd.Y);
-      if (Constant.ExceedMaxTurnSpeed(car, dir.Perpendicular(), 1.2) < -3 &&
-          validSnakeWithOffset(1) && validSnakeWithOffset(2)) {
-        goodTicks++;
-        if (goodTicks > 5) {
-          result.Add(ActionType.UseNitro);
-        }
-      } else {
-        goodTicks = 0;
+      if (validSnakeWithOffset(1) && validSnakeWithOffset(2)) {
+        result.Add(ActionType.UseNitro);
       }
 
       return result;
