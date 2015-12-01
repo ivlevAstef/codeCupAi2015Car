@@ -18,11 +18,25 @@ namespace RussianAICup2015Car.Sources {
         return false;
       }
 
-      return dirIn.Equals(dirOut.Perpendicular()) || dirIn.Equals(dirOut.Perpendicular().Negative()); 
+      return dirIn.Equals(dirOut.PerpendicularLeft()) || dirIn.Equals(dirOut.PerpendicularRight()); 
     }
 
     public override void execute(Move move) {
-      PointInt dirMove = path[2].DirIn;
+      PointInt dirMove = path[0].DirOut;
+      PointInt dirEnd = path[2].DirOut;
+
+      Vector centerTurnPos = GetWayEnd(path[2].Pos, new PointInt(0));
+      Vector endPos = GetWayEnd(path[2].Pos, dirEnd);
+
+      PhysicMoveCalculator calculator = new PhysicMoveCalculator();
+      calculator.setupEnvironment(car, game);
+
+      Move needMove = calculator.calculateMove(centerTurnPos, endPos, new Vector(dirMove.X, dirMove.Y), new Vector(dirEnd.X, dirEnd.Y));
+      move.IsBrake = needMove.IsBrake;
+      move.EnginePower = needMove.EnginePower;
+      move.WheelTurn = needMove.WheelTurn;
+
+      /*PointInt dirMove = path[2].DirIn;
       PointInt dirOut = path[2].DirOut;
       Vector dir = new Vector(dirMove.X + dirOut.X, dirMove.Y + dirOut.Y);
 
@@ -37,7 +51,7 @@ namespace RussianAICup2015Car.Sources {
       double magnitedAngle = car.GetAngleTo(car.X + dirMove.X, car.Y + dirMove.Y);
       if (MoveEndType.Success == isEndAtAngle(magnitedAngle)) {
         move.WheelTurn = car.WheelTurnForAngle(magnitedAngle, game);
-      }
+      }*/
     }
   }
 }

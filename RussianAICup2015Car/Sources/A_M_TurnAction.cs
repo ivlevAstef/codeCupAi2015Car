@@ -17,54 +17,16 @@ namespace RussianAICup2015Car.Sources {
       PointInt dirMove = path[0].DirOut;
       PointInt dirEnd = path[1].DirOut;
 
-      Vector endPoint = GetWayEnd(path[1].Pos, dirEnd);
+      Vector centerTurnPos = GetWayEnd(path[1].Pos, new PointInt(0));
+      Vector endPos = GetWayEnd(path[1].Pos, dirEnd);
 
       PhysicMoveCalculator calculator = new PhysicMoveCalculator();
       calculator.setupEnvironment(car, game);
 
-      Move needMove = calculator.calculateMove(endPoint, new Vector(dirMove.X, dirMove.Y), new Vector(dirEnd.X, dirEnd.Y));
+      Move needMove = calculator.calculateMove(centerTurnPos, endPos, new Vector(dirMove.X, dirMove.Y), new Vector(dirEnd.X, dirEnd.Y));
       move.IsBrake = needMove.IsBrake;
       move.EnginePower = needMove.EnginePower;
       move.WheelTurn = needMove.WheelTurn;
-
-      /*double angle = car.GetAngleTo(car.X + dirEnd.X, car.Y + dirEnd.Y);
-      MoveEndType moveEndType = isEndAtAngle(angle);
-
-      if (MoveEndType.Success == moveEndType) {
-        move.WheelTurn = car.WheelTurnForAngle(angle, game);
-      } else if (MoveEndType.SideCrash == moveEndType) {
-        Vector endPoint = GetWayEnd(path[0].Pos, dirMove);
-        angle = car.GetAngleTo(endPoint.X, endPoint.Y);
-        move.WheelTurn = car.WheelTurnForAngle(angle*0.5, game);
-      } else {
-        Vector endPoint = GetWaySideEnd(path[0].Pos, dirMove, dirEnd);
-
-        angle = car.GetAngleTo(endPoint.X, endPoint.Y);
-        move.WheelTurn = car.WheelTurnForAngle(angle, game);
-      }
-
-      double distanceToEnd = (GetWayEnd(path[0].Pos, dirMove) - new Vector(car.X, car.Y)).Dot(new Vector(dirMove.X, dirMove.Y));
-      double speedConstant = 5 * distanceToEnd / game.TrackTileSize;
-
-      double exceed = 0;
-      Vector dir = null;
-      if (MoveEndType.Success == moveEndType) {
-        dir = new Vector(dirEnd.X, dirEnd.Y);
-        exceed = Constant.ExceedMaxTurnSpeed(car, dir.Perpendicular(), 0.5);
-      } else if(MoveEndType.SideCrash == moveEndType) {
-        dir = new Vector(dirEnd.X, dirEnd.Y);
-        exceed = Constant.ExceedMaxTurnSpeed(car, dir.Perpendicular(), 0.9);
-      } else {
-        dir = new Vector(dirMove.X + dirEnd.X, dirMove.Y + dirEnd.Y);
-        exceed = Constant.ExceedMaxTurnSpeed(car, dir.Perpendicular(), 0.55);
-      }
-
-      if (exceed > speedConstant) {
-        move.EnginePower = Constant.MaxTurnSpeed(car, 0.9) / car.Speed();
-        move.IsBrake = exceed > speedConstant + 1;
-      } else {
-        move.EnginePower = 1.0;
-      }*/
     }
 
     public override List<ActionType> GetParallelsActions() {

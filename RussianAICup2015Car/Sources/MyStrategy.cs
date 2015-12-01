@@ -35,7 +35,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       ActionType.InitialFreeze,
       ActionType.Death,
 
-     // ActionType.StuckOut,
+      ActionType.StuckOut,
       //ActionType.Backward,
       ActionType.Around,
       ActionType.Snake,
