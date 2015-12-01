@@ -19,7 +19,6 @@ namespace RussianAICup2015Car.Sources {
       return new Vector(x + 0.5, y + 0.5) * game.TrackTileSize;
     }
 
-
     public static double AngleNormalize(this double angle) {
       while (angle > Math.PI) {
         angle -= 2.0D * Math.PI;
@@ -134,47 +133,6 @@ namespace RussianAICup2015Car.Sources {
       }
 
       return ticks;
-      /*
-      const double dt = 1;
-
-      double angularFactor = Math.Abs(car.AngularFactor(game));
-
-      if (angularFactor < 1.0e-5) {
-        return 0;
-      }
-
-      double aFrictionMult = Math.Pow(1 - game.CarRotationFrictionFactor, dt);
-      double angularFriction = game.CarRotationFrictionFactor * dt;
-
-      double baseAngularSpeed = car.WheelTurn * angularFactor;
-      double angularSpeed = car.AngularSpeed;
-
-      angularSpeed -= Extensions.Limit(angularSpeed - baseAngularSpeed, angularFriction);
-
-      double wheelTurn = car.WheelTurn;
-
-      double angle = car.Angle;
-      int ticks = 0;
-
-      int beginSign = Math.Sign(angle - (car.Angle + angleDt));
-      while (0 != beginSign && beginSign == Math.Sign(angle - (car.Angle + angleDt))) {
-        baseAngularSpeed = wheelTurn * angularFactor;
-        angle += angularSpeed * dt;
-        angularSpeed = baseAngularSpeed - (angularSpeed - baseAngularSpeed) * aFrictionMult;
-
-        if (angle > car.Angle + angleDt) {
-          wheelTurn -= game.CarWheelTurnChangePerTick;
-        } else {
-          wheelTurn += game.CarWheelTurnChangePerTick;
-        }
-
-        wheelTurn = Extensions.Limit(wheelTurn, 1);
-
-        ticks++;
-      }
-
-
-      return ticks - (int)Math.Abs(wheelTurn / game.CarWheelTurnChangePerTick);*/
     }
 
     public static double AngleForZeroWheelTurn(this Car car, Game game) {

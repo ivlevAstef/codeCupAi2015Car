@@ -135,6 +135,8 @@ namespace RussianAICup2015Car.Sources {
       return new Vector(X / len, Y / len);
     }
 
+    public double Angle { get { return Math.Atan2(Y, X); } }
+
     public double GetAngleTo(Vector v, double angle = 0) {
       return GetAngleTo(v.X, v.Y, angle);
     }

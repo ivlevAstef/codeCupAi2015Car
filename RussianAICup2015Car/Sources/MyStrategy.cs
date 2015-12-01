@@ -51,7 +51,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       path.CalculatePath();
 
       foreach (A_IAction action in actions.Values) {
-        action.setupEnvironment(car, world, game, path);
+        action.setupEnvironment(car, world, game, map, path);
       }
 
       A_IAction callAction = null;

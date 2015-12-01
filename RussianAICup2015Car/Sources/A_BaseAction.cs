@@ -7,12 +7,14 @@ namespace RussianAICup2015Car.Sources {
     protected Car car = null;
     protected World world = null;
     protected Game game = null;
+    protected Map map = null;
     protected Path path = null;
 
-    public void setupEnvironment(Car car, World world, Game game, Path path) {
+    public void setupEnvironment(Car car, World world, Game game, Map map, Path path) {
       this.car = car;
       this.world = world;
       this.game = game;
+      this.map = map;
       this.path = path;
     }
 

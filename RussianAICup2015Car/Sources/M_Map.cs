@@ -83,6 +83,23 @@ namespace RussianAICup2015Car.Sources {
       this.game = game;
     }
 
+    public PointInt[] dirsByPos(int x, int y) {
+      if(0 > x || x >= world.Width ||
+         0 > y || y >= world.Height) {
+        return new PointInt[0];
+      } 
+      return directionsByTileType[world.TilesXY[x][y]];
+    }
+
+    public PointInt[] reverseDirsByPos(int x, int y) {
+      List<PointInt> result = new List<PointInt> { DirLeft, DirRight, DirUp, DirDown };
+      PointInt[] dirs = directionsByTileType[world.TilesXY[x][y]];
+
+      result.RemoveAll(dir => containsDir(dir, dirs));
+
+      return result.ToArray();
+    }
+
     public Cell cellByMaxDepth(int maxDepth) {
       PointInt current = new PointInt((int)(car.X / game.TrackTileSize), (int)(car.Y / game.TrackTileSize));
       if (null == posCache || !posCache.Equals(current)) {
@@ -286,5 +303,13 @@ namespace RussianAICup2015Car.Sources {
       return data;
     }
 
+
+    private bool containsDir(PointInt dir, PointInt[] dirs) {
+      bool contains = false;
+      foreach(PointInt iterDir in dirs) {
+        contains |= iterDir.Equals(dir);
+      }
+      return contains;
+    }
   }
 }

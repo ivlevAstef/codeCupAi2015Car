@@ -25,13 +25,12 @@ namespace RussianAICup2015Car.Sources {
       PointInt dirMove = path[0].DirOut;
       PointInt dirEnd = path[2].DirOut;
 
-      Vector centerTurnPos = GetWayEnd(path[2].Pos, new PointInt(0));
       Vector endPos = GetWayEnd(path[2].Pos, dirEnd);
 
       PhysicMoveCalculator calculator = new PhysicMoveCalculator();
-      calculator.setupEnvironment(car, game);
+      calculator.setupEnvironment(car, map, game);
 
-      Move needMove = calculator.calculateMove(centerTurnPos, endPos, new Vector(dirMove.X, dirMove.Y), new Vector(dirEnd.X, dirEnd.Y));
+      Move needMove = calculator.calculateMove(endPos, new Vector(dirMove.X, dirMove.Y), new Vector(dirEnd.X, dirEnd.Y));
       move.IsBrake = needMove.IsBrake;
       move.EnginePower = needMove.EnginePower;
       move.WheelTurn = needMove.WheelTurn;

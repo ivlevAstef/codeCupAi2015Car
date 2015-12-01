@@ -31,15 +31,19 @@ namespace RussianAICup2015Car.Sources {
     }
 
     public override void execute(Move move) {
-      PointInt dirOut = path[1 + offset].DirOut;
-      Vector dir = new Vector(dirOut.X, dirOut.Y);
+      PointInt dirMove = path[0 + offset].DirOut;
+      PointInt dirEnd = path[1 + offset].DirOut;
 
-      if (Constant.ExceedMaxTurnSpeed(car, dir.Perpendicular(), 0.25) > 0) {
-        move.EnginePower = Constant.MaxTurnSpeed(car, 0.5) / car.Speed();
-        move.IsBrake = true;
-      } else {
-        move.EnginePower = 1.0;
-      }
+      Vector endPos = GetWayEnd(path[1 + offset].Pos, dirEnd);
+      Vector dir = new Vector(dirMove.X + dirEnd.X, dirMove.Y + dirEnd.Y).Normalize();
+
+      PhysicMoveCalculator calculator = new PhysicMoveCalculator();
+      calculator.setupEnvironment(car, map, game);
+
+      Move needMove = calculator.calculateMove(endPos, new Vector(dirMove.X, dirMove.Y), dir);
+      move.IsBrake = needMove.IsBrake;
+      move.EnginePower = needMove.EnginePower;
+      //move.WheelTurn = needMove.WheelTurn;
     }
   }
 }
