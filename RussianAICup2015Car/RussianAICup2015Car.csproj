@@ -65,6 +65,7 @@
     <Compile Include="Sources\M_Path.cs" />
     <Compile Include="Sources\PhysicCar.cs" />
     <Compile Include="Sources\PhysicExtensions.cs" />
+    <Compile Include="Sources\PhysicMoveCalculator.cs" />
     <Compile Include="Sources\Point.cs" />
     <Compile Include="Sources\A_ShootingAction.cs" />
     <Compile Include="Sources\A_M_SnakeAction.cs" />
