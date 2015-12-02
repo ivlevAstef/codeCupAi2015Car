@@ -51,20 +51,34 @@ namespace RussianAICup2015Car.Sources {
       if (null != transition && !transition.Cell.Pos.Equals(cell.Pos)) {
         lastCell = transition.Cell;
         transition = null;
-      } 
-
-      HashSet<Map.Cell> visited = new HashSet<Map.Cell>();
-      if (null != lastCell) {
-        PointInt dir = cell.Pos - lastCell.Pos;
-        transition = calculatePath(lastCell, cell, dir, visited);
-      } else {
-        transition = calculatePath(null, cell, currentDir(), visited);
       }
+
+      transition = mergePath(lastCell, transition, cell, 2);
 
       Logger.instance.Assert(null != transition, "Can't find path.");
 
       path = createPathFromTransition(transition).ToArray();
       Logger.instance.Assert(3 <= path.Length, "Can't find full path.");
+    }
+
+    private CellTransition mergePath(Cell lastCell, CellTransition iter, Map.Cell mapCell, int depthCount) {
+      if (null != iter && depthCount > 0) {
+        if (!iter.Cell.Pos.Equals(mapCell.Pos) && null != iter.Next) {
+          foreach (Tuple<Map.Cell, int> neighboring in mapCell.NeighboringCells) {
+            if (iter.Next.Cell.Pos.Equals(neighboring.Item1.Pos)) {
+              iter.Next = mergePath(iter.Cell, iter.Next, neighboring.Item1, depthCount - 1);
+              return iter;
+            }
+          }
+        }
+      }
+
+      HashSet<Map.Cell> visited = new HashSet<Map.Cell>();
+      if (null != lastCell) {
+        PointInt dir = mapCell.Pos - lastCell.Pos;
+        return calculatePath(lastCell, mapCell, dir, visited);
+      }
+      return calculatePath(null, mapCell, currentDir(), visited);
     }
 
     public int Count { get { return path.Length; } }

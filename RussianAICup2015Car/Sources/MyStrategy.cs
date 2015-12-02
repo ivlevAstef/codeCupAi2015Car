@@ -47,7 +47,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
     public void Move(Car car, World world, Game game, Move move) {
       map.setupEnvironment(car, world, game);
 
-      path.SetupEnvironment(car, world, game, map.cellByMaxDepth(8));
+      path.SetupEnvironment(car, world, game, map.cellByMaxDepth(6));
       path.CalculatePath();
 
       foreach (A_IAction action in actions.Values) {
