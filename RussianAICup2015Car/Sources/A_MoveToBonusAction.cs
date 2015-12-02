@@ -26,7 +26,7 @@ namespace RussianAICup2015Car.Sources {
 
       Vector dir = new Vector(dirMove.X, dirMove.Y);
 
-      Move needMove = calculator.calculateMove(endPos, new Vector(dirMove.X, dirMove.Y), dir);
+      Move needMove = calculator.calculateMove(endPos, dir, dir, 0.1);
       move.EnginePower = needMove.EnginePower;
       move.WheelTurn = needMove.WheelTurn;
     }

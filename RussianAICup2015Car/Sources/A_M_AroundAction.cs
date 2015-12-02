@@ -24,43 +24,16 @@ namespace RussianAICup2015Car.Sources {
       PointInt dirMove = path[0].DirOut;
       PointInt dirEnd = path[1].DirOut;
 
-      MoveEndType moveEndType = isEndAtAngle(car.GetAngleTo(car.X + dirEnd.X, car.Y + dirEnd.Y));
-      if (MoveEndType.Success == moveEndType) {
-        double angle = car.GetAngleTo(car.X + dirEnd.X - dirMove.X, car.Y + dirEnd.Y - dirMove.Y);
-        move.WheelTurn = car.WheelTurnForAngle(angle, game);
-      } else {
-        Vector endPoint = GetWaySideEnd(path[0].Pos, dirMove, dirEnd);
-        Vector endPointReverse = GetWaySideEnd(path[0].Pos, dirMove, dirEnd.Negative());
+      Vector endPos = GetWayEnd(path[1].Pos, new PointInt(0));
 
-        if(isEndAt(10 + car.TicksForAngle(car.GetAngleTo(endPoint.X, endPoint.Y), game))) {
-          double angle = car.GetAngleTo(endPoint.X, endPoint.Y);
-          move.WheelTurn = car.WheelTurnForAngle(angle, game);
-        } else {
-          double angle = car.GetAngleTo(endPointReverse.X, endPointReverse.Y);
-          move.WheelTurn = car.WheelTurnForAngle(angle, game);
-        }
-      }
+      PhysicMoveCalculator calculator = new PhysicMoveCalculator();
+      calculator.setupEnvironment(car, map, game);
 
-      Vector dir = new Vector(dirEnd.X - dirMove.X, dirEnd.Y - dirMove.Y);
-      double exceed = 0;
-      double enginePowerConst = 0.1;
-      if (MoveEndType.Success == moveEndType) {
-        exceed = Constant.ExceedMaxTurnSpeed(car, dir.Perpendicular(), 0.9);
-        enginePowerConst = 2.0;
-      } else if (MoveEndType.SideCrash == moveEndType) {
-        exceed = Constant.ExceedMaxTurnSpeed(car, dir.Perpendicular(), 0.4);
-        enginePowerConst = 0.8;
-      } else {
-        exceed = Constant.ExceedMaxTurnSpeed(car, dir.Perpendicular(), 0.1);
-        enginePowerConst = 0.3;
-      }
-
-      if (exceed > 0) {
-        move.EnginePower = Constant.MaxTurnSpeed(car, enginePowerConst) / car.Speed();
-        move.IsBrake = true;
-      } else {
-        move.EnginePower = 1.0;
-      }
+      Vector dir = new Vector(dirEnd.X, dirEnd.Y);
+      Move needMove = calculator.calculateMove(endPos, new Vector(dirMove.X, dirMove.Y), dir, 0.01);
+      move.IsBrake = needMove.IsBrake;
+      move.EnginePower = needMove.EnginePower;
+      move.WheelTurn = needMove.WheelTurn;
     }
 
     public override List<ActionType> GetParallelsActions() {

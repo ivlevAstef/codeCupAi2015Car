@@ -25,7 +25,7 @@ namespace RussianAICup2015Car.Sources {
       oneLineWidth = (game.TrackTileSize - 2 * game.TrackTileMargin) / 4;
     }
 
-    public Move calculateMove(Vector idealPos, Vector dirMove, Vector idealDir) {
+    public Move calculateMove(Vector idealPos, Vector dirMove, Vector idealDir, double lineCount = 1.25) {
       Dictionary<MovedEvent, Tuple<PhysicCar, int>> events = calculateEvents(idealPos, dirMove, idealDir);
 
       Move result = new Move();
@@ -35,7 +35,7 @@ namespace RussianAICup2015Car.Sources {
       if (events.ContainsKey(MovedEvent.PassageLine)) {
         Vector posSpeedReach = events.ContainsKey(MovedEvent.SpeedReach) ? events[MovedEvent.SpeedReach].Item1.Pos : null;
 
-        if (null == posSpeedReach || (posSpeedReach - idealPos).Dot(dirMove) > 1.25 * oneLineWidth) {
+        if (null == posSpeedReach || (posSpeedReach - idealPos).Dot(dirMove) > lineCount * oneLineWidth) {
           result.IsBrake = car.Speed() > 8;
         }
 
@@ -53,7 +53,10 @@ namespace RussianAICup2015Car.Sources {
         Vector improvedSideDir = (pos + dirMove - new Vector(car.X, car.Y));
         double angle = improvedSideDir.Angle.AngleDeviation(sideDir.Angle);
 
-        result.WheelTurn = car.WheelTurn + Math.Sign(angle) * game.CarWheelTurnChangePerTick;
+        bool nearSide = Math.Abs(sideDir.Dot(dirMove.Perpendicular())) < 5;
+        if (!nearSide) {
+          result.WheelTurn = car.WheelTurn + Math.Sign(angle) * game.CarWheelTurnChangePerTick;
+        }
       }
 
       return result;
@@ -85,7 +88,7 @@ namespace RussianAICup2015Car.Sources {
           result[MovedEvent.SideCrash] = new Tuple<PhysicCar, int>(new PhysicCar(physicCar), i);
         }
 
-        if (result.ContainsKey(MovedEvent.PassageLine) && result.ContainsKey(MovedEvent.AngleReach) && result.ContainsKey(MovedEvent.SpeedReach)) {
+        if (result.ContainsKey(MovedEvent.PassageLine) && result.ContainsKey(MovedEvent.SpeedReach)) {
           break;
         }
 
@@ -151,9 +154,8 @@ namespace RussianAICup2015Car.Sources {
         }
       }
 
-      foreach(PointInt dirInt in dirs) {
+      foreach (PointInt dirInt in dirs) {
         Vector dir = new Vector(dirInt.X, dirInt.Y);
-       
         if (intersectCarWithSide(car.Pos, car.Dir, dir, center + dir * distanceToSide)) {
           return true;
         }
@@ -225,7 +227,6 @@ namespace RussianAICup2015Car.Sources {
       double p4Sign = (p4 + pos - sidePos).Dot(sidePerp);
 
       return !(p1Sign < 0 && p2Sign < 0 && p3Sign < 0 && p4Sign < 0);
-
     }
   }
 }

@@ -12,14 +12,15 @@ namespace RussianAICup2015Car.Sources {
 
     public override void execute(Move move) {
       PointInt dirMove = path[0].DirOut;
-      PointInt dirEnd = path[1].DirOut;
 
       Vector endPos = EndSidePos();
 
       PhysicMoveCalculator calculator = new PhysicMoveCalculator();
       calculator.setupEnvironment(car, map, game);
 
-      Move needMove = calculator.calculateMove(endPos, new Vector(dirMove.X, dirMove.Y), new Vector(dirEnd.X, dirEnd.Y));
+      Vector dir = new Vector(dirMove.X, dirMove.Y);
+
+      Move needMove = calculator.calculateMove(endPos, dir, dir);
       move.IsBrake = needMove.IsBrake;
       move.EnginePower = needMove.EnginePower;
       move.WheelTurn = needMove.WheelTurn;
@@ -40,7 +41,7 @@ namespace RussianAICup2015Car.Sources {
 
     private bool isStraight() {
       int straightCount = 0;
-      for (int i = 0; i < Math.Min(4, path.Count); i++) {
+      for (int i = 0; i < Math.Min(3, path.Count); i++) {
         if (path[i].DirIn.Equals(path[i].DirOut)) {
           straightCount++;
         } else {
@@ -48,7 +49,7 @@ namespace RussianAICup2015Car.Sources {
         }
       }
 
-      return straightCount >= 4;
+      return straightCount >= 3;
     }
     private Vector EndSidePos() {
       PointInt pos = path[0].Pos;
@@ -72,7 +73,7 @@ namespace RussianAICup2015Car.Sources {
     }
 
     private Vector EndSidePos(PointInt pos, PointInt dir, PointInt normal) {
-      double sideDistance = (game.TrackTileSize * 0.5) - game.TrackTileMargin - game.CarHeight * 0.55;
+      double sideDistance = (game.TrackTileSize * 0.5) - game.TrackTileMargin - game.CarHeight * 0.75;
 
       double centerX = (pos.X +0.5) * game.TrackTileSize;
       double centerY = (pos.Y +0.5) * game.TrackTileSize;
