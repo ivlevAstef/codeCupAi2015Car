@@ -55,7 +55,7 @@ namespace RussianAICup2015Car.Sources {
 
       int mergeCells = Math.Min(3, (int)(car.Speed() / 6));//18
 
-      transition = mergePath(lastCell, transition, cell, mergeCells);
+      transition = mergePath(lastCell, transition, cell, mergeCells, 0);
 
       Logger.instance.Assert(null != transition, "Can't find path.");
 
@@ -63,12 +63,12 @@ namespace RussianAICup2015Car.Sources {
       Logger.instance.Assert(3 <= path.Length, "Can't find full path.");
     }
 
-    private CellTransition mergePath(Cell lastCell, CellTransition iter, Map.Cell mapCell, int depthCount) {
+    private CellTransition mergePath(Cell lastCell, CellTransition iter, Map.Cell mapCell, int depthCount, int depth) {
       if (null != iter && depthCount > 0) {
         if (iter.Cell.Pos.Equals(mapCell.Pos) && null != iter.Next) {
           foreach (Tuple<Map.Cell, int> neighboring in mapCell.NeighboringCells) {
             if (iter.Next.Cell.Pos.Equals(neighboring.Item1.Pos)) {
-              iter.Next = mergePath(iter.Cell, iter.Next, neighboring.Item1, depthCount - 1);
+              iter.Next = mergePath(iter.Cell, iter.Next, neighboring.Item1, depthCount - 1, depth + 1);
               return iter;
             }
           }
@@ -78,9 +78,9 @@ namespace RussianAICup2015Car.Sources {
       HashSet<Map.Cell> visited = new HashSet<Map.Cell>();
       if (null != lastCell) {
         PointInt dir = mapCell.Pos - lastCell.Pos;
-        return calculatePath(lastCell, mapCell, dir, visited);
+        return calculatePath(lastCell, mapCell, dir, visited, 8 - depth);
       }
-      return calculatePath(null, mapCell, currentDir(), visited);
+      return calculatePath(null, mapCell, currentDir(), visited, 8 - depth);
     }
 
     public int Count { get { return path.Length; } }
@@ -119,11 +119,12 @@ namespace RussianAICup2015Car.Sources {
       }
     }
 
-    private CellTransition calculatePath(Cell lastCell, Map.Cell cell, PointInt DirIn, HashSet<Map.Cell> visited) {
-      if (visited.Contains(cell)) {
+    private CellTransition calculatePath(Cell lastCell, Map.Cell cell, PointInt DirIn, HashSet<Map.Cell> visited, int depth) {
+      if (visited.Contains(cell) || depth <= 0) {
         return null;
       }
       visited.Add(cell);
+      depth--;
 
       Cell resultCell = new Cell();
       resultCell.Pos = cell.Pos;
@@ -135,7 +136,7 @@ namespace RussianAICup2015Car.Sources {
         PointInt dir = neighboring.Item1.Pos - cell.Pos;
         resultCell.DirOut = dir;
 
-        CellTransition transition = calculatePath(resultCell, neighboring.Item1, dir, visited);
+        CellTransition transition = calculatePath(resultCell, neighboring.Item1, dir, visited, depth);
         if (null != transition) {
           transition.TransitionPriority = cellTransitionPriority(lastCell, resultCell, neighboring.Item2);
 
@@ -264,7 +265,7 @@ namespace RussianAICup2015Car.Sources {
 
     private double tilePriority(PointInt dirIn, PointInt dirOut, PointInt nextDirIn, PointInt nextDirOut) {
       if (dirIn.Negative().Equals(dirOut) || nextDirIn.Negative().Equals(nextDirOut)) {
-        return -10;
+        return -100;
       }
 
       if (dirIn.Equals(dirOut)) {//line

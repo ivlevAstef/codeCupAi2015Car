@@ -21,7 +21,7 @@ namespace RussianAICup2015Car.Sources {
 
     private double idealWheelTurn;
     private double idealEnginePower;
-    private int brake = 1;
+    private int brake = 0;
     private int nitroTicks = 0;
 
     private double wheelTurn;
@@ -84,7 +84,7 @@ namespace RussianAICup2015Car.Sources {
     }
 
     public void setBrake(bool isBrake) {
-      brake = isBrake ? 1 : 0;
+      brake = isBrake ? 0 : 1;
     }
 
     public void useNitro() {
@@ -110,12 +110,13 @@ namespace RussianAICup2015Car.Sources {
 
         dir = Vector.sincos(angle);
 
-        Vector accel = dir * (enginePower * brake * carAccel);
+        Vector accel = dir * (enginePower * (1-brake) * carAccel);
 
         lastPos = pos;
         pos = pos + spd * dt;
         spd = (spd + accel) * frictionMove;
-        spd = spd - dir * limit(spd.Dot(dir), frictionLenght) - dir.PerpendicularLeft() * limit(spd.Cross(dir), frictionCross);
+        double lengthFriction = (1 - brake) * frictionLenght + brake * frictionCross;
+        spd = spd - dir * limit(spd.Dot(dir), lengthFriction) - dir.PerpendicularLeft() * limit(spd.Cross(dir), frictionCross);
       }
     }
 

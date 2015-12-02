@@ -13,6 +13,10 @@ namespace RussianAICup2015Car.Sources {
         return hasEnemyOnWasherLine();
       }
 
+      if (CarType.Jeep == car.Type) {
+        return hasEnemyOnTireLine();
+      }
+
       return false;
     }
 
@@ -71,6 +75,25 @@ namespace RussianAICup2015Car.Sources {
         }
       }
 
+      return false;
+    }
+
+    private bool hasEnemyOnTireLine() {
+      foreach (Car carIter in world.Cars) {
+        if (carIter.IsTeammate || carIter.IsFinishedTrack || carIter.Durability <= 1.0e-9) {
+          continue;
+        }
+
+        if (hasEnemyOnTireLine(carIter)) {
+          return true;
+        }
+      }
+
+      return false;
+
+    }
+
+    private bool hasEnemyOnTireLine(Car Enemy) {
       return false;
     }
   }
