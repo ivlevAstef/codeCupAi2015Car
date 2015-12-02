@@ -34,6 +34,14 @@ namespace RussianAICup2015Car.Sources {
         return null;
       }
 
+      foreach (PointInt dirInt in dirs) {
+        Vector dir = new Vector(dirInt.X, dirInt.Y);
+        Vector intersectPos = IntersectCircleWithSide(center, radius, dir, tileCenter + dir * distanceToSide);
+        if (null != intersectPos) {
+          return intersectPos;
+        }
+      }
+
       //edge
       if (Math.Abs(distanceFromCenter.X) > minDistanceToSide && Math.Abs(distanceFromCenter.Y) > minDistanceToSide) {
         Vector edge = tileCenter;
@@ -41,14 +49,6 @@ namespace RussianAICup2015Car.Sources {
         edge.Y += Math.Sign(distanceFromCenter.Y) * game.TrackTileSize * 0.5;
 
         Vector intersectPos = IntersectCircleWithEdge(center, radius, edge, sideRadius);
-        if (null != intersectPos) {
-          return intersectPos;
-        }
-      }
-
-      foreach (PointInt dirInt in dirs) {
-        Vector dir = new Vector(dirInt.X, dirInt.Y);
-        Vector intersectPos = IntersectCircleWithSide(center, radius, dir, tileCenter + dir * distanceToSide);
         if (null != intersectPos) {
           return intersectPos;
         }
@@ -98,6 +98,13 @@ namespace RussianAICup2015Car.Sources {
         return false;
       }
 
+      foreach (PointInt dirInt in dirs) {
+        Vector dir = new Vector(dirInt.X, dirInt.Y);
+        if (IntersectCarWithSide(carPos, carDir, dir, center + dir * distanceToSide)) {
+          return true;
+        }
+      }
+
       //edge
       if (Math.Abs(distanceFromCenter.X) > minDistanceToSide && Math.Abs(distanceFromCenter.Y) > minDistanceToSide) {
         Vector edge = center;
@@ -105,13 +112,6 @@ namespace RussianAICup2015Car.Sources {
         edge.Y += Math.Sign(distanceFromCenter.Y) * game.TrackTileSize * 0.5;
 
         if (IntersectCarWithCircle(carPos, carDir, edge, sideRadius)) {
-          return true;
-        }
-      }
-
-      foreach (PointInt dirInt in dirs) {
-        Vector dir = new Vector(dirInt.X, dirInt.Y);
-        if (IntersectCarWithSide(carPos, carDir, dir, center + dir * distanceToSide)) {
           return true;
         }
       }
@@ -125,7 +125,7 @@ namespace RussianAICup2015Car.Sources {
       double distanceCross = direction.Dot(dir.Perpendicular());
 
       //inside
-      if (Math.Abs(distanceLength) < game.CarWidth && Math.Abs(distanceCross) < game.CarHeight) {
+      if (Math.Abs(distanceLength) < game.CarWidth * 0.5 && Math.Abs(distanceCross) < game.CarHeight * 0.5) {
         return true;
       }
 

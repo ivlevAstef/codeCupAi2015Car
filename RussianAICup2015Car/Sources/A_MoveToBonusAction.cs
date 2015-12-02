@@ -54,7 +54,7 @@ namespace RussianAICup2015Car.Sources {
       }
 
       double speed = car.Speed();
-      double maxAngle = Math.PI / 3;
+      double maxAngle = Math.PI / 2;
 
       Bonus priorityBonus = null;
       foreach (Bonus bonus in world.Bonuses) {

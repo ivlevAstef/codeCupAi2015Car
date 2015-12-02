@@ -109,33 +109,32 @@ namespace RussianAICup2015Car.Sources {
       Vector tireSpd = self.Dir * game.TireInitialSpeed;
       double minTireSpeed = game.TireInitialSpeed * game.TireDisappearSpeedFactor;
 
-      for (int i = 0; i < 200; i++) {
+      for (int i = 0; i < 50; i++) {
         tirePos += tireSpd;
 
         foreach (PhysicCar physicCar in their) {
           physicCar.Iteration(1);
 
-          if (itersectTireWithCar(tirePos, tireSpd, physicCar)) {
+          if (itersectTireWithCar(tirePos, tireSpd, physicCar, 2)) {
             if (ignored == physicCar) {
               continue;
             }
 
             return false;
-          } else if (ignored == physicCar) {
-            ignored = null;
-          }
+          } 
         }
 
         foreach (PhysicCar physicCar in enemies) {
           physicCar.Iteration(1);
 
-          if (itersectTireWithCar(tirePos, tireSpd, physicCar)) {
-            return true;
+          if (itersectTireWithCar(tirePos, tireSpd, physicCar, 0.5)) {
+             return true;
           }
         }
 
         Vector itersectWithMap = CollisionDetector.instance.IntersectCircleWithMap(tirePos, game.TireRadius);
         if (null != itersectWithMap) {
+          ignored = null;
           tireSpd = calcTireSpeedAfterKick(tireSpd, (tirePos - itersectWithMap).Normalize());
         }
 
@@ -147,8 +146,8 @@ namespace RussianAICup2015Car.Sources {
       return false;
     }
 
-    private bool itersectTireWithCar(Vector tirePos, Vector tireSpd, PhysicCar car) {
-      return CollisionDetector.instance.IntersectCarWithCircle(car.Pos, car.Dir, tirePos, game.TireRadius);
+    private bool itersectTireWithCar(Vector tirePos, Vector tireSpd, PhysicCar car, double multR = 1) {
+      return CollisionDetector.instance.IntersectCarWithCircle(car.Pos, car.Dir, tirePos, game.TireRadius * multR);
     }
 
     private bool itersectTireWithSide(Vector tirePos, Vector tireSpd, PhysicCar car) {
@@ -156,7 +155,12 @@ namespace RussianAICup2015Car.Sources {
     }
 
     private Vector calcTireSpeedAfterKick(Vector speed, Vector normal) {
-      const double momentumTransferFactor = 1;
+      const double magicFriction = 0.02;
+
+      double friction = Math.Min(magicFriction, -speed.Dot(normal));
+      return normal.Negative() * (2 * speed.Dot(normal)) + speed - (normal * friction);
+
+      /*const double momentumTransferFactor = 1;
       double denominatorC = (speed.Negative().Cross(normal) / game.TireMass);
       Vector denominatorV = speed.Perpendicular() * denominatorC;
 
@@ -164,7 +168,7 @@ namespace RussianAICup2015Car.Sources {
       double impulseChange = - (1 + momentumTransferFactor) * speed.Dot(normal) / denominator;
       Vector vectorChange = normal * (impulseChange / game.TireMass);
 
-      return speed + vectorChange;
+      return speed + vectorChange;*/
     }
   }
 }
