@@ -53,7 +53,9 @@ namespace RussianAICup2015Car.Sources {
         transition = transition.Next;
       }
 
-      transition = mergePath(lastCell, transition, cell, 3);
+      int mergeCells = Math.Min(3, (int)(car.Speed() / 6));//18
+
+      transition = mergePath(lastCell, transition, cell, mergeCells);
 
       Logger.instance.Assert(null != transition, "Can't find path.");
 
@@ -63,7 +65,7 @@ namespace RussianAICup2015Car.Sources {
 
     private CellTransition mergePath(Cell lastCell, CellTransition iter, Map.Cell mapCell, int depthCount) {
       if (null != iter && depthCount > 0) {
-        if (!iter.Cell.Pos.Equals(mapCell.Pos) && null != iter.Next) {
+        if (iter.Cell.Pos.Equals(mapCell.Pos) && null != iter.Next) {
           foreach (Tuple<Map.Cell, int> neighboring in mapCell.NeighboringCells) {
             if (iter.Next.Cell.Pos.Equals(neighboring.Item1.Pos)) {
               iter.Next = mergePath(iter.Cell, iter.Next, neighboring.Item1, depthCount - 1);
@@ -103,14 +105,17 @@ namespace RussianAICup2015Car.Sources {
     }
 
     private PointInt currentDir() {
-      //TODO: supported get real angle for wheelTurn = 0
-      double x = Math.Cos(car.Angle + car.AngularSpeed * (car.WheelTurn / game.CarWheelTurnChangePerTick));
-      double y = Math.Sin(car.Angle + car.AngularSpeed * (car.WheelTurn / game.CarWheelTurnChangePerTick));
+      PhysicCar physicCar = new PhysicCar(car, game);
+      int ticks = (int)Math.Abs(Math.Round(physicCar.WheelTurn / game.CarWheelTurnChangePerTick));
 
-      if (Math.Abs(x) > Math.Abs(y)) {
-        return new PointInt(Math.Sign(x), 0);
+      physicCar.setWheelTurn(0);
+      physicCar.Iteration(ticks);
+
+
+      if (Math.Abs(physicCar.Dir.X) > Math.Abs(physicCar.Dir.X)) {
+        return new PointInt(Math.Sign(physicCar.Dir.X), 0);
       } else {
-        return new PointInt(0, Math.Sign(y));
+        return new PointInt(0, Math.Sign(physicCar.Dir.Y));
       }
     }
 
@@ -132,22 +137,7 @@ namespace RussianAICup2015Car.Sources {
 
         CellTransition transition = calculatePath(resultCell, neighboring.Item1, dir, visited);
         if (null != transition) {
-          CellTransition last = lastTransition(lastCell, resultCell, this.transition);
-
-          double lastPriority = double.MinValue;
-          double currentPriority = double.MinValue;
-          if (null != last) {
-            lastPriority = last.TransitionPriority;
-          }  
-          if (null != lastCell) {
-            currentPriority = cellTransitionPriority(lastCell, resultCell, neighboring.Item2);
-          } 
-          
-          if(null != last || null != lastCell) {
-            transition.TransitionPriority = Math.Max(lastPriority, currentPriority);
-          } else {
-            transition.TransitionPriority = 0;
-          }
+          transition.TransitionPriority = cellTransitionPriority(lastCell, resultCell, neighboring.Item2);
 
           if (null == max || transition.Priority > max.Priority) {
             max = transition;
@@ -266,6 +256,9 @@ namespace RussianAICup2015Car.Sources {
     }
 
     private double tilePriority(Cell lastCell, Cell cell) {
+      if (null == lastCell) {
+        return 0;
+      }
       return tilePriority(lastCell.DirIn, cell.Pos - lastCell.Pos, cell.DirIn, cell.DirOut);
     }
 
@@ -278,8 +271,8 @@ namespace RussianAICup2015Car.Sources {
         return 0.42;
       }
 
-      if (null == nextDirOut || nextDirIn.Equals(nextDirOut)) {
-        return 0;
+      if (null == nextDirOut || nextDirIn.Equals(nextDirOut)) {//turn
+        return -0.6;
       }
 
       if (dirIn.Equals(nextDirOut.Negative()) && dirOut.Equals(nextDirIn)) {//around

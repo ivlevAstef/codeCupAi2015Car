@@ -30,7 +30,7 @@ namespace RussianAICup2015Car.Sources {
       PhysicMoveCalculator calculator = new PhysicMoveCalculator();
       calculator.setupEnvironment(car, map, game);
 
-      Move needMove = calculator.calculateMove(endPos, new Vector(dirMove.X, dirMove.Y), new Vector(dirEnd.X, dirEnd.Y));
+      Move needMove = calculator.calculateMove(endPos, new Vector(dirMove.X, dirMove.Y), new Vector(dirEnd.X + dirMove.X, dirEnd.Y + dirMove.Y));
       move.IsBrake = needMove.IsBrake;
       move.EnginePower = needMove.EnginePower;
       move.WheelTurn = needMove.WheelTurn;
