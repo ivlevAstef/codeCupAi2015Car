@@ -50,10 +50,10 @@ namespace RussianAICup2015Car.Sources {
     public void CalculatePath() {
       if (null != transition && !transition.Cell.Pos.Equals(cell.Pos)) {
         lastCell = transition.Cell;
-        transition = null;
+        transition = transition.Next;
       }
 
-      transition = mergePath(lastCell, transition, cell, 2);
+      transition = mergePath(lastCell, transition, cell, 3);
 
       Logger.instance.Assert(null != transition, "Can't find path.");
 
