@@ -10,11 +10,11 @@ namespace RussianAICup2015Car.Sources {
       }
 
       if (CarType.Buggy == car.Type) {
-        return hasEnemyOnWasherLine();
+        return isShootingWasher();
       }
 
       if (CarType.Jeep == car.Type) {
-        return hasEnemyOnTireLine();
+        return isRunTire();
       }
 
       return false;
@@ -24,13 +24,13 @@ namespace RussianAICup2015Car.Sources {
       move.IsThrowProjectile = true;
     }    
 
-    private bool hasEnemyOnWasherLine() {
+    private bool isShootingWasher() {
       foreach (Car carIter in world.Cars) {
         if (carIter.IsTeammate || carIter.IsFinishedTrack || carIter.Durability <= 1.0e-9) {
           continue;
         }
 
-        if (hasEnemyOnWasherLine(carIter)) {
+        if (isEnemyOnWasherLine(carIter)) {
           return true;
         }
       }
@@ -38,7 +38,7 @@ namespace RussianAICup2015Car.Sources {
       return false;
     }
 
-    private bool hasEnemyOnWasherLine(Car enemy) {
+    private bool isEnemyOnWasherLine(Car enemy) {
       Vector washerPos = new Vector(car.X, car.Y);
       Vector washerDir = Vector.sincos(car.Angle);
       Vector washerSpd = washerDir * game.WasherInitialSpeed;
@@ -78,23 +78,93 @@ namespace RussianAICup2015Car.Sources {
       return false;
     }
 
-    private bool hasEnemyOnTireLine() {
+    private bool isRunTire() {
+      PhysicCar self = null;
+      List<PhysicCar> their = new List<PhysicCar>();
+      List<PhysicCar> enemies = new List<PhysicCar>();
+
       foreach (Car carIter in world.Cars) {
-        if (carIter.IsTeammate || carIter.IsFinishedTrack || carIter.Durability <= 1.0e-9) {
-          continue;
+        PhysicCar physicCar = new PhysicCar(carIter, game);
+        if (carIter.IsTeammate) { 
+          their.Add(physicCar);
+        } else {
+          enemies.Add(physicCar);
         }
 
-        if (hasEnemyOnTireLine(carIter)) {
-          return true;
+         if (carIter.Id == car.Id) {
+           self = physicCar;
+          }
+      }
+
+      return isRunTire(self, their.ToArray(), enemies.ToArray());
+
+    }
+
+    private bool isRunTire(PhysicCar self, PhysicCar[] their, PhysicCar[] enemies) {
+      Logger.instance.Assert(null != self, "Self car is null.");
+
+      PhysicCar ignored = self;
+
+      Vector tirePos = self.Pos;
+      Vector tireSpd = self.Dir * game.TireInitialSpeed;
+      double minTireSpeed = game.TireInitialSpeed * game.TireDisappearSpeedFactor;
+
+      for (int i = 0; i < 200; i++) {
+        tirePos += tireSpd;
+
+        foreach (PhysicCar physicCar in their) {
+          physicCar.Iteration(1);
+
+          if (itersectTireWithCar(tirePos, tireSpd, physicCar)) {
+            if (ignored == physicCar) {
+              continue;
+            }
+
+            return false;
+          } else if (ignored == physicCar) {
+            ignored = null;
+          }
+        }
+
+        foreach (PhysicCar physicCar in enemies) {
+          physicCar.Iteration(1);
+
+          if (itersectTireWithCar(tirePos, tireSpd, physicCar)) {
+            return true;
+          }
+        }
+
+        Vector itersectWithMap = CollisionDetector.instance.IntersectCircleWithMap(tirePos, game.TireRadius);
+        if (null != itersectWithMap) {
+          tireSpd = calcTireSpeedAfterKick(tireSpd, (tirePos - itersectWithMap).Normalize());
+        }
+
+        if (tireSpd.Length < minTireSpeed) {
+          return false;
         }
       }
 
       return false;
-
     }
 
-    private bool hasEnemyOnTireLine(Car Enemy) {
-      return false;
+    private bool itersectTireWithCar(Vector tirePos, Vector tireSpd, PhysicCar car) {
+      return CollisionDetector.instance.IntersectCarWithCircle(car.Pos, car.Dir, tirePos, game.TireRadius);
+    }
+
+    private bool itersectTireWithSide(Vector tirePos, Vector tireSpd, PhysicCar car) {
+      return CollisionDetector.instance.IntersectCarWithCircle(car.Pos, car.Dir, tirePos, game.TireRadius);
+    }
+
+    private Vector calcTireSpeedAfterKick(Vector speed, Vector normal) {
+      const double momentumTransferFactor = 1;
+      double denominatorC = (speed.Negative().Cross(normal) / game.TireMass);
+      Vector denominatorV = speed.Perpendicular() * denominatorC;
+
+      double denominator = (1/game.TireMass) + normal.Dot(denominatorV);
+      double impulseChange = - (1 + momentumTransferFactor) * speed.Dot(normal) / denominator;
+      Vector vectorChange = normal * (impulseChange / game.TireMass);
+
+      return speed + vectorChange;
     }
   }
 }

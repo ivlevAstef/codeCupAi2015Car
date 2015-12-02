@@ -16,12 +16,10 @@ namespace RussianAICup2015Car.Sources {
 
     private Car car;
     private Game game;
-    private Map map;
 
-    public void setupEnvironment(Car car, Map map, Game game) {
+    public void setupEnvironment(Car car, Game game) {
       this.car = car;
       this.game = game;
-      this.map = map;
       oneLineWidth = (game.TrackTileSize - 2 * game.TrackTileMargin) / 4;
     }
 
@@ -128,44 +126,7 @@ namespace RussianAICup2015Car.Sources {
     }
 
     private bool checkSideCrash(PhysicCar car, Vector dirMove, Vector idealDir) {
-      int xTile = (int)(car.Pos.X / game.TrackTileSize);
-      int yTile = (int)(car.Pos.Y / game.TrackTileSize);
-      PointInt[] dirs = map.reverseDirsByPos(xTile, yTile);
-      if (null == dirs || 4 == dirs.Length/*undefined or empty*/) {
-        return false;
-      }
-
-      double sideRadius = game.TrackTileMargin * 1.05;
-      double distanceToSide = game.TrackTileSize * 0.5 - game.TrackTileMargin * 1.05;
-      double minDistanceToSide = distanceToSide - game.CarWidth * 0.5;
-
-      Vector center = new Vector(xTile + 0.5, yTile + 0.5) * game.TrackTileSize;
-      Vector distanceFromCenter = car.Pos - center;
-
-      //car near the center tile
-      if (Math.Abs(distanceFromCenter.X) < minDistanceToSide && Math.Abs(distanceFromCenter.Y) < minDistanceToSide) {
-        return false;
-      }
-
-      //edge
-      if (Math.Abs(distanceFromCenter.X) > minDistanceToSide && Math.Abs(distanceFromCenter.Y) > minDistanceToSide) {
-        Vector edge = center;
-        edge.X += Math.Sign(distanceFromCenter.X) * game.TrackTileSize * 0.5;
-        edge.Y += Math.Sign(distanceFromCenter.Y) * game.TrackTileSize * 0.5;
-
-        if (intersectCarWithCircle(car.Pos, car.Dir, edge, sideRadius)) {
-          return true;
-        }
-      }
-
-      foreach (PointInt dirInt in dirs) {
-        Vector dir = new Vector(dirInt.X, dirInt.Y);
-        if (intersectCarWithSide(car.Pos, car.Dir, dir, center + dir * distanceToSide)) {
-          return true;
-        }
-      }
-
-      return false;
+      return CollisionDetector.instance.IntersectCarWithMap(car.Pos, car.Dir);
     }
 
     private static double WheelTurnForEndZeroWheelTurn(Car car, Game game, double finalAngle) {
@@ -192,45 +153,6 @@ namespace RussianAICup2015Car.Sources {
       physicCar.Iteration(ticks);
 
       return physicCar;
-    }
-
-    ///Math
-    private double DistanceToLine(Vector point, Vector p1, Vector p2) {
-      Vector delta = p2 - p1;
-      Vector distanceP1 = point - p1;
-      double t = delta.Normalize().Dot(distanceP1);
-      t = Math.Max(0, Math.Min(t, 1));
-
-      Vector res = delta * t + p1;
-      return (res - point).Length;
-    } 
-
-    private bool intersectCarWithCircle(Vector pos, Vector dir, Vector center, double radius) {
-      Vector p1 = (dir * car.Width + dir.Perpendicular() * car.Height) * 0.5;
-      Vector p2 = (dir * car.Width + dir.Perpendicular() * -car.Height) * 0.5;
-      Vector p3 = (dir * -car.Width + dir.Perpendicular() * -car.Height) * 0.5;
-      Vector p4 = (dir * -car.Width + dir.Perpendicular() * car.Height) * 0.5;
-
-      double d = DistanceToLine(center, pos + p1, pos + p2);
-      d = Math.Min(d, DistanceToLine(center, pos + p2, pos + p3));
-      d = Math.Min(d, DistanceToLine(center, pos + p3, pos + p4));
-      d = Math.Min(d, DistanceToLine(center, pos + p4, pos + p1));
-
-      return d < radius;
-    }
-
-    private bool intersectCarWithSide(Vector pos, Vector dir, Vector sidePerp, Vector sidePos) {
-      Vector p1 = (dir * car.Width + dir.Perpendicular() * car.Height) * 0.5;
-      Vector p2 = (dir * car.Width + dir.Perpendicular() * -car.Height) * 0.5;
-      Vector p3 = (dir * -car.Width + dir.Perpendicular() * -car.Height) * 0.5;
-      Vector p4 = (dir * -car.Width + dir.Perpendicular() * car.Height) * 0.5;
-
-      double p1Sign = (p1 + pos - sidePos).Dot(sidePerp);
-      double p2Sign = (p2 + pos - sidePos).Dot(sidePerp);
-      double p3Sign = (p3 + pos - sidePos).Dot(sidePerp);
-      double p4Sign = (p4 + pos - sidePos).Dot(sidePerp);
-
-      return !(p1Sign < 0 && p2Sign < 0 && p3Sign < 0 && p4Sign < 0);
     }
   }
 }

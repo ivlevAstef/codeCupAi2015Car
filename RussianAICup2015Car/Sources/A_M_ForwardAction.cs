@@ -16,7 +16,7 @@ namespace RussianAICup2015Car.Sources {
       Vector endPos = EndSidePos();
 
       PhysicMoveCalculator calculator = new PhysicMoveCalculator();
-      calculator.setupEnvironment(car, map, game);
+      calculator.setupEnvironment(car, game);
 
       Vector dir = new Vector(dirMove.X, dirMove.Y);
 

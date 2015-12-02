@@ -20,7 +20,7 @@ namespace RussianAICup2015Car.Sources {
       Vector endPos = GetWayEnd(path[1].Pos, dirEnd);
 
       PhysicMoveCalculator calculator = new PhysicMoveCalculator();
-      calculator.setupEnvironment(car, map, game);
+      calculator.setupEnvironment(car, game);
 
       Move needMove = calculator.calculateMove(endPos, new Vector(dirMove.X, dirMove.Y), new Vector(dirEnd.X, dirEnd.Y));
       move.IsBrake = needMove.IsBrake;

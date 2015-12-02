@@ -28,7 +28,7 @@ namespace RussianAICup2015Car.Sources {
       //endPos = endPos + new Vector(dirMove.X, dirMove.Y) * game.TrackTileSize * 0.1;
 
       PhysicMoveCalculator calculator = new PhysicMoveCalculator();
-      calculator.setupEnvironment(car, map, game);
+      calculator.setupEnvironment(car, game);
 
       Vector dir = new Vector(dirEnd.X, dirEnd.Y);
       Move needMove = calculator.calculateMove(endPos, new Vector(dirMove.X, dirMove.Y), dir, 0.03);

@@ -52,6 +52,7 @@
     <Compile Include="Sources\A_IAction.cs" />
     <Compile Include="Sources\A_M_PreTurnAction.cs" />
     <Compile Include="Sources\A_M_SnakePreEnd.cs" />
+    <Compile Include="Sources\CollisionDetector.cs" />
     <Compile Include="Sources\Constant.cs" />
     <Compile Include="Sources\Extensions.cs" />
     <Compile Include="Sources\Logger.cs" />
