@@ -10,6 +10,7 @@ namespace RussianAICup2015Car.Sources {
     public double EnginePower { get { return enginePower; } }
 
     public Vector Pos { get { return pos; } }
+    public Vector LastPos { get { return lastPos; } }
     public Vector Speed { get { return spd; } }
     public Vector Dir { get { return dir; } }
     public double Angle { get { return angle; } }
@@ -26,6 +27,7 @@ namespace RussianAICup2015Car.Sources {
     private double wheelTurn;
     private double enginePower;
 
+    private Vector lastPos;
     private Vector pos;
     private Vector spd;
     private Vector dir;
@@ -64,6 +66,7 @@ namespace RussianAICup2015Car.Sources {
       idealEnginePower = physicCar.idealEnginePower;
 
       pos = physicCar.pos;
+      lastPos = physicCar.lastPos;
       spd = physicCar.spd;
       angle = physicCar.angle;
       dir = physicCar.dir;
@@ -109,6 +112,7 @@ namespace RussianAICup2015Car.Sources {
 
         Vector accel = dir * (enginePower * brake * carAccel);
 
+        lastPos = pos;
         pos = pos + spd * dt;
         spd = (spd + accel) * frictionMove;
         spd = spd - dir * limit(spd.Dot(dir), frictionLenght) - dir.PerpendicularLeft() * limit(spd.Cross(dir), frictionCross);
@@ -122,6 +126,7 @@ namespace RussianAICup2015Car.Sources {
       setEnginePower(enginePower);
 
       pos = new Vector(car.X, car.Y);
+      lastPos = new Vector(car.X, car.Y);
       spd = new Vector(car.SpeedX, car.SpeedY);
       angle = car.Angle;
       dir = Vector.sincos(angle);

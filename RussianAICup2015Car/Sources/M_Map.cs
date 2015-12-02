@@ -93,7 +93,7 @@ namespace RussianAICup2015Car.Sources {
 
     public PointInt[] reverseDirsByPos(int x, int y) {
       List<PointInt> result = new List<PointInt> { DirLeft, DirRight, DirUp, DirDown };
-      PointInt[] dirs = directionsByTileType[world.TilesXY[x][y]];
+      PointInt[] dirs = dirsByPos(x,y);
 
       result.RemoveAll(dir => containsDir(dir, dirs));
 

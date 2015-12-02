@@ -25,26 +25,30 @@ namespace RussianAICup2015Car.Sources {
       oneLineWidth = (game.TrackTileSize - 2 * game.TrackTileMargin) / 4;
     }
 
-    public Move calculateMove(Vector idealPos, Vector dirMove, Vector idealDir, bool magnifiedPos = false) {
-      Dictionary<MovedEvent, PhysicCar> events = calculateEvents(idealPos, dirMove, idealDir);
+    public Move calculateMove(Vector idealPos, Vector dirMove, Vector idealDir) {
+      Dictionary<MovedEvent, Tuple<PhysicCar, int>> events = calculateEvents(idealPos, dirMove, idealDir);
 
       Move result = new Move();
       result.EnginePower = 1.0;
       result.WheelTurn = WheelTurnForEndZeroWheelTurn(car, game, Math.Atan2(dirMove.Y, dirMove.X));
 
       if (events.ContainsKey(MovedEvent.PassageLine)) {
-        Vector posSpeedReach = events.ContainsKey(MovedEvent.SpeedReach) ? events[MovedEvent.SpeedReach].Pos : null;
+        Vector posSpeedReach = events.ContainsKey(MovedEvent.SpeedReach) ? events[MovedEvent.SpeedReach].Item1.Pos : null;
 
         if (null == posSpeedReach || (posSpeedReach - idealPos).Dot(dirMove) > 1.25 * oneLineWidth) {
           result.IsBrake = car.Speed() > 8;
         }
+
+        int tickToPassageLine = events[MovedEvent.PassageLine].Item2;
+        int tickToAngleReach = events.ContainsKey(MovedEvent.SpeedReach) ? events[MovedEvent.SpeedReach].Item2 : maxIterationCount;
+        bool magnifiedPos = tickToAngleReach < tickToPassageLine;
 
         double idealAngle = magnifiedPos ? car.GetAbsoluteAngleTo(idealPos.X, idealPos.Y) : Math.Atan2(idealDir.Y, idealDir.X);
         result.WheelTurn = WheelTurnForEndZeroWheelTurn(car, game, idealAngle);
       }
 
       if (events.ContainsKey(MovedEvent.SideCrash)) {
-        Vector pos = events[MovedEvent.SideCrash].Pos;
+        Vector pos = events[MovedEvent.SideCrash].Item1.Pos;
         Vector sideDir = (pos - new Vector(car.X, car.Y));
         Vector improvedSideDir = (pos + dirMove - new Vector(car.X, car.Y));
         double angle = improvedSideDir.Angle.AngleDeviation(sideDir.Angle);
@@ -55,25 +59,30 @@ namespace RussianAICup2015Car.Sources {
       return result;
     }
 
-    private Dictionary<MovedEvent, PhysicCar> calculateEvents(Vector idealPos, Vector dirMove, Vector idealDir) {
-      Dictionary<MovedEvent, PhysicCar> result = new Dictionary<MovedEvent, PhysicCar>();
+    private Dictionary<MovedEvent, Tuple<PhysicCar, int>> calculateEvents(Vector idealPos, Vector dirMove, Vector idealDir) {
+      Dictionary<MovedEvent, Tuple<PhysicCar, int>> result = new Dictionary<MovedEvent, Tuple<PhysicCar, int>>();
 
       double idealAngle = Math.Atan2(idealDir.Y, idealDir.X);
       PhysicCar physicCar = new PhysicCar(car, game);
       physicCar.setEnginePower(1.0);
 
       for (int i = 0; i < maxIterationCount; i++) {
-        if (!result.ContainsKey(MovedEvent.PassageLine) && checkPassageLine(physicCar, idealPos, dirMove)) {
-          result[MovedEvent.PassageLine] = new PhysicCar(physicCar);
+        bool passageLine = checkPassageLine(physicCar, idealPos, dirMove);
+        bool angleReach = checkAngleReach(physicCar, idealAngle);
+        bool speedReach = checkSpeedReach(physicCar);
+        bool sideCrash = checkSideCrash(physicCar, dirMove, idealDir);
+
+        if (!result.ContainsKey(MovedEvent.PassageLine) && passageLine) {
+          result[MovedEvent.PassageLine] = new Tuple<PhysicCar,int>(new PhysicCar(physicCar), i);
         }
-        if (!result.ContainsKey(MovedEvent.AngleReach) && checkAngleReach(physicCar, idealAngle)) {
-          result[MovedEvent.AngleReach] = new PhysicCar(physicCar);
+        if (!result.ContainsKey(MovedEvent.AngleReach) && angleReach) {
+          result[MovedEvent.AngleReach] = new Tuple<PhysicCar,int>(new PhysicCar(physicCar), i);
         }
-        if (!result.ContainsKey(MovedEvent.SpeedReach) && checkAngleReach(physicCar, idealAngle) && checkSpeedReach(physicCar)) {
-          result[MovedEvent.SpeedReach] = new PhysicCar(physicCar);
+        if (!result.ContainsKey(MovedEvent.SpeedReach) && angleReach && speedReach) {
+          result[MovedEvent.SpeedReach] = new Tuple<PhysicCar,int>(new PhysicCar(physicCar), i);
         }
-        if (!result.ContainsKey(MovedEvent.PassageLine) && !result.ContainsKey(MovedEvent.SideCrash) && checkSideCrash(physicCar, dirMove, idealDir)) {
-          result[MovedEvent.SideCrash] = new PhysicCar(physicCar);
+        if (!result.ContainsKey(MovedEvent.PassageLine) && !result.ContainsKey(MovedEvent.SideCrash) && sideCrash) {
+          result[MovedEvent.SideCrash] = new Tuple<PhysicCar, int>(new PhysicCar(physicCar), i);
         }
 
         if (result.ContainsKey(MovedEvent.PassageLine) && result.ContainsKey(MovedEvent.AngleReach) && result.ContainsKey(MovedEvent.SpeedReach)) {
@@ -97,7 +106,7 @@ namespace RussianAICup2015Car.Sources {
     }
 
     private bool checkPassageLine(PhysicCar car, Vector idealPos, Vector dirMove) {
-      return Math.Abs((car.Pos - idealPos).Dot(dirMove)) < oneLineWidth * 0.25;
+      return Math.Sign((car.Pos - idealPos).Dot(dirMove)) != Math.Sign((car.LastPos - idealPos).Dot(dirMove));
     }
 
     private bool checkAngleReach(PhysicCar car, double idealAngle) {
