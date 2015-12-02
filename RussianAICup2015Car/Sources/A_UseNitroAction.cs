@@ -3,12 +3,7 @@ using System.Collections.Generic;
 
 namespace RussianAICup2015Car.Sources {
   class A_UseNitroAction : A_BaseAction {
-    private PointInt lastPos = null;
-
     public override bool valid() {
-      bool newTile = null != lastPos && !lastPos.Equals(path[0].Pos);
-      lastPos = path[0].Pos;
-
       if (car.Speed() > 30) {
         return false;
       }
@@ -17,7 +12,7 @@ namespace RussianAICup2015Car.Sources {
         return false;
       }
 
-      return newTile;
+      return true;
     }
 
     public override void execute(Move move) {

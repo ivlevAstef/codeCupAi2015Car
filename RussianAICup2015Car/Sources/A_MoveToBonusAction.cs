@@ -11,7 +11,7 @@ namespace RussianAICup2015Car.Sources {
 
       findedBonus = findBonus();
 
-      return null != findedBonus && angleToBonus(findedBonus) < Math.PI / 9;
+      return null != findedBonus;
     }
 
     public override void execute(Move move) {
@@ -26,7 +26,7 @@ namespace RussianAICup2015Car.Sources {
 
       Vector dir = new Vector(dirMove.X, dirMove.Y);
 
-      Move needMove = calculator.calculateMove(endPos, dir, dir, 0.1);
+      Move needMove = calculator.calculateMove(endPos, dir, dir, 0.05);
       move.EnginePower = needMove.EnginePower;
       move.WheelTurn = needMove.WheelTurn;
     }
@@ -36,24 +36,6 @@ namespace RussianAICup2015Car.Sources {
         ActionType.PreTurn,
         ActionType.Shooting
       };
-    }
-
-    private double angleToBonus(Bonus bonus) {
-      Vector dirMove = new Vector(path[0].DirOut.X, path[0].DirOut.Y);
-      Vector center = new Vector((path[0].Pos.X + 0.5), (path[0].Pos.Y + 0.5)) * game.TrackTileSize;
-
-      double dirAngle = Math.Atan2(dirMove.Y, dirMove.X);
-
-      double centerX = car.X * Math.Abs(dirMove.X) + center.X * Math.Abs(dirMove.Y);
-      double centerY = car.Y * Math.Abs(dirMove.Y) + center.Y * Math.Abs(dirMove.X);
-
-      double centerAngle = new Vector(centerX, centerY).GetAngleTo(bonus.X, bonus.Y, dirAngle);
-      double sign = Math.Sign(centerAngle);
-
-      double x = bonus.X + sign * dirMove.Y * (bonus.Height * 0.25 + car.Height * 0.5);
-      double y = bonus.Y - sign * dirMove.X * (bonus.Height * 0.25 + car.Height * 0.5);
-
-      return car.GetAngleTo(x, y);
     }
 
     private Bonus findBonus() {
@@ -72,7 +54,7 @@ namespace RussianAICup2015Car.Sources {
       }
 
       double speed = car.Speed();
-      double maxAngle = Math.PI / (9 * Math.Min(0.75, speed / (game.TrackTileSize / 80)));
+      double maxAngle = Math.PI / 6;
 
       Bonus priorityBonus = null;
       foreach (Bonus bonus in world.Bonuses) {

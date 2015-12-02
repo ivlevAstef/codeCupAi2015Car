@@ -33,7 +33,7 @@ namespace RussianAICup2015Car.Sources {
         ActionType.SnakePreEnd
       };
 
-      if (validSnakeWithOffset(1) && validSnakeWithOffset(2)) {
+      if (validSnakeWithOffset(-1) && validSnakeWithOffset(1) && validSnakeWithOffset(2)) {
         result.Add(ActionType.UseNitro);
       }
 

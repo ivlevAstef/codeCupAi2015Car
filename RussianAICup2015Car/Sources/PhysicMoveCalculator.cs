@@ -36,7 +36,7 @@ namespace RussianAICup2015Car.Sources {
         Vector posSpeedReach = events.ContainsKey(MovedEvent.SpeedReach) ? events[MovedEvent.SpeedReach].Item1.Pos : null;
 
         if (null == posSpeedReach || (posSpeedReach - idealPos).Dot(dirMove) > lineCount * oneLineWidth) {
-          result.IsBrake = car.Speed() > 8;
+          result.IsBrake = car.Speed() > 9;
         }
 
         int tickToPassageLine = events[MovedEvent.PassageLine].Item2;
@@ -53,9 +53,13 @@ namespace RussianAICup2015Car.Sources {
         Vector improvedSideDir = (pos + dirMove - new Vector(car.X, car.Y));
         double angle = improvedSideDir.Angle.AngleDeviation(sideDir.Angle);
 
-        bool nearSide = Math.Abs(sideDir.Dot(dirMove.Perpendicular())) < 5;
+        bool nearSide = Math.Abs(sideDir.Dot(dirMove.Perpendicular())) < 10;
         if (!nearSide) {
           result.WheelTurn = car.WheelTurn + Math.Sign(angle) * game.CarWheelTurnChangePerTick;
+        }
+
+        if (events[MovedEvent.SideCrash].Item2 < 10) {
+          result.IsBrake = car.Speed() > 9;
         }
       }
 
@@ -131,8 +135,8 @@ namespace RussianAICup2015Car.Sources {
         return false;
       }
 
-      double sideRadius = game.TrackTileMargin;
-      double distanceToSide = game.TrackTileSize * 0.5 - game.TrackTileMargin;
+      double sideRadius = game.TrackTileMargin * 1.05;
+      double distanceToSide = game.TrackTileSize * 0.5 - game.TrackTileMargin * 1.05;
       double minDistanceToSide = distanceToSide - game.CarWidth * 0.5;
 
       Vector center = new Vector(xTile + 0.5, yTile + 0.5) * game.TrackTileSize;

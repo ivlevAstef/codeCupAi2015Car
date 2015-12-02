@@ -25,7 +25,7 @@ namespace RussianAICup2015Car.Sources {
       PointInt dirMove = path[0].DirOut;
       PointInt dirEnd = path[2].DirOut;
 
-      Vector endPos = GetWayEnd(path[2].Pos, dirEnd);
+      Vector endPos = GetWayEnd(path[2].Pos, new PointInt(0));
 
       PhysicMoveCalculator calculator = new PhysicMoveCalculator();
       calculator.setupEnvironment(car, map, game);
