@@ -54,12 +54,6 @@ namespace RussianAICup2015Car.Sources {
       }
 
       double speed = car.Speed();
-      if (null != path && null != path[0].DirOut) {
-        Vector dirMove = new Vector(path[0].DirOut.X, path[0].DirOut.X);
-        Vector carDir = new Vector(car.SpeedX, car.SpeedY);
-        speed = Math.Max(0, carDir.Dot(dirMove));
-      }
-
       int mergeCells = Math.Min(3, (int)(speed / 6));//18
 
       transition = mergePath(lastCell, transition, cell, mergeCells, 0);
