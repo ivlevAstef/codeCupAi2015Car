@@ -61,8 +61,8 @@ namespace RussianAICup2015Car.Sources {
 
           bool isParallel = Math.Abs(Vector.sincos(car.Angle).Dot(sideNormal)) < 0.015;//10 degrees
 
-          if (!isParallel && events[MovedEvent.SideCrash].Item2 < 10 && speedSign > 0) {
-            result.IsBrake = car.Speed() > 9;
+          if (!isParallel && events[MovedEvent.SideCrash].Item2 < 20 && speedSign > 0) {
+            result.IsBrake = car.Speed() > 8;
           }
         }
       }
