@@ -36,6 +36,10 @@ namespace RussianAICup2015Car.Sources {
         result.Add(ActionType.UseNitro);
       }
 
+      if (nearCrossRoad()) {
+        result.Add(ActionType.AvoidSideHit);
+      }
+
       return result;
     }
 
@@ -51,6 +55,18 @@ namespace RussianAICup2015Car.Sources {
 
       return straightCount >= 3;
     }
+
+    private bool nearCrossRoad() {
+      for (int i = 1; i < Math.Min(3, path.Count); i++) {
+        if (path[i].DirOuts.Length == 3) {//because one dir it's IN
+          return true;
+        }
+      }
+
+      return false;
+    }
+
+
     private Vector EndSidePos() {
       PointInt pos = path[0].Pos;
       PointInt dir = path[0].DirOut;

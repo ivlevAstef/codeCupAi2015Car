@@ -23,7 +23,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
 
       { ActionType.MoveToBonus, new A_MoveToBonusAction()},
       //{ ActionType.Overtake, new A_OvertakeAction()},
-      //{ ActionType.AvoidSideHit, new ()},
+      { ActionType.AvoidSideHit, new A_AvoidSideHit()},
       //{ ActionType.AvoidWindShieldHit, new ()},
 
       { ActionType.Shooting, new A_ShootingAction()},
