@@ -39,7 +39,7 @@ namespace RussianAICup2015Car.Sources {
     }
 
     private Bonus findBonus() {
-      PointInt dir = path[0].DirOut;
+      Vector dir = new Vector(path[0].DirOut.X, path[0].DirOut.Y);
 
       Dictionary<BonusType, int> priority = new Dictionary<BonusType, int> {
         { BonusType.AmmoCrate , Math.Min(10, 70 - 10 * car.ProjectileCount) },
@@ -54,23 +54,22 @@ namespace RussianAICup2015Car.Sources {
       }
 
       double speed = car.Speed();
-      double maxAngle = Math.PI / 2;
+      Vector carPos = new Vector(car.X, car.Y);
 
       Bonus priorityBonus = null;
       foreach (Bonus bonus in world.Bonuses) {
         double distance = car.GetDistanceTo(bonus);
-        if (distance > game.TrackTileSize * 4.0) {
+        if (distance > game.TrackTileSize * 3.0) {
           continue;
         }
 
-        double angle = car.GetAbsoluteAngleTo(bonus.X, bonus.Y, dir.X, dir.Y);
-        if (Math.Abs(angle) > maxAngle) {
+        Vector bonusPos = new Vector(bonus.X, bonus.Y);
+
+        if ((bonusPos - carPos).Dot(dir) < 0) {//back
           continue;
         }
 
-        PointInt selfTile = tilePos(car.X, car.Y);
-        PointInt bonusTile = tilePos(bonus.X, bonus.Y);
-        if (!selfTile.Equals(bonusTile) && !(selfTile + dir).Equals(bonusTile)) {
+        if (!isNextTile(tilePos(bonus.X, bonus.Y))) {
           continue;
         }
 
@@ -80,6 +79,15 @@ namespace RussianAICup2015Car.Sources {
       }
 
       return priorityBonus;
+    }
+
+    private bool isNextTile(PointInt checkTile) {
+      for (int i = 0; i < Math.Min(3, path.Count); i++) {
+        if (path[i].Equals(checkTile)) {
+          return true;
+        }
+      }
+      return false;
     }
 
     private PointInt tilePos(double x, double y) {
