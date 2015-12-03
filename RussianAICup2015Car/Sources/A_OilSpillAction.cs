@@ -9,10 +9,6 @@ namespace RussianAICup2015Car.Sources {
         return false;
       }
 
-      if (Math.Abs(car.AngularSpeed) < 0.02) {
-        return false;
-      }
-
       if (isFindAroundOils()) {
         return false;
       }
@@ -25,17 +21,20 @@ namespace RussianAICup2015Car.Sources {
     }
 
     private Vector oilCenter() {
+      Vector backSide = Vector.sincos(car.Angle) * (car.Width * 0.5 + game.OilSlickInitialRange);
+
+      return new Vector(car.X, car.Y) - backSide;
+    }
+
+    private Vector carTileCenter() {
       double centerX = (Math.Floor(car.X / game.TrackTileSize) + 0.5) * game.TrackTileSize;
       double centerY = (Math.Floor(car.Y / game.TrackTileSize) + 0.5) * game.TrackTileSize;
-      double backsideX = -Math.Cos(car.Angle) * (car.Width * 0.5 + game.OilSlickInitialRange);
-      double backsideY = -Math.Sin(car.Angle) * (car.Width * 0.5 + game.OilSlickInitialRange);
-
-      return new Vector(centerX + backsideX, centerY + backsideY);
+      return new Vector(centerX , centerY);
     }
 
     private bool centering() {
-      Vector center = oilCenter();
-      return car.GetDistanceTo(center.X, center.Y) < 4 * game.OilSlickRadius;
+      Vector dirMove = new Vector(path[0].DirIn.X,path[0].DirIn.Y);
+      return Math.Abs((carTileCenter() - oilCenter()).Cross(dirMove)) < game.OilSlickRadius * 0.25;
     }
 
     private bool isFindAroundOils() {
