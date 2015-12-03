@@ -128,7 +128,7 @@ namespace RussianAICup2015Car.Sources {
           physicCar.Iteration(1);
 
           if (itersectTireWithCar(tirePos, tireSpd, physicCar, 0.5)) {
-             return true;
+             return physicCar.Car.Durability > 1.0e-9 && !physicCar.Car.IsFinishedTrack;
           }
         }
 

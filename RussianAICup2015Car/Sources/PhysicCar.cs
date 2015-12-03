@@ -18,6 +18,8 @@ namespace RussianAICup2015Car.Sources {
     public double Angle { get { return angle; } }
     public double AngularSpeed { get { return angleSpeed; } }
 
+    public Car Car { get { return car; } }
+
     private Car car;
     private Game game;
 
