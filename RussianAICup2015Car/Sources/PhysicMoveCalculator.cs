@@ -55,16 +55,16 @@ namespace RussianAICup2015Car.Sources {
         Vector sideNormal = events[MovedEvent.SideCrash].Item3 as Vector;
         Logger.instance.Assert(null != sideNormal, "Can't get side normal");
 
-        double angle = physicCar.Angle.AngleDeviation(sideNormal.Angle);
+        double angle = dirMove.Angle.AngleDeviation(sideNormal.Angle);
+        if (Math.PI / 4 < Math.Abs(angle) && Math.Abs(angle) < 3 * Math.PI / 4) {
+          result.WheelTurn = car.WheelTurn - speedSign * Math.Sign(angle) * game.CarWheelTurnChangePerTick;
 
-        result.WheelTurn = car.WheelTurn - speedSign * Math.Sign(angle) * game.CarWheelTurnChangePerTick;
+          bool isParallel = Math.Abs(Vector.sincos(car.Angle).Dot(sideNormal)) < 0.015;//10 degrees
 
-        bool isParallel = Math.Abs(Vector.sincos(car.Angle).Dot(sideNormal)) < 0.015;//10 degrees
-
-        if (!isParallel && events[MovedEvent.SideCrash].Item2 < 10 && speedSign > 0) {
-          result.IsBrake = car.Speed() > 9;
+          if (!isParallel && events[MovedEvent.SideCrash].Item2 < 10 && speedSign > 0) {
+            result.IsBrake = car.Speed() > 9;
+          }
         }
-
       }
 
       return result;

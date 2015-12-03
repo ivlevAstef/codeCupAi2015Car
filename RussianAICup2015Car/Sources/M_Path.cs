@@ -39,6 +39,7 @@ namespace RussianAICup2015Car.Sources {
     private CellTransition transition = null;
     private Cell[] path = null;
     private Cell lastCell = null;
+    private PointInt lastDir = null;
 
     public void SetupEnvironment(Car car, World world, Game game, Map.Cell cell) {
       this.car = car;
@@ -50,13 +51,23 @@ namespace RussianAICup2015Car.Sources {
     public void CalculatePath() {
       if (null != transition && !transition.Cell.Pos.Equals(cell.Pos)) {
         lastCell = transition.Cell;
+
+        PointInt nextPos = getNextPos(cell);
+        if (nextPos.Equals(lastCell)) {
+          lastCell = null;
+          lastDir = nextPos - cell.Pos;
+        } else {
+          lastDir = cell.Pos - lastCell.Pos;
+        }
+
         transition = transition.Next;
       }
 
       double speed = car.Speed();
       int mergeCells = Math.Min(3, (int)(speed / 6));//18
 
-      transition = mergePath(lastCell, transition, cell, mergeCells, 0);
+      lastDir = lastDir ?? currentDir();
+      transition = mergePath(lastCell, lastDir, transition, cell, mergeCells, 0);
 
       Logger.instance.Assert(null != transition, "Can't find path.");
 
@@ -64,12 +75,24 @@ namespace RussianAICup2015Car.Sources {
       Logger.instance.Assert(3 <= path.Length, "Can't find full path.");
     }
 
-    private CellTransition mergePath(Cell lastCell, CellTransition iter, Map.Cell mapCell, int depthCount, int depth) {
+    private PointInt getNextPos(Map.Cell mapCell) {
+      Tuple<Map.Cell, int> next = null;
+      foreach (Tuple<Map.Cell, int> neighboring in mapCell.NeighboringCells) {
+        if (null == next || neighboring.Item2 < next.Item2) {
+          next = neighboring;
+        }
+      }
+
+      return next.Item1.Pos;
+    }
+
+    private CellTransition mergePath(Cell lastCell, PointInt dir, CellTransition iter, Map.Cell mapCell, int depthCount, int depth) {
       if (null != iter && depthCount > 0) {
         if (iter.Cell.Pos.Equals(mapCell.Pos) && null != iter.Next) {
           foreach (Tuple<Map.Cell, int> neighboring in mapCell.NeighboringCells) {
             if (iter.Next.Cell.Pos.Equals(neighboring.Item1.Pos)) {
-              iter.Next = mergePath(iter.Cell, iter.Next, neighboring.Item1, depthCount - 1, depth + 1);
+              PointInt nextDir = iter.Next.Cell.Pos - iter.Cell.Pos;
+              iter.Next = mergePath(iter.Cell, nextDir, iter.Next, neighboring.Item1, depthCount - 1, depth + 1);
               return iter;
             }
           }
@@ -77,11 +100,7 @@ namespace RussianAICup2015Car.Sources {
       }
 
       HashSet<Map.Cell> visited = new HashSet<Map.Cell>();
-      if (null != lastCell) {
-        PointInt dir = mapCell.Pos - lastCell.Pos;
-        return calculatePath(lastCell, mapCell, dir, visited, 8 - depth);
-      }
-      return calculatePath(null, mapCell, currentDir(), visited, 8 - depth);
+      return calculatePath(lastCell, mapCell, dir, visited, 8 - depth);
     }
 
     public int Count { get { return path.Length; } }
@@ -169,32 +188,13 @@ namespace RussianAICup2015Car.Sources {
       return result;
     }
 
-    private bool equalsCellTransition(Cell cell, CellTransition transition) {
-      return null != cell && null != transition && 
-         cell.Pos.Equals(transition.Cell.Pos) &&
-         cell.DirIn.Equals(transition.Cell.DirIn) &&
-         cell.DirOut.Equals(transition.Cell.DirOut);
-    }
-
-    private CellTransition lastTransition(Cell lastCell, Cell cell, CellTransition transition) {
-      if (null == transition) {
-        return null;
-      }
-
-      if (equalsCellTransition(lastCell, transition) && equalsCellTransition(cell, transition.Next)) {
-        return transition;
-      }
-
-      return lastTransition(lastCell, cell, transition.Next);
-    }
-
     private double cellPriority(Cell cell) {
       double priority = 0;
 
       foreach (Bonus bonus in world.Bonuses) {
         PointInt pos = new PointInt((int)(bonus.X/game.TrackTileSize), (int)(bonus.Y/game.TrackTileSize));
         if (pos.Equals(cell.Pos)) {
-          priority += 0.35;
+          priority += 0.1;
         }
       }
 
