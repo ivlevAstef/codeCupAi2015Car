@@ -48,6 +48,10 @@ namespace RussianAICup2015Car.Sources {
       return new PointInt(p1.X - p2.X, p1.Y - p2.Y);
     }
 
+    public static PointInt operator *(PointInt p1, PointInt p2) {
+      return new PointInt(p1.X * p2.X, p1.Y * p2.Y);
+    }
+
     public PointInt Negative() {
       return new PointInt(-X, -Y);
     }

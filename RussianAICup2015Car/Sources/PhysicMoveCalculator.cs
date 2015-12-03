@@ -16,19 +16,23 @@ namespace RussianAICup2015Car.Sources {
 
     private Car car;
     private Game game;
+    private World world;
 
-    public void setupEnvironment(Car car, Game game) {
+    public void setupEnvironment(Car car, Game game, World world) {
       this.car = car;
       this.game = game;
+      this.world = world;
       oneLineWidth = (game.TrackTileSize - 2 * game.TrackTileMargin) / 4;
     }
 
     public Move calculateMove(Vector idealPos, Vector dirMove, Vector idealDir, double lineCount = 1.25) {
-      Dictionary<MovedEvent, Tuple<PhysicCar, int>> events = calculateEvents(idealPos, dirMove, idealDir);
+      Dictionary<MovedEvent, Tuple<PhysicCar, int, object>> events = calculateEvents(idealPos, dirMove, idealDir);
+
+      double speedSign = Math.Sign(Vector.sincos(car.Angle).Dot(new Vector(car.SpeedX, car.SpeedY)));
 
       Move result = new Move();
       result.EnginePower = 1.0;
-      result.WheelTurn = WheelTurnForEndZeroWheelTurn(car, game, Math.Atan2(dirMove.Y, dirMove.X));
+      result.WheelTurn = WheelTurnForEndZeroWheelTurn(car, game, Math.Atan2(dirMove.Y, dirMove.X), speedSign);
 
       if (events.ContainsKey(MovedEvent.PassageLine)) {
         Vector posSpeedReach = events.ContainsKey(MovedEvent.SpeedReach) ? events[MovedEvent.SpeedReach].Item1.Pos : null;
@@ -38,56 +42,64 @@ namespace RussianAICup2015Car.Sources {
         }
 
         int tickToPassageLine = events[MovedEvent.PassageLine].Item2;
-        int tickToAngleReach = events.ContainsKey(MovedEvent.SpeedReach) ? events[MovedEvent.SpeedReach].Item2 : maxIterationCount;
-        bool magnifiedPos = tickToAngleReach < tickToPassageLine;
+        int tickToSpeedReach = events.ContainsKey(MovedEvent.SpeedReach) ? events[MovedEvent.SpeedReach].Item2 : maxIterationCount;
+        bool magnifiedPos = tickToSpeedReach < tickToPassageLine;
 
         double idealAngle = magnifiedPos ? car.GetAbsoluteAngleTo(idealPos.X, idealPos.Y) : Math.Atan2(idealDir.Y, idealDir.X);
-        result.WheelTurn = WheelTurnForEndZeroWheelTurn(car, game, idealAngle);
+        result.WheelTurn = WheelTurnForEndZeroWheelTurn(car, game, idealAngle, speedSign);
       }
 
       if (events.ContainsKey(MovedEvent.SideCrash)) {
-        Vector pos = events[MovedEvent.SideCrash].Item1.Pos;
-        Vector sideDir = (pos - new Vector(car.X, car.Y));
-        Vector improvedSideDir = (pos + dirMove - new Vector(car.X, car.Y));
-        double angle = improvedSideDir.Angle.AngleDeviation(sideDir.Angle);
+        PhysicCar physicCar = events[MovedEvent.SideCrash].Item1;
+        Vector pos = physicCar.Pos;
+        Vector sideNormal = events[MovedEvent.SideCrash].Item3 as Vector;
+        Logger.instance.Assert(null != sideNormal, "Can't get side normal");
 
-        bool nearSide = Math.Abs(sideDir.Dot(dirMove.Perpendicular())) < 10;
-        if (!nearSide) {
-          result.WheelTurn = car.WheelTurn + Math.Sign(angle) * game.CarWheelTurnChangePerTick;
-        }
+        double angle = physicCar.Angle.AngleDeviation(sideNormal.Angle);
 
-        if (events[MovedEvent.SideCrash].Item2 < 10) {
+        result.WheelTurn = car.WheelTurn - speedSign * Math.Sign(angle) * game.CarWheelTurnChangePerTick;
+
+        bool isParallel = Math.Abs(Vector.sincos(car.Angle).Dot(sideNormal)) < 0.015;//10 degrees
+
+        if (!isParallel && events[MovedEvent.SideCrash].Item2 < 10 && speedSign > 0) {
           result.IsBrake = car.Speed() > 9;
         }
+
       }
 
       return result;
     }
 
-    private Dictionary<MovedEvent, Tuple<PhysicCar, int>> calculateEvents(Vector idealPos, Vector dirMove, Vector idealDir) {
-      Dictionary<MovedEvent, Tuple<PhysicCar, int>> result = new Dictionary<MovedEvent, Tuple<PhysicCar, int>>();
+    private Dictionary<MovedEvent, Tuple<PhysicCar, int, object>> calculateEvents(Vector idealPos, Vector dirMove, Vector idealDir) {
+      Dictionary<MovedEvent, Tuple<PhysicCar, int, object>> result = new Dictionary<MovedEvent, Tuple<PhysicCar, int, object>>();
 
-      double idealAngle = Math.Atan2(idealDir.Y, idealDir.X);
       PhysicCar physicCar = new PhysicCar(car, game);
       physicCar.setEnginePower(1.0);
 
       for (int i = 0; i < maxIterationCount; i++) {
+        double idealAngle = Math.Atan2(idealDir.Y, idealDir.X);
+        double speedSign = Math.Sign(physicCar.Speed.Dot(physicCar.Dir));
+        if (speedSign < 0) {
+          idealAngle = Math.Atan2(dirMove.Y, dirMove.X);
+        }
+
         bool passageLine = checkPassageLine(physicCar, idealPos, dirMove);
         bool angleReach = checkAngleReach(physicCar, idealAngle);
         bool speedReach = checkSpeedReach(physicCar);
-        bool sideCrash = checkSideCrash(physicCar, dirMove, idealDir);
+        Vector sideCrashNormal = checkSideCrashRetNormal(physicCar, idealPos, new PointInt((int)Math.Round(dirMove.X), (int)Math.Round(dirMove.Y)));
+        bool sideCrash = null != sideCrashNormal;
 
         if (!result.ContainsKey(MovedEvent.PassageLine) && passageLine) {
-          result[MovedEvent.PassageLine] = new Tuple<PhysicCar,int>(new PhysicCar(physicCar), i);
+          result[MovedEvent.PassageLine] = new Tuple<PhysicCar, int, object>(new PhysicCar(physicCar), i, null);
         }
         if (!result.ContainsKey(MovedEvent.AngleReach) && angleReach) {
-          result[MovedEvent.AngleReach] = new Tuple<PhysicCar,int>(new PhysicCar(physicCar), i);
+          result[MovedEvent.AngleReach] = new Tuple<PhysicCar, int, object>(new PhysicCar(physicCar), i, null);
         }
         if (!result.ContainsKey(MovedEvent.SpeedReach) && angleReach && speedReach) {
-          result[MovedEvent.SpeedReach] = new Tuple<PhysicCar,int>(new PhysicCar(physicCar), i);
+          result[MovedEvent.SpeedReach] = new Tuple<PhysicCar, int, object>(new PhysicCar(physicCar), i, null);
         }
         if (!result.ContainsKey(MovedEvent.PassageLine) && !result.ContainsKey(MovedEvent.SideCrash) && sideCrash) {
-          result[MovedEvent.SideCrash] = new Tuple<PhysicCar, int>(new PhysicCar(physicCar), i);
+          result[MovedEvent.SideCrash] = new Tuple<PhysicCar, int, object>(new PhysicCar(physicCar), i, sideCrashNormal);
         }
 
         if (result.ContainsKey(MovedEvent.PassageLine) && result.ContainsKey(MovedEvent.SpeedReach)) {
@@ -95,6 +107,9 @@ namespace RussianAICup2015Car.Sources {
         }
 
         //move
+
+        intersectOilStick(physicCar);
+
         PhysicCar zeroWheelTurn = PhysicCarForZeroWheelTurn(physicCar, game);
         double angleDeviation = idealAngle.AngleDeviation(zeroWheelTurn.Angle);
 
@@ -125,11 +140,29 @@ namespace RussianAICup2015Car.Sources {
       return (car.Speed.Normalize() - car.Dir).Length < 1.0e-3;
     }
 
-    private bool checkSideCrash(PhysicCar car, Vector dirMove, Vector idealDir) {
-      return CollisionDetector.instance.IntersectCarWithMap(car.Pos, car.Dir);
+    private Vector checkSideCrashRetNormal(PhysicCar car, Vector idealPos, PointInt dirMove) {
+      PointInt carPos = new PointInt((int)(car.Pos.X/game.TrackTileSize),(int)(car.Pos.Y/game.TrackTileSize));
+      PointInt endPos = new PointInt((int)(idealPos.X/game.TrackTileSize),(int)(idealPos.Y/game.TrackTileSize));
+      bool isEndPos = (carPos * dirMove).Equals(endPos * dirMove);
+
+      PointInt[] additionalDirs = isEndPos ? null : new PointInt[] { dirMove.PerpendicularLeft(), dirMove.PerpendicularRight() };
+      Vector normal = CollisionDetector.instance.IntersectCarWithMap(car.Pos, car.Dir, additionalDirs);
+      if (null != normal && car.Speed.Dot(normal) < 0) {
+        return normal;
+      }
+      return null;
     }
 
-    private static double WheelTurnForEndZeroWheelTurn(Car car, Game game, double finalAngle) {
+    private void intersectOilStick(PhysicCar car) {
+      foreach (OilSlick stick in world.OilSlicks) {
+        if ((car.Pos - new Vector(stick.X, stick.Y)).Length < stick.Radius) {
+          car.traveledOnOil(stick);
+          return;
+        }
+      }
+    }
+
+    private static double WheelTurnForEndZeroWheelTurn(Car car, Game game, double finalAngle, double sign) {
       PhysicCar physicCar = new PhysicCar(car, game);
       int ticks = (int)Math.Abs(Math.Round(physicCar.WheelTurn / game.CarWheelTurnChangePerTick));
 
@@ -142,7 +175,7 @@ namespace RussianAICup2015Car.Sources {
         return 0;
       }
 
-      return car.WheelTurn + game.CarWheelTurnChangePerTick * Math.Sign(angleDeviation);
+      return car.WheelTurn + sign * game.CarWheelTurnChangePerTick * Math.Sign(angleDeviation);
     }
 
     private static PhysicCar PhysicCarForZeroWheelTurn(PhysicCar car, Game game) {

@@ -1,5 +1,6 @@
 ﻿using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
 using System;
+using System.Collections.Generic;
 
 namespace RussianAICup2015Car.Sources {
   public class CollisionDetector {
@@ -14,6 +15,8 @@ namespace RussianAICup2015Car.Sources {
     }
 
     ////////////////////////////////////////////////CIRCLE
+
+    /// <returns>intersect pos</returns>
     public Vector IntersectCircleWithMap(Vector center, double radius) {
       int xTile = (int)(center.X / game.TrackTileSize);
       int yTile = (int)(center.Y / game.TrackTileSize);
@@ -78,12 +81,21 @@ namespace RussianAICup2015Car.Sources {
     }
 
     ////////////////////////////////////////////////CAR
-    public bool IntersectCarWithMap(Vector carPos, Vector carDir) {
+
+    /// <returns>normal outside map</returns>
+    public Vector IntersectCarWithMap(Vector carPos, Vector carDir, PointInt[] additionalSide = null) {
       int xTile = (int)(carPos.X / game.TrackTileSize);
       int yTile = (int)(carPos.Y / game.TrackTileSize);
       PointInt[] dirs = map.reverseDirsByPos(xTile, yTile);
       if (null == dirs || 4 == dirs.Length/*undefined or empty*/) {
-        return false;
+        return null;
+      }
+
+      if (null != additionalSide) {
+        HashSet<PointInt> allDirs = new HashSet<PointInt>(dirs);
+        allDirs.UnionWith(additionalSide);
+        dirs = new PointInt[allDirs.Count];
+        allDirs.CopyTo(dirs);
       }
 
       double sideRadius = game.TrackTileMargin * 1.05;
@@ -95,16 +107,15 @@ namespace RussianAICup2015Car.Sources {
 
       //car near the center tile
       if (Math.Abs(distanceFromCenter.X) < minDistanceToSide && Math.Abs(distanceFromCenter.Y) < minDistanceToSide) {
-        return false;
+        return null;
       }
 
       foreach (PointInt dirInt in dirs) {
         Vector dir = new Vector(dirInt.X, dirInt.Y);
         if (IntersectCarWithSide(carPos, carDir, dir, center + dir * distanceToSide)) {
-          return true;
+          return dir.Negative();
         }
       }
-
       //edge
       if (Math.Abs(distanceFromCenter.X) > minDistanceToSide && Math.Abs(distanceFromCenter.Y) > minDistanceToSide) {
         Vector edge = center;
@@ -112,11 +123,11 @@ namespace RussianAICup2015Car.Sources {
         edge.Y += Math.Sign(distanceFromCenter.Y) * game.TrackTileSize * 0.5;
 
         if (IntersectCarWithCircle(carPos, carDir, edge, sideRadius)) {
-          return true;
+          return (carPos - edge).Normalize();
         }
       }
 
-      return false;
+      return null;
     }
 
     public bool IntersectCarWithCircle(Vector pos, Vector dir, Vector center, double radius) {

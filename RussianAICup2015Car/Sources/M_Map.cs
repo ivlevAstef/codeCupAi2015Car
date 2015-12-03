@@ -171,7 +171,7 @@ namespace RussianAICup2015Car.Sources {
     }
 
     private void fillCell(ref Cell cell, int checkPointOffset, Dictionary<CellKey, Cell> allCells, bool useAlternative) {
-      int[,] map = getMap(checkpointByOffset(checkPointOffset));
+      int[,] map = getMap(checkPointOffset);
       PointInt pos = cell.Pos;
 
       cell.Dirs = dirsByPos(pos);
@@ -215,11 +215,13 @@ namespace RussianAICup2015Car.Sources {
       return new PointInt(world.Waypoints[checkPointIndex][0], world.Waypoints[checkPointIndex][1]);
     }
 
-    private int[,] getMap(PointInt checkpoint) {
-      if (!mapCache.ContainsKey(checkpoint)) {
-        mapCache[checkpoint] = createMap(posCache, checkpoint);
+    private int[,] getMap(int offset) {
+      PointInt checkPoint = checkpointByOffset(offset);
+      if (!mapCache.ContainsKey(checkPoint)) {
+        PointInt lastPos = 0 == offset ? posCache : checkpointByOffset(offset-1);
+        mapCache[checkPoint] = createMap(lastPos, checkPoint);
       }
-      return mapCache[checkpoint];
+      return mapCache[checkPoint];
     }
 
     private int[,] createMap(PointInt begin, PointInt end) {
@@ -271,7 +273,9 @@ namespace RussianAICup2015Car.Sources {
           PointInt nextPos = pos + dir;
           if (result[nextPos.X, nextPos.Y] > result[pos.X, pos.Y] + 1) {
             result[nextPos.X, nextPos.Y] = result[pos.X, pos.Y] + 1;
-            backStack.Enqueue(nextPos);
+            if (!nextPos.Equals(begin)) {
+              backStack.Enqueue(nextPos);
+            }
           }
         }
       }

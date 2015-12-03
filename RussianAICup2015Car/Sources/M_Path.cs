@@ -53,7 +53,14 @@ namespace RussianAICup2015Car.Sources {
         transition = transition.Next;
       }
 
-      int mergeCells = Math.Min(3, (int)(car.Speed() / 6));//18
+      double speed = car.Speed();
+      if (null != path && null != path[0].DirOut) {
+        Vector dirMove = new Vector(path[0].DirOut.X, path[0].DirOut.X);
+        Vector carDir = new Vector(car.SpeedX, car.SpeedY);
+        speed = Math.Max(0, carDir.Dot(dirMove));
+      }
+
+      int mergeCells = Math.Min(3, (int)(speed / 6));//18
 
       transition = mergePath(lastCell, transition, cell, mergeCells, 0);
 
@@ -265,7 +272,7 @@ namespace RussianAICup2015Car.Sources {
 
     private double tilePriority(PointInt dirIn, PointInt dirOut, PointInt nextDirIn, PointInt nextDirOut) {
       if (dirIn.Negative().Equals(dirOut) || nextDirIn.Negative().Equals(nextDirOut)) {
-        return -100;
+        return -8;
       }
 
       if (dirIn.Equals(dirOut)) {//line

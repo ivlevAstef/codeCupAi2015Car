@@ -22,7 +22,7 @@ namespace RussianAICup2015Car.Sources {
       Vector endPos = new Vector(findedBonus.X, findedBonus.Y);
 
       PhysicMoveCalculator calculator = new PhysicMoveCalculator();
-      calculator.setupEnvironment(car, game);
+      calculator.setupEnvironment(car, game, world);
 
       Vector dir = new Vector(dirMove.X, dirMove.Y);
 

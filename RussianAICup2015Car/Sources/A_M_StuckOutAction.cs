@@ -4,7 +4,7 @@ using System;
 
 namespace RussianAICup2015Car.Sources {
   class A_M_StuckOutAction : A_M_BaseMoveAction {
-    private const double maxTicks = 80;
+    private const double maxTicks = 100;
 
     private int ignoreTicks = 10;
     private int zeroSpeedTicks = 0;
@@ -75,6 +75,9 @@ namespace RussianAICup2015Car.Sources {
       double timePower = Math.Sin((Math.PI * 0.5) * (double)(maxTicks - outStuckTicks) / maxTicks);
       timePower = 1.1 * timePower - 0.1;
       move.EnginePower = sign * timePower;
+      if (timePower < 1.0e-3) {
+        move.IsBrake = true;
+      }
 
       PointInt dir = path[0].DirOut;
 

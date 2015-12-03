@@ -5,6 +5,8 @@ using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
 namespace RussianAICup2015Car.Sources {
   public class PhysicCar {
     private const double dt = 1;
+    private const double oilFrictionMult = 0.3;
+    private const double oilBrakeFactor = 0.3;
 
     public double WheelTurn { get { return wheelTurn; } }
     public double EnginePower { get { return enginePower; } }
@@ -21,8 +23,9 @@ namespace RussianAICup2015Car.Sources {
 
     private double idealWheelTurn;
     private double idealEnginePower;
-    private int brake = 0;
+    private bool brake = false;
     private int nitroTicks = 0;
+    private int oilTicks = 0;
 
     private double wheelTurn;
     private double enginePower;
@@ -72,6 +75,7 @@ namespace RussianAICup2015Car.Sources {
       dir = physicCar.dir;
       angleSpeed = physicCar.angleSpeed;
       nitroTicks = physicCar.nitroTicks;
+      oilTicks = physicCar.oilTicks;
       brake = physicCar.brake;
     }
 
@@ -84,11 +88,21 @@ namespace RussianAICup2015Car.Sources {
     }
 
     public void setBrake(bool isBrake) {
-      brake = isBrake ? 0 : 1;
+      brake = isBrake;
     }
 
     public void useNitro() {
       nitroTicks = game.NitroDurationTicks;
+    }
+
+    public void traveledOnOil(OilSlick oil = null) {
+      if (oilTicks > 0) {
+        return;
+      }
+      oilTicks = game.MaxOiledStateDurationTicks;
+      if (null != oil) {
+        oilTicks = Math.Min(oilTicks, oil.RemainingLifetime);
+      }
     }
 
     public void Iteration(int ticks) {
@@ -101,6 +115,14 @@ namespace RussianAICup2015Car.Sources {
           nitroTicks--;
         }
 
+        double brakeV = brake ? 1 : 0;
+        double frictionMult = 1;
+        if (oilTicks > 0) {
+          brakeV = brake ? oilBrakeFactor : 0;
+          frictionMult = oilFrictionMult;
+          oilTicks--;
+        }
+        
         double baseAngleSpeed = wheelTurn * game.CarAngularSpeedFactor * spd.Dot(dir);
 
         angle += angleSpeed * dt;
@@ -110,13 +132,14 @@ namespace RussianAICup2015Car.Sources {
 
         dir = Vector.sincos(angle);
 
-        Vector accel = dir * (enginePower * (1-brake) * carAccel);
+        Vector accel = dir * (enginePower * (1 - brakeV) * carAccel);
 
         lastPos = pos;
         pos = pos + spd * dt;
         spd = (spd + accel) * frictionMove;
-        double lengthFriction = (1 - brake) * frictionLenght + brake * frictionCross;
-        spd = spd - dir * limit(spd.Dot(dir), lengthFriction) - dir.PerpendicularLeft() * limit(spd.Cross(dir), frictionCross);
+
+        double lengthFriction = (1 - brakeV) * frictionLenght + brakeV * frictionCross;
+        spd = spd - dir * limit(spd.Dot(dir), lengthFriction * frictionMult) - dir.PerpendicularLeft() * limit(spd.Cross(dir), frictionCross * frictionMult);
       }
     }
 
@@ -134,6 +157,7 @@ namespace RussianAICup2015Car.Sources {
       angleSpeed = car.AngularSpeed;
 
       nitroTicks = car.RemainingNitroTicks;
+      oilTicks = car.RemainingOiledTicks;
     }
 
     private double signLimitChange(double need, double value, double add) {

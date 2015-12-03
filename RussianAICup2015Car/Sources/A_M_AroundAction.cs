@@ -17,7 +17,9 @@ namespace RussianAICup2015Car.Sources {
         return false;
       }
 
-      return dirIn.Equals(dirOut.Negative()) && !posIn.Equals(posOut);
+      bool isLine = path[1].DirIn.Equals(path[1].DirOut) || path[2].DirIn.Equals(path[2].DirOut);
+
+      return !isLine && dirIn.Equals(dirOut.Negative()) && !posIn.Equals(posOut);
     }
 
     public override void execute(Move move) {
@@ -28,7 +30,7 @@ namespace RussianAICup2015Car.Sources {
       //endPos = endPos + new Vector(dirMove.X, dirMove.Y) * game.TrackTileSize * 0.1;
 
       PhysicMoveCalculator calculator = new PhysicMoveCalculator();
-      calculator.setupEnvironment(car, game);
+      calculator.setupEnvironment(car, game, world);
 
       Vector dir = new Vector(dirEnd.X, dirEnd.Y);
       Move needMove = calculator.calculateMove(endPos, new Vector(dirMove.X, dirMove.Y), dir, 0.03);
