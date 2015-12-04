@@ -109,6 +109,8 @@ namespace RussianAICup2015Car.Sources {
     private bool isRunTire(PhysicCar self, PhysicCar[] their, PhysicCar[] enemies) {
       Logger.instance.Assert(null != self, "Self car is null.");
 
+      double maxAngle = Math.Sin(Math.PI / 6);
+
       PhysicCar ignored = self;
 
       Vector tirePos = self.Pos;
@@ -134,8 +136,11 @@ namespace RussianAICup2015Car.Sources {
         foreach (PhysicCar physicCar in enemies) {
           physicCar.Iteration(1);
 
-          if (itersectTireWithCar(tirePos, tireSpd, physicCar, 0.5)) {
-             return physicCar.Car.Durability > 1.0e-9 && !physicCar.Car.IsFinishedTrack;
+          if (itersectTireWithCar(tirePos, tireSpd, physicCar, 0.25) ) {
+            Vector normal = intersectCarNormal(physicCar, tirePos);
+            double angle = tireSpd.Normalize().Cross(normal);
+
+            return angle < maxAngle && physicCar.Car.Durability > 1.0e-9 && !physicCar.Car.IsFinishedTrack;
           }
         }
 
@@ -158,8 +163,18 @@ namespace RussianAICup2015Car.Sources {
       return CollisionDetector.instance.IntersectCarWithCircle(car.Pos, car.Dir, tirePos, game.TireRadius * multR);
     }
 
-    private bool itersectTireWithSide(Vector tirePos, Vector tireSpd, PhysicCar car) {
-      return CollisionDetector.instance.IntersectCarWithCircle(car.Pos, car.Dir, tirePos, game.TireRadius);
+    private Vector intersectCarNormal(PhysicCar car, Vector pos) {
+      double carSideAngle = Math.Atan2(game.CarHeight, game.CarWidth);
+      double angle = car.Dir.Angle.AngleDeviation((pos - car.Pos).Angle);
+
+      //side intersect
+      if (carSideAngle < Math.Abs(angle) && Math.Abs(angle) < Math.PI - carSideAngle) {
+        double sign = Math.Sign(angle);
+        return car.Dir.PerpendicularRight() * sign;
+      } else { //length intersect
+        double sign = Math.Sign(Math.PI * 0.5 - Math.Abs(angle));
+        return car.Dir * sign;
+      }
     }
 
     private Vector calcTireSpeedAfterKick(Vector speed, Vector normal) {
