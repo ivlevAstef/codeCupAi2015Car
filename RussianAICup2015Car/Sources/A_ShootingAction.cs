@@ -4,6 +4,9 @@ using System;
 
 namespace RussianAICup2015Car.Sources {
   class A_ShootingAction : A_BaseAction {
+    private static readonly int maxTireRebound = 1;
+    private static readonly int tireCalculateTicks = 50;
+
     public override bool valid() {
       if (0 < car.RemainingProjectileCooldownTicks || car.ProjectileCount <= 0) {
         return false;
@@ -48,6 +51,7 @@ namespace RussianAICup2015Car.Sources {
       }
 
       PhysicCar physicCar = new PhysicCar(enemy, game);
+      physicCar.setEnginePower(1);
 
       double radius = Math.Min(car.Width, car.Height) * 0.25 + game.WasherRadius;
 
@@ -59,6 +63,7 @@ namespace RussianAICup2015Car.Sources {
       ticks = Math.Max((int)(1.5 * game.TrackTileSize / game.WasherInitialSpeed), ticks);
 
       for (int i = 0; i < ticks; i++) {
+
         physicCar.Iteration(1);
         washerPos = washerPos + washerSpd;
 
@@ -85,6 +90,7 @@ namespace RussianAICup2015Car.Sources {
 
       foreach (Car carIter in world.Cars) {
         PhysicCar physicCar = new PhysicCar(carIter, game);
+        physicCar.setEnginePower(1);
         if (carIter.IsTeammate) { 
           their.Add(physicCar);
         } else {
@@ -109,7 +115,8 @@ namespace RussianAICup2015Car.Sources {
       Vector tireSpd = self.Dir * game.TireInitialSpeed;
       double minTireSpeed = game.TireInitialSpeed * game.TireDisappearSpeedFactor;
 
-      for (int i = 0; i < 50; i++) {
+      int tireRebound = maxTireRebound + 1;
+      for (int i = 0; i < tireCalculateTicks; i++) {
         tirePos += tireSpd;
 
         foreach (PhysicCar physicCar in their) {
@@ -136,9 +143,10 @@ namespace RussianAICup2015Car.Sources {
         if (null != itersectWithMap) {
           ignored = null;
           tireSpd = calcTireSpeedAfterKick(tireSpd, (tirePos - itersectWithMap).Normalize());
+          tireRebound--;
         }
 
-        if (tireSpd.Length < minTireSpeed) {
+        if (tireSpd.Length < minTireSpeed || tireRebound < 0) {
           return false;
         }
       }
