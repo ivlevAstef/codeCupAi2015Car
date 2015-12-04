@@ -25,7 +25,7 @@ namespace RussianAICup2015Car.Sources {
 
     private bool checkSideHit(PhysicCar self, List<PhysicCar> enemies) {
       double checkRadius = (game.CarHeight + game.CarWidth) * Math.Sqrt(2) * 0.5;
-      const double maxAngle = Math.PI / 4;
+      double maxAngle = Math.Cos(Math.PI / 6);
 
       for (int i = 0; i < MaxCheckTicks; i++) {
         self.Iteration(1);
@@ -33,8 +33,8 @@ namespace RussianAICup2015Car.Sources {
           enemy.Iteration(1);
 
           Vector distance = enemy.Pos - self.Pos;
-          double angle = Math.Abs(Math.Acos(distance.Normalize().Dot(self.Dir)));
-          double angleSpeed = Math.Abs(Math.Acos(self.Dir.Dot(enemy.Dir)));
+          double angle = Math.Abs(distance.Normalize().Cross(self.Dir));
+          double angleSpeed = Math.Abs(self.Dir.Dot(enemy.Dir));
           if (distance.Length < checkRadius && angle < maxAngle && angleSpeed < maxAngle) {
             return true;
           }
