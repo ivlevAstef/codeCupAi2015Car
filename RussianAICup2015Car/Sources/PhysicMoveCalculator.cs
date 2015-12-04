@@ -59,7 +59,7 @@ namespace RussianAICup2015Car.Sources {
         if (Math.PI / 4 < Math.Abs(angle) && Math.Abs(angle) < 3 * Math.PI / 4) {
           result.WheelTurn = car.WheelTurn - speedSign * Math.Sign(angle) * game.CarWheelTurnChangePerTick;
 
-          bool isParallel = Math.Abs(Vector.sincos(car.Angle).Dot(sideNormal)) < 0.015;//10 degrees
+          bool isParallel = Math.Abs(physicCar.Dir.Dot(sideNormal)) < Math.Cos(Math.PI/9);//20 degrees
 
           if (!isParallel && events[MovedEvent.SideCrash].Item2 < 20 && speedSign > 0) {
             result.IsBrake = car.Speed() > 8;
