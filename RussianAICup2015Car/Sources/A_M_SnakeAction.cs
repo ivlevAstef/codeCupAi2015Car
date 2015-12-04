@@ -33,7 +33,10 @@ namespace RussianAICup2015Car.Sources {
         ActionType.SnakePreEnd
       };
 
-      if (validSnakeWithOffset(-1) && validSnakeWithOffset(1) && validSnakeWithOffset(2)) {
+      Vector dir = new Vector(path[0].DirOut.X + path[1].DirOut.X, path[0].DirOut.Y + path[1].DirOut.Y);
+      double maxAngle = Math.Cos(Math.PI / 18);
+
+      if (validSnakeWithOffset(1) && validSnakeWithOffset(2) && Math.Abs(dir.Cross(Vector.sincos(car.Angle))) < maxAngle) {
         result.Add(ActionType.UseNitro);
       }
 

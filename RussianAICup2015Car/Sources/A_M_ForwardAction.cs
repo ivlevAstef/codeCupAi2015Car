@@ -32,7 +32,10 @@ namespace RussianAICup2015Car.Sources {
         ActionType.Shooting
       };
 
-      if (isStraight()) {
+      Vector dir = new Vector(path[0].DirOut.X, path[0].DirOut.Y);
+      double maxAngle = Math.Cos(Math.PI/9);
+
+      if (isStraight() && Math.Abs(dir.Cross(Vector.sincos(car.Angle))) < maxAngle) {
         result.Add(ActionType.UseNitro);
       }
 
