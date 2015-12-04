@@ -40,7 +40,21 @@ namespace RussianAICup2015Car.Sources {
         result.Add(ActionType.UseNitro);
       }
 
+      if (nearCrossRoadOrT()) {
+        result.Add(ActionType.AvoidSideHit);
+      }
+
       return result;
+    }
+
+    private bool nearCrossRoadOrT() {
+      for (int i = 1; i < Math.Min(3, path.Count); i++) {
+        if (path[i].DirOuts.Length >= 2) {//crosroad or T.
+          return true;
+        }
+      }
+
+      return false;
     }
 
     private bool validSnakeWithOffset(int offset) {
