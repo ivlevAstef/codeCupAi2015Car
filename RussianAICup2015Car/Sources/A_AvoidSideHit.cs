@@ -4,14 +4,14 @@ using System;
 
 namespace RussianAICup2015Car.Sources {
   class A_AvoidSideHit : A_BaseAction {
-    private const int MaxCheckTicks = 30;
+    private const int MaxCheckTicks = 40;
 
     public override bool valid() {
 
       PhysicCar self = new PhysicCar(car, game);
       List<PhysicCar> enemies = new List<PhysicCar>();
       foreach (Car iter in world.Cars) {
-        if (iter.Id != car.Id && iter.Speed() > 8) {
+        if (iter.Id != car.Id) {
           enemies.Add(new PhysicCar(iter, game));
         }
       }
@@ -26,6 +26,11 @@ namespace RussianAICup2015Car.Sources {
     private bool checkSideHit(PhysicCar self, List<PhysicCar> enemies) {
       double checkRadius = (game.CarHeight + game.CarWidth) * Math.Sqrt(2) * 0.5;
       double maxAngle = Math.Cos(Math.PI / 6);
+
+      self.setEnginePower(1);
+      foreach (PhysicCar enemy in enemies) {
+        enemy.setEnginePower(1);
+      }
 
       for (int i = 0; i < MaxCheckTicks; i++) {
         self.Iteration(1);
