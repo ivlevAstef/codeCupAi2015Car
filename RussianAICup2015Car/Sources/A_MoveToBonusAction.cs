@@ -83,7 +83,7 @@ namespace RussianAICup2015Car.Sources {
 
     private bool isNextTile(PointInt checkTile) {
       for (int i = 0; i < Math.Min(3, path.Count); i++) {
-        if (path[i].Equals(checkTile)) {
+        if (path[i].Pos.Equals(checkTile)) {
           return true;
         }
       }
