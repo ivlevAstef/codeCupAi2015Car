@@ -53,7 +53,7 @@ namespace RussianAICup2015Car.Sources {
         lastCell = transition.Cell;
 
         PointInt nextPos = getNextPos(cell);
-        if (nextPos.Equals(lastCell)) {
+        if (nextPos.Equals(lastCell.Pos)) {
           lastCell = null;
           lastDir = nextPos - cell.Pos;
         } else {

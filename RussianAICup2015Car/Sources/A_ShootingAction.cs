@@ -161,7 +161,7 @@ namespace RussianAICup2015Car.Sources {
       return normal.Negative() * (2 * speed.Dot(normal)) + speed - (normal * friction);
 
       /*const double momentumTransferFactor = 1;
-      double denominatorC = (speed.Negative().Cross(normal) / game.TireMass);
+      double denominatorC = (speed.Negative().Cross(normal) / game.AngularMass!!!);
       Vector denominatorV = speed.Perpendicular() * denominatorC;
 
       double denominator = (1/game.TireMass) + normal.Dot(denominatorV);
