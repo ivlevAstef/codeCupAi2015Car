@@ -8,7 +8,11 @@ namespace RussianAICup2015Car.Sources {
         return false;
       }
 
-      if (car.Speed() > 30) {
+      if (car.RemainingOiledTicks > 0) {
+        return false;
+      }
+
+      if (car.Speed() > 35) {
         return false;
       }
 

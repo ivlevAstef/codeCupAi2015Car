@@ -58,7 +58,6 @@
     <Compile Include="Sources\Extensions.cs" />
     <Compile Include="Sources\Logger.cs" />
     <Compile Include="Sources\A_MoveToBonusAction.cs" />
-    <Compile Include="Sources\MoveInfo.cs" />
     <Compile Include="Sources\MyStrategy.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Sources\A_OilSpillAction.cs" />

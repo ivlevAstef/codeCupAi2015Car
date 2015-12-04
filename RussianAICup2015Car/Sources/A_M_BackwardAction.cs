@@ -23,7 +23,7 @@ namespace RussianAICup2015Car.Sources {
     }
 
     public override void execute(Move move) {
-      move.EnginePower = -1.0;
+      /*move.EnginePower = -1.0;
 
       if (null == movedDir) {
         movedDir = path[0].DirOut;
@@ -59,7 +59,7 @@ namespace RussianAICup2015Car.Sources {
 
       Logger.instance.Debug("Angle {0} wheelTurn {1}", magnitedAngle, magnitedForce);
 
-      move.WheelTurn = magnitedForce;
+      move.WheelTurn = magnitedForce;*/
     }
 
     public override List<ActionType> GetParallelsActions() {
@@ -68,6 +68,7 @@ namespace RussianAICup2015Car.Sources {
       };
     } 
 
+    /*
     private double magniteToCenter(PointInt dir) {
       double powerTilt = movedSign(dir) * game.TrackTileSize * 1;
 
@@ -92,5 +93,6 @@ namespace RussianAICup2015Car.Sources {
 
       return Math.Sign(speed);
     }
+     */
   }
 }

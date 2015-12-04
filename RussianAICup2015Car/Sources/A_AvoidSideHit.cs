@@ -25,7 +25,7 @@ namespace RussianAICup2015Car.Sources {
 
     private bool checkSideHit(PhysicCar self, List<PhysicCar> enemies) {
       double checkRadius = (game.CarHeight + game.CarWidth) * Math.Sqrt(2) * 0.5;
-      double maxAngle = Math.Cos(Math.PI / 6);
+      double maxAngle = Math.Sin(Math.PI / 6);
 
       self.setEnginePower(1);
       foreach (PhysicCar enemy in enemies) {
