@@ -53,6 +53,7 @@
     <Compile Include="Sources\A_IAction.cs" />
     <Compile Include="Sources\A_M_PreTurnMoving.cs" />
     <Compile Include="Sources\A_M_SnakePreEndMoving.cs" />
+    <Compile Include="Sources\M_GlobalMap.cs" />
     <Compile Include="Sources\P_CollisionDetector.cs" />
     <Compile Include="Sources\C_Constant.cs" />
     <Compile Include="Sources\C_Extensions.cs" />
@@ -62,7 +63,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Sources\A_OilSpillAction.cs" />
     <Compile Include="Sources\A_M_OvertakeMoving.cs" />
-    <Compile Include="Sources\M_Map.cs" />
+    <Compile Include="Sources\M_LiMap.cs" />
     <Compile Include="Sources\M_Path.cs" />
     <Compile Include="Sources\P_PhysicCar.cs" />
     <Compile Include="Sources\P_PhysicMoveCalculator.cs" />

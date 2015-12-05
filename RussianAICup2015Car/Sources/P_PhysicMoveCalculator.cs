@@ -88,7 +88,7 @@ namespace RussianAICup2015Car.Sources.Physic {
         bool passageLine = checkPassageLine(physicCar, idealPos, dirMove);
         bool angleReach = checkAngleReach(physicCar, idealAngle);
         bool speedReach = checkSpeedReach(physicCar);
-        Vector sideCrashNormal = checkSideCrashRetNormal(physicCar, idealPos, new PointInt((int)Math.Round(dirMove.X), (int)Math.Round(dirMove.Y)));
+        Vector sideCrashNormal = checkSideCrashRetNormal(physicCar, idealPos, new Direction((int)Math.Round(dirMove.X), (int)Math.Round(dirMove.Y)));
         bool sideCrash = null != sideCrashNormal;
 
         if (!result.ContainsKey(MovedEvent.PassageLine) && passageLine) {
@@ -142,12 +142,12 @@ namespace RussianAICup2015Car.Sources.Physic {
       return (car.Speed.Normalize() - car.Dir).Length < 1.0e-3;
     }
 
-    private Vector checkSideCrashRetNormal(PCar car, Vector idealPos, PointInt dirMove) {
-      PointInt carPos = new PointInt((int)(car.Pos.X/game.TrackTileSize),(int)(car.Pos.Y/game.TrackTileSize));
-      PointInt endPos = new PointInt((int)(idealPos.X/game.TrackTileSize),(int)(idealPos.Y/game.TrackTileSize));
+    private Vector checkSideCrashRetNormal(PCar car, Vector idealPos, Direction dirMove) {
+      Direction carPos = new Direction((int)(car.Pos.X/game.TrackTileSize),(int)(car.Pos.Y/game.TrackTileSize));
+      Direction endPos = new Direction((int)(idealPos.X/game.TrackTileSize),(int)(idealPos.Y/game.TrackTileSize));
       bool isEndPos = (carPos * dirMove).Equals(endPos * dirMove);
 
-      PointInt[] additionalDirs = isEndPos ? null : new PointInt[] { dirMove.PerpendicularLeft(), dirMove.PerpendicularRight() };
+      Direction[] additionalDirs = isEndPos ? null : new Direction[] { dirMove.PerpendicularLeft(), dirMove.PerpendicularRight() };
       Vector normal = CollisionDetector.instance.IntersectCarWithMap(car.Pos, car.Dir, additionalDirs);
       if (null != normal && car.Speed.Dot(normal) < 0) {
         return normal;

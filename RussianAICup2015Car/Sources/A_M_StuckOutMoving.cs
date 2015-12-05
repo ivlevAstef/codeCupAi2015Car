@@ -80,7 +80,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
         move.IsBrake = true;
       }
 
-      PointInt dir = path[0].DirOut;
+      TileDir dir = path[0].DirOut;
 
       double angle = sign * car.GetAngleTo(car.X + dir.X, car.Y + dir.Y) * timePower;
 

@@ -9,11 +9,11 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
     public override bool valid() {
       Logger.instance.Assert(3 <= path.Count, "incorrect way cells count.");
 
-      PointInt posIn = path[1].Pos;
-      PointInt posOut = path[2].Pos;
+      Direction posIn = path[1].Pos;
+      Direction posOut = path[2].Pos;
 
-      PointInt dirIn = path[1].DirIn;
-      PointInt dirOut = path[2].DirOut;
+      Direction dirIn = path[1].DirIn;
+      Direction dirOut = path[2].DirOut;
 
       if (null == dirOut) {
         return false;
@@ -25,10 +25,10 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
     }
 
     public override void execute(Move move) {
-      PointInt dirMove = path[0].DirOut;
-      PointInt dirEnd = path[1].DirOut;
+      Direction dirMove = path[0].DirOut;
+      Direction dirEnd = path[1].DirOut;
 
-      Vector endPos = GetWayEnd(path[1].Pos, new PointInt(0));
+      Vector endPos = GetWayEnd(path[1].Pos, new Direction(0));
       //endPos = endPos + new Vector(dirMove.X, dirMove.Y) * game.TrackTileSize * 0.1;
 
       Physic.MovingCalculator calculator = new Physic.MovingCalculator();

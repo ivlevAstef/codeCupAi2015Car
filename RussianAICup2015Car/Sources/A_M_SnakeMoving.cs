@@ -12,8 +12,8 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
     }
 
     public override void execute(Move move) {
-      PointInt dirMove = path[0].DirOut;
-      PointInt dirEnd = path[1].DirOut;
+      TileDir dirMove = path[0].DirOut;
+      TileDir dirEnd = path[1].DirOut;
 
       Vector endPos = GetWayEnd(path[1].Pos, dirEnd);
       Vector dir = new Vector(dirMove.X + dirEnd.X, dirMove.Y + dirEnd.Y).Normalize();
@@ -64,17 +64,17 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
         return true;
       }
 
-      PointInt posIn = path[1 + offset].Pos;
-      PointInt posOut = path[2 + offset].Pos;
+      TileDir posIn = path[1 + offset].Pos;
+      TileDir posOut = path[2 + offset].Pos;
 
-      PointInt dirIn = path[1 + offset].DirIn;
-      PointInt dirOut = path[2 + offset].DirOut;
+      TileDir dirIn = path[1 + offset].DirIn;
+      TileDir dirOut = path[2 + offset].DirOut;
 
-      if (null == dirOut || dirOut.Equals(new PointInt(0))) {
+      if (null == dirOut || dirOut.Equals(new TileDir(0))) {
         return false;
       }
 
-      PointInt dir = new PointInt(posOut.X - posIn.X, posOut.Y - posIn.Y);
+      TileDir dir = new TileDir(posOut.X - posIn.X, posOut.Y - posIn.Y);
 
       return dirIn.Equals(dirOut) && (dir.Equals(dirIn.PerpendicularLeft()) || dir.Equals(dirIn.PerpendicularRight()));
     }

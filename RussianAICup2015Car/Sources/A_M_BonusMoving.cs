@@ -18,7 +18,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
     public override void execute(Move move) {
       Logger.instance.Assert(null != findedBonus, "Didn't find bonus.");
 
-      PointInt dirMove = path[0].DirOut;
+      TileDir dirMove = path[0].DirOut;
 
       Vector endPos = new Vector(findedBonus.X, findedBonus.Y);
 
@@ -82,7 +82,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       return priorityBonus;
     }
 
-    private bool isNextTile(PointInt checkTile) {
+    private bool isNextTile(TileDir checkTile) {
       for (int i = 0; i < Math.Min(3, path.Count); i++) {
         if (path[i].Pos.Equals(checkTile)) {
           return true;
@@ -91,8 +91,8 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       return false;
     }
 
-    private PointInt tilePos(double x, double y) {
-      return new PointInt((int)(x / game.TrackTileSize), (int)(y / game.TrackTileSize));
+    private TileDir tilePos(double x, double y) {
+      return new TileDir((int)(x / game.TrackTileSize), (int)(y / game.TrackTileSize));
     }
   }
 }

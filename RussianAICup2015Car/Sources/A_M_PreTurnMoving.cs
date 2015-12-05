@@ -12,8 +12,8 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
         return false;
       }
 
-      PointInt dirIn = path[2].DirIn;
-      PointInt dirOut = path[2].DirOut;
+      TileDir dirIn = path[2].DirIn;
+      TileDir dirOut = path[2].DirOut;
 
       if (null == dirOut) {
         return false;
@@ -23,10 +23,10 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
     }
 
     public override void execute(Move move) {
-      PointInt dirMove = path[0].DirOut;
-      PointInt dirEnd = path[2].DirOut;
+      TileDir dirMove = path[0].DirOut;
+      TileDir dirEnd = path[2].DirOut;
 
-      Vector endPos = GetWayEnd(path[2].Pos, new PointInt(0));
+      Vector endPos = GetWayEnd(path[2].Pos, new TileDir(0));
 
       Physic.MovingCalculator calculator = new Physic.MovingCalculator();
       calculator.setupEnvironment(car, game, world);

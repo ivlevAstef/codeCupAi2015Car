@@ -23,7 +23,7 @@ namespace RussianAICup2015Car.Sources.Physic {
     public Vector IntersectCircleWithMap(Vector center, double radius) {
       int xTile = (int)(center.X / game.TrackTileSize);
       int yTile = (int)(center.Y / game.TrackTileSize);
-      PointInt[] dirs = map.reverseDirsByPos(xTile, yTile);
+      Direction[] dirs = map.reverseDirsByPos(xTile, yTile);
       if (null == dirs || 4 == dirs.Length/*undefined or empty*/) {
         return null;
       }
@@ -40,7 +40,7 @@ namespace RussianAICup2015Car.Sources.Physic {
         return null;
       }
 
-      foreach (PointInt dirInt in dirs) {
+      foreach (Direction dirInt in dirs) {
         Vector dir = new Vector(dirInt.X, dirInt.Y);
         Vector intersectPos = IntersectCircleWithSide(center, radius, dir, tileCenter + dir * distanceToSide);
         if (null != intersectPos) {
@@ -86,18 +86,18 @@ namespace RussianAICup2015Car.Sources.Physic {
     ////////////////////////////////////////////////CAR
 
     /// <returns>normal outside map</returns>
-    public Vector IntersectCarWithMap(Vector carPos, Vector carDir, PointInt[] additionalSide = null) {
+    public Vector IntersectCarWithMap(Vector carPos, Vector carDir, Direction[] additionalSide = null) {
       int xTile = (int)(carPos.X / game.TrackTileSize);
       int yTile = (int)(carPos.Y / game.TrackTileSize);
-      PointInt[] dirs = map.reverseDirsByPos(xTile, yTile);
+      Direction[] dirs = map.reverseDirsByPos(xTile, yTile);
       if (null == dirs || 4 == dirs.Length/*undefined or empty*/) {
         return null;
       }
 
       if (null != additionalSide) {
-        HashSet<PointInt> allDirs = new HashSet<PointInt>(dirs);
+        HashSet<Direction> allDirs = new HashSet<Direction>(dirs);
         allDirs.UnionWith(additionalSide);
-        dirs = new PointInt[allDirs.Count];
+        dirs = new Direction[allDirs.Count];
         allDirs.CopyTo(dirs);
       }
 
@@ -113,7 +113,7 @@ namespace RussianAICup2015Car.Sources.Physic {
         return null;
       }
 
-      foreach (PointInt dirInt in dirs) {
+      foreach (Direction dirInt in dirs) {
         Vector dir = new Vector(dirInt.X, dirInt.Y);
         if (IntersectCarWithSide(carPos, carDir, dir, center + dir * distanceToSide)) {
           return dir.Negative();

@@ -8,15 +8,15 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
     public override bool valid() {
       Logger.instance.Assert(3 <= path.Count, "incorrect way cells count.");
 
-      PointInt dirIn = path[1].DirIn;
-      PointInt dirOut = path[1].DirOut;
+      TileDir dirIn = path[1].DirIn;
+      TileDir dirOut = path[1].DirOut;
 
       return dirIn.Equals(dirOut.Perpendicular()) || dirIn.Equals(dirOut.Perpendicular().Negative()); 
     }
 
     public override void execute(Move move) {
-      PointInt dirMove = path[0].DirOut;
-      PointInt dirEnd = path[1].DirOut;
+      TileDir dirMove = path[0].DirOut;
+      TileDir dirEnd = path[1].DirOut;
 
       Vector endPos = GetWayEnd(path[1].Pos, dirEnd);
 

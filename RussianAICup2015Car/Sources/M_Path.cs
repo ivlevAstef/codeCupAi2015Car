@@ -6,11 +6,11 @@ using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
 namespace RussianAICup2015Car.Sources.Map {
   public class Path {
     public class Cell {
-      public PointInt Pos;
+      public TileDir Pos;
 
-      public PointInt DirIn;
-      public PointInt DirOut;
-      public PointInt[] DirOuts;
+      public TileDir DirIn;
+      public TileDir DirOut;
+      public TileDir[] DirOuts;
     };
 
     private class CellTransition {
@@ -40,7 +40,7 @@ namespace RussianAICup2015Car.Sources.Map {
     private CellTransition transition = null;
     private Cell[] path = null;
     private Cell lastCell = null;
-    private PointInt lastDir = null;
+    private TileDir lastDir = null;
 
     public void SetupEnvironment(Car car, World world, Game game, LiMap.Cell cell) {
       this.car = car;
@@ -53,7 +53,7 @@ namespace RussianAICup2015Car.Sources.Map {
       if (null != transition && !transition.Cell.Pos.Equals(cell.Pos)) {
         lastCell = transition.Cell;
 
-        PointInt nextPos = getNextPos(cell);
+        TileDir nextPos = getNextPos(cell);
         if (nextPos.Equals(lastCell.Pos)) {
           lastCell = null;
           lastDir = nextPos - cell.Pos;
@@ -77,7 +77,7 @@ namespace RussianAICup2015Car.Sources.Map {
       Logger.instance.Assert(3 <= path.Length, "Can't find full path.");
     }
 
-    private PointInt getNextPos(LiMap.Cell mapCell) {
+    private TileDir getNextPos(LiMap.Cell mapCell) {
       Tuple<LiMap.Cell, int> next = null;
       foreach (Tuple<LiMap.Cell, int> neighboring in mapCell.NeighboringCells) {
         if (null == next || neighboring.Item2 < next.Item2) {
@@ -88,12 +88,12 @@ namespace RussianAICup2015Car.Sources.Map {
       return next.Item1.Pos;
     }
 
-    private CellTransition mergePath(Cell lastCell, PointInt dir, CellTransition iter, LiMap.Cell mapCell, int depthCount, int depth) {
+    private CellTransition mergePath(Cell lastCell, TileDir dir, CellTransition iter, LiMap.Cell mapCell, int depthCount, int depth) {
       if (null != iter && depthCount > 0) {
         if (iter.Cell.Pos.Equals(mapCell.Pos) && null != iter.Next) {
           foreach (Tuple<LiMap.Cell, int> neighboring in mapCell.NeighboringCells) {
             if (iter.Next.Cell.Pos.Equals(neighboring.Item1.Pos)) {
-              PointInt nextDir = iter.Next.Cell.Pos - iter.Cell.Pos;
+              TileDir nextDir = iter.Next.Cell.Pos - iter.Cell.Pos;
               iter.Next = mergePath(iter.Cell, nextDir, iter.Next, neighboring.Item1, depthCount - 1, depth + 1);
               return iter;
             }
@@ -122,11 +122,11 @@ namespace RussianAICup2015Car.Sources.Map {
       return result;
     }
 
-    private PointInt currentPos() {
-      return new PointInt((int)(car.X / game.TrackTileSize), (int)(car.Y / game.TrackTileSize));
+    private TileDir currentPos() {
+      return new TileDir((int)(car.X / game.TrackTileSize), (int)(car.Y / game.TrackTileSize));
     }
 
-    private PointInt currentDir() {
+    private TileDir currentDir() {
       Physic.PCar physicCar = new Physic.PCar(car, game);
       int ticks = (int)Math.Abs(Math.Round(physicCar.WheelTurn / game.CarWheelTurnChangePerTick));
 
@@ -135,13 +135,13 @@ namespace RussianAICup2015Car.Sources.Map {
 
 
       if (Math.Abs(physicCar.Dir.X) > Math.Abs(physicCar.Dir.X)) {
-        return new PointInt(Math.Sign(physicCar.Dir.X), 0);
+        return new TileDir(Math.Sign(physicCar.Dir.X), 0);
       } else {
-        return new PointInt(0, Math.Sign(physicCar.Dir.Y));
+        return new TileDir(0, Math.Sign(physicCar.Dir.Y));
       }
     }
 
-    private CellTransition calculatePath(Cell lastCell, LiMap.Cell cell, PointInt DirIn, HashSet<LiMap.Cell> visited, int depth) {
+    private CellTransition calculatePath(Cell lastCell, LiMap.Cell cell, TileDir DirIn, HashSet<LiMap.Cell> visited, int depth) {
       if (visited.Contains(cell) || depth <= 0) {
         return null;
       }
@@ -155,7 +155,7 @@ namespace RussianAICup2015Car.Sources.Map {
       CellTransition max = null;
 
       foreach(Tuple<LiMap.Cell,int> neighboring in cell.NeighboringCells) {
-        PointInt dir = neighboring.Item1.Pos - cell.Pos;
+        TileDir dir = neighboring.Item1.Pos - cell.Pos;
         resultCell.DirOut = dir;
 
         CellTransition transition = calculatePath(resultCell, neighboring.Item1, dir, visited, depth);
@@ -168,8 +168,8 @@ namespace RussianAICup2015Car.Sources.Map {
         }
       }
 
-      List<PointInt> dirOuts = new List<PointInt>();
-      foreach(PointInt dir in cell.Dirs) {
+      List<TileDir> dirOuts = new List<TileDir>();
+      foreach(TileDir dir in cell.Dirs) {
         if (!dir.Equals(DirIn.Negative())) {
           dirOuts.Add(dir);
         }
@@ -194,7 +194,7 @@ namespace RussianAICup2015Car.Sources.Map {
       double priority = 0;
 
       foreach (Bonus bonus in world.Bonuses) {
-        PointInt pos = new PointInt((int)(bonus.X/game.TrackTileSize), (int)(bonus.Y/game.TrackTileSize));
+        TileDir pos = new TileDir((int)(bonus.X/game.TrackTileSize), (int)(bonus.Y/game.TrackTileSize));
         if (pos.Equals(cell.Pos)) {
           priority += 0.1;
         }
@@ -206,7 +206,7 @@ namespace RussianAICup2015Car.Sources.Map {
           continue;
         }
 
-        PointInt carPos = new PointInt((int)(car.X / game.TrackTileSize), (int)(car.Y / game.TrackTileSize));
+        TileDir carPos = new TileDir((int)(car.X / game.TrackTileSize), (int)(car.Y / game.TrackTileSize));
         if (!carPos.Equals(cell.Pos)) {
           continue;
         }
@@ -236,13 +236,13 @@ namespace RussianAICup2015Car.Sources.Map {
       return Math.Min(angle, angleReverse) < Math.PI / 9;
     }
 
-    private bool pointStraight(PointInt pos) {
+    private bool pointStraight(TileDir pos) {
       if (!smallAngle()) {
         return false;
       }
 
-      PointInt distance = pos - currentPos();
-      PointInt dir = currentDir();
+      TileDir distance = pos - currentPos();
+      TileDir dir = currentDir();
 
       int distanceLength = Math.Abs(distance.X) + Math.Abs(distance.Y);
 
@@ -266,7 +266,7 @@ namespace RussianAICup2015Car.Sources.Map {
       return tilePriority(lastCell.DirIn, cell.Pos - lastCell.Pos, cell.DirIn, cell.DirOut);
     }
 
-    private double tilePriority(PointInt dirIn, PointInt dirOut, PointInt nextDirIn, PointInt nextDirOut) {
+    private double tilePriority(TileDir dirIn, TileDir dirOut, TileDir nextDirIn, TileDir nextDirOut) {
       if (dirIn.Negative().Equals(dirOut) || nextDirIn.Negative().Equals(nextDirOut)) {
         return -8;
       }

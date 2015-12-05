@@ -5,12 +5,12 @@ using System;
 
 namespace RussianAICup2015Car.Sources.Actions.Moving {
   class BackwardMoving : MovingBase {
-    private PointInt movedDir = null;
+    private TileDir movedDir = null;
 
     public override bool valid() {
       Logger.instance.Assert(3 <= path.Count, "incorrect way cells count.");
 
-      PointInt dir = path[0].DirOut;
+      TileDir dir = path[0].DirOut;
 
       if (null != movedDir && !dir.Equals(movedDir)) {
         return true;

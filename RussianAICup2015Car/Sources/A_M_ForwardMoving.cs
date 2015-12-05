@@ -12,7 +12,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
     }
 
     public override void execute(Move move) {
-      PointInt dirMove = path[0].DirOut;
+      TileDir dirMove = path[0].DirOut;
 
       Vector endPos = EndSidePos();
 
@@ -72,9 +72,9 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
 
 
     private Vector EndSidePos() {
-      PointInt pos = path[0].Pos;
-      PointInt dir = path[0].DirOut;
-      PointInt normal = new PointInt(0);
+      TileDir pos = path[0].Pos;
+      TileDir dir = path[0].DirOut;
+      TileDir normal = new TileDir(0);
 
       for (int i = 1; i < Math.Min(8, path.Count); i++) {
         if (null == path[i].DirOut) {
@@ -92,7 +92,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       return EndSidePos(pos, dir, normal.Negative());
     }
 
-    private Vector EndSidePos(PointInt pos, PointInt dir, PointInt normal) {
+    private Vector EndSidePos(TileDir pos, TileDir dir, TileDir normal) {
       double sideDistance = (game.TrackTileSize * 0.5) - game.TrackTileMargin - game.CarHeight * 0.75;
 
       double centerX = (pos.X +0.5) * game.TrackTileSize;

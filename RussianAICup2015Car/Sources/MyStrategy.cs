@@ -52,9 +52,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
     };
 
     public void Move(Car car, World world, Game game, Move move) {
-      map.setupEnvironment(car, world, game);
-      path.SetupEnvironment(car, world, game, map.cellByMaxDepth(8));
-      CollisionDetector.instance.SetupEnvironment(game, map);
+      setupEnvironment(car, world, game, move);
 
       path.CalculatePath();
 
@@ -88,6 +86,15 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       }
 
       Logger.instance.Debug("Car Speed: {0:F} Car Angle:{1:F3}", car.Speed(), car.Angle);
+    }
+
+    private void setupEnvironment(Car car, World world, Game game, Move move) {
+      TilePos.TileSize = game.TrackTileSize;
+
+      map.setupEnvironment(car, world, game);
+      path.SetupEnvironment(car, world, game, map.cellByMaxDepth(8));
+
+      CollisionDetector.instance.SetupEnvironment(game, map);
     }
   }
 }

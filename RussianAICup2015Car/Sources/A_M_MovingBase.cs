@@ -11,7 +11,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       SideCrash
     }
 
-    protected Vector GetWaySideEnd(PointInt pos, PointInt dir, PointInt normal) {
+    protected Vector GetWaySideEnd(TileDir pos, TileDir dir, TileDir normal) {
       double sideDistance = game.TrackTileMargin + game.CarHeight * 0.5;
       double endSideDistance = game.TrackTileSize * 0.5 - sideDistance;
 
@@ -23,7 +23,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       return new Vector(endX, endY);
     }
 
-    protected Vector GetWayEnd(PointInt wayPos, PointInt dir) {
+    protected Vector GetWayEnd(TileDir wayPos, TileDir dir) {
       double nextWaypointX = (wayPos.X + 0.5 + dir.X * 0.5) * game.TrackTileSize;
       double nextWaypointY = (wayPos.Y + 0.5 + dir.Y * 0.5) * game.TrackTileSize;
       return new Vector(nextWaypointX, nextWaypointY);
