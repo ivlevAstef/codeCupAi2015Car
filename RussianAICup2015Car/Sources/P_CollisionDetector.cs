@@ -10,21 +10,20 @@ namespace RussianAICup2015Car.Sources.Physic {
     public static readonly CollisionDetector instance = new CollisionDetector();
 
     private Game game;
-    private LiMap map;
+    private GlobalMap gmap;
 
-    public void SetupEnvironment(Game game, LiMap map) {
+    public void SetupEnvironment(Game game, GlobalMap gmap) {
       this.game = game;
-      this.map = map;
+      this.gmap = gmap;
     }
 
     ////////////////////////////////////////////////CIRCLE
 
     /// <returns>intersect pos</returns>
     public Vector IntersectCircleWithMap(Vector center, double radius) {
-      int xTile = (int)(center.X / game.TrackTileSize);
-      int yTile = (int)(center.Y / game.TrackTileSize);
-      Direction[] dirs = map.reverseDirsByPos(xTile, yTile);
-      if (null == dirs || 4 == dirs.Length/*undefined or empty*/) {
+      TilePos tilePos = new TilePos(center.X, center.Y);
+      HashSet<TileDir> dirs = gmap.ReverseDirs(tilePos);
+      if (null == dirs || 4 == dirs.Count/*undefined or empty*/) {
         return null;
       }
 
@@ -32,7 +31,7 @@ namespace RussianAICup2015Car.Sources.Physic {
       double distanceToSide = game.TrackTileSize * 0.5 - game.TrackTileMargin;
       double minDistanceToSide = distanceToSide - radius;
 
-      Vector tileCenter = new Vector(xTile + 0.5, yTile + 0.5) * game.TrackTileSize;
+      Vector tileCenter = new Vector(tilePos.X + 0.5, tilePos.Y + 0.5) * game.TrackTileSize;
       Vector distanceFromCenter = center - tileCenter;
 
       //circle near the center tile
@@ -40,7 +39,7 @@ namespace RussianAICup2015Car.Sources.Physic {
         return null;
       }
 
-      foreach (Direction dirInt in dirs) {
+      foreach (TileDir dirInt in dirs) {
         Vector dir = new Vector(dirInt.X, dirInt.Y);
         Vector intersectPos = IntersectCircleWithSide(center, radius, dir, tileCenter + dir * distanceToSide);
         if (null != intersectPos) {
@@ -86,26 +85,22 @@ namespace RussianAICup2015Car.Sources.Physic {
     ////////////////////////////////////////////////CAR
 
     /// <returns>normal outside map</returns>
-    public Vector IntersectCarWithMap(Vector carPos, Vector carDir, Direction[] additionalSide = null) {
-      int xTile = (int)(carPos.X / game.TrackTileSize);
-      int yTile = (int)(carPos.Y / game.TrackTileSize);
-      Direction[] dirs = map.reverseDirsByPos(xTile, yTile);
-      if (null == dirs || 4 == dirs.Length/*undefined or empty*/) {
+    public Vector IntersectCarWithMap(Vector carPos, Vector carDir, TileDir[] additionalSide = null) {
+      TilePos tilePos = new TilePos(carPos.X, carPos.Y);
+      HashSet<TileDir> dirs = gmap.ReverseDirs(tilePos);
+      if (null == dirs || 4 == dirs.Count/*undefined or empty*/) {
         return null;
       }
 
       if (null != additionalSide) {
-        HashSet<Direction> allDirs = new HashSet<Direction>(dirs);
-        allDirs.UnionWith(additionalSide);
-        dirs = new Direction[allDirs.Count];
-        allDirs.CopyTo(dirs);
+        dirs.UnionWith(additionalSide);
       }
 
       double sideRadius = game.TrackTileMargin * 1.05;
       double distanceToSide = game.TrackTileSize * 0.5 - game.TrackTileMargin * 1.05;
       double minDistanceToSide = distanceToSide - game.CarWidth * 0.5;
 
-      Vector center = new Vector(xTile + 0.5, yTile + 0.5) * game.TrackTileSize;
+      Vector center = new Vector(tilePos.X + 0.5, tilePos.Y + 0.5) * game.TrackTileSize;
       Vector distanceFromCenter = carPos - center;
 
       //car near the center tile
@@ -113,7 +108,7 @@ namespace RussianAICup2015Car.Sources.Physic {
         return null;
       }
 
-      foreach (Direction dirInt in dirs) {
+      foreach (TileDir dirInt in dirs) {
         Vector dir = new Vector(dirInt.X, dirInt.Y);
         if (IntersectCarWithSide(carPos, carDir, dir, center + dir * distanceToSide)) {
           return dir.Negative();
@@ -134,9 +129,9 @@ namespace RussianAICup2015Car.Sources.Physic {
     }
 
     public bool IntersectCarWithCircle(Vector pos, Vector dir, Vector center, double radius) {
-      Vector direction = center - pos;
-      double distanceLength = direction.Dot(dir);
-      double distanceCross = direction.Dot(dir.Perpendicular());
+      Vector TileDir = center - pos;
+      double distanceLength = TileDir.Dot(dir);
+      double distanceCross = TileDir.Dot(dir.Perpendicular());
 
       //inside
       if (Math.Abs(distanceLength) < game.CarWidth * 0.5 && Math.Abs(distanceCross) < game.CarHeight * 0.5) {

@@ -64,8 +64,8 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
         return true;
       }
 
-      TileDir posIn = path[1 + offset].Pos;
-      TileDir posOut = path[2 + offset].Pos;
+      TilePos posIn = path[1 + offset].Pos;
+      TilePos posOut = path[2 + offset].Pos;
 
       TileDir dirIn = path[1 + offset].DirIn;
       TileDir dirOut = path[2 + offset].DirOut;

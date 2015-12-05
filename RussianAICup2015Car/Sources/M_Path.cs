@@ -6,7 +6,7 @@ using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
 namespace RussianAICup2015Car.Sources.Map {
   public class Path {
     public class Cell {
-      public TileDir Pos;
+      public TilePos Pos;
 
       public TileDir DirIn;
       public TileDir DirOut;
@@ -42,18 +42,19 @@ namespace RussianAICup2015Car.Sources.Map {
     private Cell lastCell = null;
     private TileDir lastDir = null;
 
-    public void SetupEnvironment(Car car, World world, Game game, LiMap.Cell cell) {
+    public void SetupEnvironment(Car car, World world, Game game) {
       this.car = car;
       this.world = world;
       this.game = game;
-      this.cell = cell;
     }
 
-    public void CalculatePath() {
+    public void CalculatePath(LiMap.Cell cell) {
+      this.cell = cell;
+
       if (null != transition && !transition.Cell.Pos.Equals(cell.Pos)) {
         lastCell = transition.Cell;
 
-        TileDir nextPos = getNextPos(cell);
+        TilePos nextPos = getNextPos(cell);
         if (nextPos.Equals(lastCell.Pos)) {
           lastCell = null;
           lastDir = nextPos - cell.Pos;
@@ -77,7 +78,7 @@ namespace RussianAICup2015Car.Sources.Map {
       Logger.instance.Assert(3 <= path.Length, "Can't find full path.");
     }
 
-    private TileDir getNextPos(LiMap.Cell mapCell) {
+    private TilePos getNextPos(LiMap.Cell mapCell) {
       Tuple<LiMap.Cell, int> next = null;
       foreach (Tuple<LiMap.Cell, int> neighboring in mapCell.NeighboringCells) {
         if (null == next || neighboring.Item2 < next.Item2) {
@@ -122,8 +123,8 @@ namespace RussianAICup2015Car.Sources.Map {
       return result;
     }
 
-    private TileDir currentPos() {
-      return new TileDir((int)(car.X / game.TrackTileSize), (int)(car.Y / game.TrackTileSize));
+    private TilePos currentPos() {
+      return new TilePos(car.X, car.Y);
     }
 
     private TileDir currentDir() {
@@ -194,7 +195,7 @@ namespace RussianAICup2015Car.Sources.Map {
       double priority = 0;
 
       foreach (Bonus bonus in world.Bonuses) {
-        TileDir pos = new TileDir((int)(bonus.X/game.TrackTileSize), (int)(bonus.Y/game.TrackTileSize));
+        TilePos pos = new TilePos(bonus.X, bonus.Y);
         if (pos.Equals(cell.Pos)) {
           priority += 0.1;
         }
@@ -206,7 +207,7 @@ namespace RussianAICup2015Car.Sources.Map {
           continue;
         }
 
-        TileDir carPos = new TileDir((int)(car.X / game.TrackTileSize), (int)(car.Y / game.TrackTileSize));
+        TilePos carPos = new TilePos(car.X, car.Y);
         if (!carPos.Equals(cell.Pos)) {
           continue;
         }
@@ -236,7 +237,7 @@ namespace RussianAICup2015Car.Sources.Map {
       return Math.Min(angle, angleReverse) < Math.PI / 9;
     }
 
-    private bool pointStraight(TileDir pos) {
+    private bool pointStraight(TilePos pos) {
       if (!smallAngle()) {
         return false;
       }
