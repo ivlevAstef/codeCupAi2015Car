@@ -66,6 +66,7 @@ namespace RussianAICup2015Car.Sources.Map {
 
       double speed = car.Speed();
       int mergeCells = Math.Min(3, (int)(speed / 6));//18
+      mergeCells = 0;
 
       lastDir = lastDir ?? currentDir();
       transition = mergePath(lastCell, lastDir, transition, cell, mergeCells, 0);
