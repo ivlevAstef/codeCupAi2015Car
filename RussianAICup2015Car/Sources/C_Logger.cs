@@ -1,7 +1,7 @@
 ﻿#define USE_LOG
 using System;
 
-namespace RussianAICup2015Car.Sources {
+namespace RussianAICup2015Car.Sources.Common {
   public class Logger {
     public static readonly Logger instance = new Logger();
 

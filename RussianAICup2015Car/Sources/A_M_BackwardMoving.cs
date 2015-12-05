@@ -1,9 +1,10 @@
-﻿using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
+﻿using RussianAICup2015Car.Sources.Common;
+using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
 using System.Collections.Generic;
 using System;
 
-namespace RussianAICup2015Car.Sources {
-  class A_M_BackwardAction : A_M_BaseMoveAction {
+namespace RussianAICup2015Car.Sources.Actions.Moving {
+  class BackwardMoving : MovingBase {
     private PointInt movedDir = null;
 
     public override bool valid() {

@@ -1,9 +1,10 @@
-﻿using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
+﻿using RussianAICup2015Car.Sources.Common;
+using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
 using System.Collections.Generic;
 using System;
 
-namespace RussianAICup2015Car.Sources {
-  class A_ShootingAction : A_BaseAction {
+namespace RussianAICup2015Car.Sources.Actions {
+  class ShootingAction : BaseAction {
     private static readonly int maxTireRebound = 1;
     private static readonly int tireCalculateTicks = 50;
 
@@ -50,7 +51,7 @@ namespace RussianAICup2015Car.Sources {
         return false;
       }
 
-      PhysicCar physicCar = new PhysicCar(enemy, game);
+      Physic.PCar physicCar = new Physic.PCar(enemy, game);
       physicCar.setEnginePower(1);
 
       double radius = Math.Min(car.Width, car.Height) * 0.25 + game.WasherRadius;
@@ -84,12 +85,12 @@ namespace RussianAICup2015Car.Sources {
     }
 
     private bool isRunTire() {
-      PhysicCar self = null;
-      List<PhysicCar> their = new List<PhysicCar>();
-      List<PhysicCar> enemies = new List<PhysicCar>();
+      Physic.PCar self = null;
+      List<Physic.PCar> their = new List<Physic.PCar>();
+      List<Physic.PCar> enemies = new List<Physic.PCar>();
 
       foreach (Car carIter in world.Cars) {
-        PhysicCar physicCar = new PhysicCar(carIter, game);
+        Physic.PCar physicCar = new Physic.PCar(carIter, game);
         physicCar.setEnginePower(1);
         if (carIter.IsTeammate) { 
           their.Add(physicCar);
@@ -106,12 +107,12 @@ namespace RussianAICup2015Car.Sources {
 
     }
 
-    private bool isRunTire(PhysicCar self, PhysicCar[] their, PhysicCar[] enemies) {
+    private bool isRunTire(Physic.PCar self, Physic.PCar[] their, Physic.PCar[] enemies) {
       Logger.instance.Assert(null != self, "Self car is null.");
 
       double maxAngle = Math.Sin(Math.PI / 6);
 
-      PhysicCar ignored = self;
+      Physic.PCar ignored = self;
 
       Vector tirePos = self.Pos;
       Vector tireSpd = self.Dir * game.TireInitialSpeed;
@@ -121,7 +122,7 @@ namespace RussianAICup2015Car.Sources {
       for (int i = 0; i < tireCalculateTicks; i++) {
         tirePos += tireSpd;
 
-        foreach (PhysicCar physicCar in their) {
+        foreach (Physic.PCar physicCar in their) {
           physicCar.Iteration(1);
 
           if (itersectTireWithCar(tirePos, tireSpd, physicCar, 2)) {
@@ -133,7 +134,7 @@ namespace RussianAICup2015Car.Sources {
           } 
         }
 
-        foreach (PhysicCar physicCar in enemies) {
+        foreach (Physic.PCar physicCar in enemies) {
           physicCar.Iteration(1);
 
           if (itersectTireWithCar(tirePos, tireSpd, physicCar, 0.25) ) {
@@ -144,7 +145,7 @@ namespace RussianAICup2015Car.Sources {
           }
         }
 
-        Vector itersectWithMap = CollisionDetector.instance.IntersectCircleWithMap(tirePos, game.TireRadius);
+        Vector itersectWithMap = Physic.CollisionDetector.instance.IntersectCircleWithMap(tirePos, game.TireRadius);
         if (null != itersectWithMap) {
           ignored = null;
           tireSpd = calcTireSpeedAfterKick(tireSpd, (tirePos - itersectWithMap).Normalize());
@@ -159,11 +160,11 @@ namespace RussianAICup2015Car.Sources {
       return false;
     }
 
-    private bool itersectTireWithCar(Vector tirePos, Vector tireSpd, PhysicCar car, double multR = 1) {
-      return CollisionDetector.instance.IntersectCarWithCircle(car.Pos, car.Dir, tirePos, game.TireRadius * multR);
+    private bool itersectTireWithCar(Vector tirePos, Vector tireSpd, Physic.PCar car, double multR = 1) {
+      return Physic.CollisionDetector.instance.IntersectCarWithCircle(car.Pos, car.Dir, tirePos, game.TireRadius * multR);
     }
 
-    private Vector intersectCarNormal(PhysicCar car, Vector pos) {
+    private Vector intersectCarNormal(Physic.PCar car, Vector pos) {
       double carSideAngle = Math.Atan2(game.CarHeight, game.CarWidth);
       double angle = car.Dir.Angle.AngleDeviation((pos - car.Pos).Angle);
 

@@ -1,9 +1,10 @@
-﻿using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
+﻿using RussianAICup2015Car.Sources.Common;
+using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
 using System.Collections.Generic;
 using System;
 
-namespace RussianAICup2015Car.Sources {
-  class A_MoveToBonusAction : A_BaseAction {
+namespace RussianAICup2015Car.Sources.Actions.Moving {
+  class BonusMoving : MovingBase {
     private Bonus findedBonus = null;
 
     public override bool valid() {
@@ -21,7 +22,7 @@ namespace RussianAICup2015Car.Sources {
 
       Vector endPos = new Vector(findedBonus.X, findedBonus.Y);
 
-      PhysicMoveCalculator calculator = new PhysicMoveCalculator();
+      Physic.MovingCalculator calculator = new Physic.MovingCalculator();
       calculator.setupEnvironment(car, game, world);
 
       Vector dir = new Vector(dirMove.X, dirMove.Y);

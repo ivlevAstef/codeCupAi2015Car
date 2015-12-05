@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
 
-namespace RussianAICup2015Car.Sources {
-  class A_Death : A_BaseAction {
+namespace RussianAICup2015Car.Sources.Actions {
+  class DeathAction : BaseAction {
     public override bool valid() {
       return car.Durability <= 1.0e-9;
     }

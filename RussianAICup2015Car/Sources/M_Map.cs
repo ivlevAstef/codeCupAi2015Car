@@ -1,9 +1,10 @@
-﻿using System;
+﻿using RussianAICup2015Car.Sources.Common;
+using System;
 using System.Collections.Generic;
 using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
 
-namespace RussianAICup2015Car.Sources {
-  public class Map {
+namespace RussianAICup2015Car.Sources.Map {
+  public class LiMap {
     public class Cell {
       public PointInt Pos { get; set; }
 

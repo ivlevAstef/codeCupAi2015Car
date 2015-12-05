@@ -42,35 +42,35 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Runner.cs" />
-    <Compile Include="Sources\A_AvoidSideHit.cs" />
-    <Compile Include="Sources\A_M_BaseMoveAction.cs" />
-    <Compile Include="Sources\A_Death.cs" />
-    <Compile Include="Sources\A_InitialFreeze.cs" />
-    <Compile Include="Sources\A_M_AroundAction.cs" />
-    <Compile Include="Sources\A_M_BackwardAction.cs" />
+    <Compile Include="Sources\A_M_AvoidSideHitMoving.cs" />
+    <Compile Include="Sources\A_M_MovingBase.cs" />
+    <Compile Include="Sources\A_DeathAction.cs" />
+    <Compile Include="Sources\A_InitialFreezeAction.cs" />
+    <Compile Include="Sources\A_M_AroundMoving.cs" />
+    <Compile Include="Sources\A_M_BackwardMoving.cs" />
     <Compile Include="Sources\A_BaseAction.cs" />
-    <Compile Include="Sources\A_M_ForwardAction.cs" />
+    <Compile Include="Sources\A_M_ForwardMoving.cs" />
     <Compile Include="Sources\A_IAction.cs" />
-    <Compile Include="Sources\A_M_PreTurnAction.cs" />
-    <Compile Include="Sources\A_M_SnakePreEnd.cs" />
-    <Compile Include="Sources\CollisionDetector.cs" />
-    <Compile Include="Sources\Constant.cs" />
-    <Compile Include="Sources\Extensions.cs" />
-    <Compile Include="Sources\Logger.cs" />
-    <Compile Include="Sources\A_MoveToBonusAction.cs" />
+    <Compile Include="Sources\A_M_PreTurnMoving.cs" />
+    <Compile Include="Sources\A_M_SnakePreEndMoving.cs" />
+    <Compile Include="Sources\P_CollisionDetector.cs" />
+    <Compile Include="Sources\C_Constant.cs" />
+    <Compile Include="Sources\C_Extensions.cs" />
+    <Compile Include="Sources\C_Logger.cs" />
+    <Compile Include="Sources\A_M_BonusMoving.cs" />
     <Compile Include="Sources\MyStrategy.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Sources\A_OilSpillAction.cs" />
-    <Compile Include="Sources\A_OvertakeAction.cs" />
+    <Compile Include="Sources\A_M_OvertakeMoving.cs" />
     <Compile Include="Sources\M_Map.cs" />
     <Compile Include="Sources\M_Path.cs" />
-    <Compile Include="Sources\PhysicCar.cs" />
-    <Compile Include="Sources\PhysicMoveCalculator.cs" />
-    <Compile Include="Sources\Point.cs" />
+    <Compile Include="Sources\P_PhysicCar.cs" />
+    <Compile Include="Sources\P_PhysicMoveCalculator.cs" />
+    <Compile Include="Sources\C_Point.cs" />
     <Compile Include="Sources\A_ShootingAction.cs" />
-    <Compile Include="Sources\A_M_SnakeAction.cs" />
-    <Compile Include="Sources\A_M_StuckOutAction.cs" />
-    <Compile Include="Sources\A_M_TurnAction.cs" />
+    <Compile Include="Sources\A_M_SnakeMoving.cs" />
+    <Compile Include="Sources\A_M_StuckOutMoving.cs" />
+    <Compile Include="Sources\A_M_TurnMoving.cs" />
     <Compile Include="Sources\A_UseNitroAction.cs" />
   </ItemGroup>
   <ItemGroup>

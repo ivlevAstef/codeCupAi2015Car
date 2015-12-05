@@ -1,8 +1,9 @@
-﻿using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
+﻿using RussianAICup2015Car.Sources.Common;
+using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
 using System.Collections.Generic;
 
-namespace RussianAICup2015Car.Sources {
-  class A_UseNitroAction : A_BaseAction {
+namespace RussianAICup2015Car.Sources.Actions {
+  class UseNitroAction : BaseAction {
     public override bool valid() {
       if (car.RemainingNitroCooldownTicks > 0 || car.NitroChargeCount <= 0) {
         return false;

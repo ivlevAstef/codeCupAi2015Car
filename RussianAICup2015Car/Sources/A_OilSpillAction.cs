@@ -1,9 +1,10 @@
-﻿using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
+﻿using RussianAICup2015Car.Sources.Common;
+using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
 using System.Collections.Generic;
 using System;
 
-namespace RussianAICup2015Car.Sources {
-  class A_OilSpillAction : A_BaseAction {
+namespace RussianAICup2015Car.Sources.Actions {
+  class OilSpillAction : BaseAction {
     public override bool valid() {
       if (car.RemainingOiledTicks > 0 || car.OilCanisterCount <= 0) {
         return false;

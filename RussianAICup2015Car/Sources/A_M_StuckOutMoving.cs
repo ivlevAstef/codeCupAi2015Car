@@ -1,9 +1,10 @@
-﻿using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
+﻿using RussianAICup2015Car.Sources.Common;
+using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
 using System.Collections.Generic;
 using System;
 
-namespace RussianAICup2015Car.Sources {
-  class A_M_StuckOutAction : A_M_BaseMoveAction {
+namespace RussianAICup2015Car.Sources.Actions.Moving {
+  class StuckOutMoving : MovingBase {
     private const double maxTicks = 100;
 
     private int ignoreTicks = 10;

@@ -1,8 +1,9 @@
-﻿using System;
+﻿using RussianAICup2015Car.Sources.Common;
+using System;
 using System.Collections.Generic;
 using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
 
-namespace RussianAICup2015Car.Sources {
+namespace RussianAICup2015Car.Sources.Map {
   public class Path {
     public class Cell {
       public PointInt Pos;
@@ -34,14 +35,14 @@ namespace RussianAICup2015Car.Sources {
     private Car car = null;
     private World world = null;
     private Game game = null;
-    private Map.Cell cell = null;
+    private LiMap.Cell cell = null;
 
     private CellTransition transition = null;
     private Cell[] path = null;
     private Cell lastCell = null;
     private PointInt lastDir = null;
 
-    public void SetupEnvironment(Car car, World world, Game game, Map.Cell cell) {
+    public void SetupEnvironment(Car car, World world, Game game, LiMap.Cell cell) {
       this.car = car;
       this.world = world;
       this.game = game;
@@ -75,9 +76,9 @@ namespace RussianAICup2015Car.Sources {
       Logger.instance.Assert(3 <= path.Length, "Can't find full path.");
     }
 
-    private PointInt getNextPos(Map.Cell mapCell) {
-      Tuple<Map.Cell, int> next = null;
-      foreach (Tuple<Map.Cell, int> neighboring in mapCell.NeighboringCells) {
+    private PointInt getNextPos(LiMap.Cell mapCell) {
+      Tuple<LiMap.Cell, int> next = null;
+      foreach (Tuple<LiMap.Cell, int> neighboring in mapCell.NeighboringCells) {
         if (null == next || neighboring.Item2 < next.Item2) {
           next = neighboring;
         }
@@ -86,10 +87,10 @@ namespace RussianAICup2015Car.Sources {
       return next.Item1.Pos;
     }
 
-    private CellTransition mergePath(Cell lastCell, PointInt dir, CellTransition iter, Map.Cell mapCell, int depthCount, int depth) {
+    private CellTransition mergePath(Cell lastCell, PointInt dir, CellTransition iter, LiMap.Cell mapCell, int depthCount, int depth) {
       if (null != iter && depthCount > 0) {
         if (iter.Cell.Pos.Equals(mapCell.Pos) && null != iter.Next) {
-          foreach (Tuple<Map.Cell, int> neighboring in mapCell.NeighboringCells) {
+          foreach (Tuple<LiMap.Cell, int> neighboring in mapCell.NeighboringCells) {
             if (iter.Next.Cell.Pos.Equals(neighboring.Item1.Pos)) {
               PointInt nextDir = iter.Next.Cell.Pos - iter.Cell.Pos;
               iter.Next = mergePath(iter.Cell, nextDir, iter.Next, neighboring.Item1, depthCount - 1, depth + 1);
@@ -99,7 +100,7 @@ namespace RussianAICup2015Car.Sources {
         }
       }
 
-      HashSet<Map.Cell> visited = new HashSet<Map.Cell>();
+      HashSet<LiMap.Cell> visited = new HashSet<LiMap.Cell>();
       return calculatePath(lastCell, mapCell, dir, visited, 8 - depth);
     }
 
@@ -125,7 +126,7 @@ namespace RussianAICup2015Car.Sources {
     }
 
     private PointInt currentDir() {
-      PhysicCar physicCar = new PhysicCar(car, game);
+      Physic.PCar physicCar = new Physic.PCar(car, game);
       int ticks = (int)Math.Abs(Math.Round(physicCar.WheelTurn / game.CarWheelTurnChangePerTick));
 
       physicCar.setWheelTurn(0);
@@ -139,7 +140,7 @@ namespace RussianAICup2015Car.Sources {
       }
     }
 
-    private CellTransition calculatePath(Cell lastCell, Map.Cell cell, PointInt DirIn, HashSet<Map.Cell> visited, int depth) {
+    private CellTransition calculatePath(Cell lastCell, LiMap.Cell cell, PointInt DirIn, HashSet<LiMap.Cell> visited, int depth) {
       if (visited.Contains(cell) || depth <= 0) {
         return null;
       }
@@ -152,7 +153,7 @@ namespace RussianAICup2015Car.Sources {
 
       CellTransition max = null;
 
-      foreach(Tuple<Map.Cell,int> neighboring in cell.NeighboringCells) {
+      foreach(Tuple<LiMap.Cell,int> neighboring in cell.NeighboringCells) {
         PointInt dir = neighboring.Item1.Pos - cell.Pos;
         resultCell.DirOut = dir;
 
@@ -247,8 +248,8 @@ namespace RussianAICup2015Car.Sources {
       return 0 == distanceLength || (Math.Sign(distance.X) == dir.X && Math.Sign(distance.Y) == dir.Y && distanceLength < 4);
     }
 
-     private bool currentStraight(HashSet<Map.Cell> visited) {
-      foreach(Map.Cell cell in visited) {
+     private bool currentStraight(HashSet<LiMap.Cell> visited) {
+      foreach(LiMap.Cell cell in visited) {
         if (!pointStraight(cell.Pos)) {
           return false;
         }

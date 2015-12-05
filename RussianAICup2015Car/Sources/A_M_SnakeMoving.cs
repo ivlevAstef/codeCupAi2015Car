@@ -1,9 +1,10 @@
-﻿using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
+﻿using RussianAICup2015Car.Sources.Common;
+using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
 using System.Collections.Generic;
 using System;
 
-namespace RussianAICup2015Car.Sources {
-  class A_M_SnakeAction : A_M_BaseMoveAction {
+namespace RussianAICup2015Car.Sources.Actions.Moving {
+  class SnakeMoving : MovingBase {
     public override bool valid() {
       Logger.instance.Assert(3 <= path.Count, "incorrect way cells count.");
 
@@ -17,7 +18,7 @@ namespace RussianAICup2015Car.Sources {
       Vector endPos = GetWayEnd(path[1].Pos, dirEnd);
       Vector dir = new Vector(dirMove.X + dirEnd.X, dirMove.Y + dirEnd.Y).Normalize();
 
-      PhysicMoveCalculator calculator = new PhysicMoveCalculator();
+      Physic.MovingCalculator calculator = new Physic.MovingCalculator();
       calculator.setupEnvironment(car, game, world);
 
       Move needMove = calculator.calculateMove(endPos, new Vector(dirMove.X, dirMove.Y), dir, 0.5);

@@ -1,9 +1,10 @@
-﻿using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
+﻿using RussianAICup2015Car.Sources.Common;
+using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
 using System.Collections.Generic;
 using System;
 
-namespace RussianAICup2015Car.Sources {
-  class A_M_SnakePreEnd : A_M_BaseMoveAction {
+namespace RussianAICup2015Car.Sources.Actions.Moving {
+  class SnakePreEndMoving : MovingBase {
     private const int offset = 1;
 
     public override bool valid() {
@@ -38,7 +39,7 @@ namespace RussianAICup2015Car.Sources {
       Vector dir = new Vector(dirMove.X + dirEnd.X, dirMove.Y + dirEnd.Y).Normalize();
       dirMove = path[0].DirOut;
 
-      PhysicMoveCalculator calculator = new PhysicMoveCalculator();
+      Physic.MovingCalculator calculator = new Physic.MovingCalculator();
       calculator.setupEnvironment(car, game, world);
 
       Move needMove = calculator.calculateMove(endPos, new Vector(dirMove.X, dirMove.Y), dir, 0.5);

@@ -1,18 +1,19 @@
-﻿using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
+﻿using RussianAICup2015Car.Sources.Common;
+using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
 using System.Collections.Generic;
 using System;
 
-namespace RussianAICup2015Car.Sources {
-  class A_AvoidSideHit : A_BaseAction {
+namespace RussianAICup2015Car.Sources.Actions.Moving {
+  class AvoidSideHitMoving : MovingBase {
     private const int MaxCheckTicks = 40;
 
     public override bool valid() {
 
-      PhysicCar self = new PhysicCar(car, game);
-      List<PhysicCar> enemies = new List<PhysicCar>();
+      Physic.PCar self = new Physic.PCar(car, game);
+      List<Physic.PCar> enemies = new List<Physic.PCar>();
       foreach (Car iter in world.Cars) {
         if (iter.Id != car.Id) {
-          enemies.Add(new PhysicCar(iter, game));
+          enemies.Add(new Physic.PCar(iter, game));
         }
       }
 
@@ -23,18 +24,18 @@ namespace RussianAICup2015Car.Sources {
       move.IsBrake = true;
     }
 
-    private bool checkSideHit(PhysicCar self, List<PhysicCar> enemies) {
+    private bool checkSideHit(Physic.PCar self, List<Physic.PCar> enemies) {
       double checkRadius = (game.CarHeight + game.CarWidth) * Math.Sqrt(2) * 0.5;
       double maxAngle = Math.Sin(Math.PI / 6);
 
       self.setEnginePower(1);
-      foreach (PhysicCar enemy in enemies) {
+      foreach (Physic.PCar enemy in enemies) {
         enemy.setEnginePower(1);
       }
 
       for (int i = 0; i < MaxCheckTicks; i++) {
         self.Iteration(1);
-        foreach (PhysicCar enemy in enemies) {
+        foreach (Physic.PCar enemy in enemies) {
           enemy.Iteration(1);
 
           Vector distance = enemy.Pos - self.Pos;

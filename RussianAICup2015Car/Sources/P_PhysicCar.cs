@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
 
-namespace RussianAICup2015Car.Sources {
-  public class PhysicCar {
+using RussianAICup2015Car.Sources.Common;
+
+namespace RussianAICup2015Car.Sources.Physic {
+  public class PCar {
     private const double dt = 1;
     private const double oilFrictionMult = 0.3;
     private const double oilBrakeFactor = 0.3;
@@ -48,7 +50,7 @@ namespace RussianAICup2015Car.Sources {
     private readonly double frictionAngle;
     private readonly double frictionMaxAngleSpeed;
 
-    public PhysicCar(Car car, Game game) {
+    public PCar(Car car, Game game) {
       this.car = car;
       this.game = game;
 
@@ -64,7 +66,7 @@ namespace RussianAICup2015Car.Sources {
       init();
     }
 
-    public PhysicCar(PhysicCar physicCar) : this(physicCar.car, physicCar.game) {
+    public PCar(PCar physicCar) : this(physicCar.car, physicCar.game) {
       wheelTurn = physicCar.wheelTurn;
       idealWheelTurn = physicCar.idealWheelTurn;
       enginePower = physicCar.enginePower;

@@ -2,14 +2,17 @@
 using System;
 using System.Collections.Generic;
 
-namespace RussianAICup2015Car.Sources {
+using RussianAICup2015Car.Sources.Common;
+using RussianAICup2015Car.Sources.Map;
+
+namespace RussianAICup2015Car.Sources.Physic {
   public class CollisionDetector {
     public static readonly CollisionDetector instance = new CollisionDetector();
 
     private Game game;
-    private Map map;
+    private LiMap map;
 
-    public void SetupEnvironment(Game game, Map map) {
+    public void SetupEnvironment(Game game, LiMap map) {
       this.game = game;
       this.map = map;
     }

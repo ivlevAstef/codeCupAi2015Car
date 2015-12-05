@@ -1,7 +1,10 @@
 ﻿using System.Collections.Generic;
 using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
 
-namespace RussianAICup2015Car.Sources {
+using RussianAICup2015Car.Sources.Map;
+
+namespace RussianAICup2015Car.Sources.Actions {
+
   public enum ActionType {
     InitialFreeze,
     Death,
@@ -25,8 +28,8 @@ namespace RussianAICup2015Car.Sources {
     UseNitro
   };
 
-  public interface A_IAction {
-    void setupEnvironment(Car car, World world, Game game, Map map, Path path);
+  public interface IAction {
+    void setupEnvironment(Car car, World world, Game game, LiMap map, Path path);
 
     bool valid();
 

@@ -1,16 +1,18 @@
 ﻿using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
 using System.Collections.Generic;
 
-namespace RussianAICup2015Car.Sources {
+using RussianAICup2015Car.Sources.Map;
 
-  public abstract class A_BaseAction : A_IAction {
+namespace RussianAICup2015Car.Sources.Actions {
+
+  public abstract class BaseAction : IAction {
     protected Car car = null;
     protected World world = null;
     protected Game game = null;
-    protected Map map = null;
+    protected LiMap map = null;
     protected Path path = null;
 
-    public void setupEnvironment(Car car, World world, Game game, Map map, Path path) {
+    public void setupEnvironment(Car car, World world, Game game, LiMap map, Path path) {
       this.car = car;
       this.world = world;
       this.game = game;

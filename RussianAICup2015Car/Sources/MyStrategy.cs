@@ -3,32 +3,39 @@ using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
 using RussianAICup2015Car.Sources;
 using System.Collections.Generic;
 
+using RussianAICup2015Car.Sources.Common;
+using RussianAICup2015Car.Sources.Actions;
+using RussianAICup2015Car.Sources.Actions.Moving;
+using RussianAICup2015Car.Sources.Map;
+using RussianAICup2015Car.Sources.Physic;
+
+
 namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
   public sealed class MyStrategy : IStrategy {
-    private Map map = new Map();
+    private LiMap map = new LiMap();
     private Path path = new Path();
 
-    private Dictionary<ActionType, A_IAction> actions = new Dictionary<ActionType, A_IAction> {
-      { ActionType.InitialFreeze, new A_InitialFreeze()},
-      { ActionType.Death, new A_Death()},
+    private Dictionary<ActionType, IAction> actions = new Dictionary<ActionType, IAction> {
+      { ActionType.InitialFreeze, new InitialFreezeAction()},
+      { ActionType.Death, new DeathAction()},
 
-      { ActionType.Forward, new A_M_ForwardAction()},
-      { ActionType.Backward, new A_M_BackwardAction()},
-      { ActionType.PreTurn, new A_M_PreTurnAction()},
-      { ActionType.SnakePreEnd, new A_M_SnakePreEnd()},
-      { ActionType.Turn, new A_M_TurnAction()},
-      { ActionType.Snake, new A_M_SnakeAction()},
-      { ActionType.Around, new A_M_AroundAction()},
-      { ActionType.StuckOut, new A_M_StuckOutAction()},
+      { ActionType.Forward, new ForwardMoving()},
+      { ActionType.Backward, new BackwardMoving()},
+      { ActionType.PreTurn, new PreTurnMoving()},
+      { ActionType.SnakePreEnd, new SnakePreEndMoving()},
+      { ActionType.Turn, new TurnMoving()},
+      { ActionType.Snake, new SnakeMoving()},
+      { ActionType.Around, new AroundMoving()},
+      { ActionType.StuckOut, new StuckOutMoving()},
 
-      { ActionType.MoveToBonus, new A_MoveToBonusAction()},
+      { ActionType.MoveToBonus, new BonusMoving()},
       //{ ActionType.Overtake, new A_OvertakeAction()},
-      { ActionType.AvoidSideHit, new A_AvoidSideHit()},
+      { ActionType.AvoidSideHit, new AvoidSideHitMoving()},
       //{ ActionType.AvoidWindShieldHit, new ()},
 
-      { ActionType.Shooting, new A_ShootingAction()},
-      { ActionType.OilSpill, new A_OilSpillAction()},
-      { ActionType.UseNitro, new A_UseNitroAction()},
+      { ActionType.Shooting, new ShootingAction()},
+      { ActionType.OilSpill, new OilSpillAction()},
+      { ActionType.UseNitro, new UseNitroAction()},
     };
 
     private ActionType[] baseActions = new ActionType[] {
@@ -51,11 +58,11 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
 
       path.CalculatePath();
 
-      foreach (A_IAction action in actions.Values) {
+      foreach (IAction action in actions.Values) {
         action.setupEnvironment(car, world, game, map, path);
       }
 
-      A_IAction callAction = null;
+      IAction callAction = null;
 
       foreach (ActionType actionType in baseActions) {
         if (actions[actionType].valid()) {

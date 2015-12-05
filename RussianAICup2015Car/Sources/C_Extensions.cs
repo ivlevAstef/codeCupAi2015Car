@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
 
-namespace RussianAICup2015Car.Sources {
+namespace RussianAICup2015Car.Sources.Common {
   public static class Extensions {
     public static Vector CenterTile(this Car car, Game game) {
       double x = Math.Floor(car.X / game.TrackTileSize);
@@ -40,7 +40,7 @@ namespace RussianAICup2015Car.Sources {
     }
 
     public static double AngleForZeroWheelTurn(this Car car, Game game) {
-      PhysicCar physicCar = new PhysicCar(car, game);
+      Physic.PCar physicCar = new Physic.PCar(car, game);
       physicCar.setWheelTurn(0);
 
       for (int i = 0; i < 25; i++) {

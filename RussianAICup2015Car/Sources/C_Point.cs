@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace RussianAICup2015Car.Sources {
+namespace RussianAICup2015Car.Sources.Common {
   public class Point<Type> where Type : struct {
     public Type X;
     public Type Y;

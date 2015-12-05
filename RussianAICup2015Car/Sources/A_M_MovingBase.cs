@@ -1,9 +1,10 @@
-﻿using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
+﻿using RussianAICup2015Car.Sources.Common;
+using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
 using System.Collections.Generic;
 using System;
 
-namespace RussianAICup2015Car.Sources {
-  public abstract class A_M_BaseMoveAction : A_BaseAction {
+namespace RussianAICup2015Car.Sources.Actions.Moving {
+  public abstract class MovingBase : BaseAction {
     public enum MoveEndType {
       Success,
       NotArrival,
