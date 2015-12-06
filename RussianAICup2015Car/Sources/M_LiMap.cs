@@ -6,11 +6,19 @@ using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
 namespace RussianAICup2015Car.Sources.Map {
   public class LiMap {
     public class Cell {
-      public TilePos Pos { get; set; }
+      public readonly TilePos Pos;
+      public readonly HashSet<TileDir> Dirs;
+      public Transition[] Transitions { get { return transitions; } }
+      private Transition[] transitions;
 
-      public HashSet<TileDir> Dirs { get; set; }
-      public List<Transition> Transitions { get; set; }//int - Value of shortening the distance to checkpoint. default -1.
-      //contains only valid cells -> by which you can get to the checkpoint
+      public Cell(TilePos pos, HashSet<TileDir> dirs) {
+        this.Pos = pos;
+        this.Dirs = dirs;
+      }
+
+      public void setTransitions(List<Transition> transitions) {
+        this.transitions = transitions.ToArray();
+      }
     }
 
     public class Transition {
@@ -24,8 +32,8 @@ namespace RussianAICup2015Car.Sources.Map {
     }
 
     private class CellKey {
-      public TilePos Pos;
-      public int CheckPoint;
+      public readonly TilePos Pos;
+      public readonly int CheckPoint;
 
       public CellKey(TilePos pos, int checkPoint) {
         this.Pos = pos;
@@ -46,13 +54,13 @@ namespace RussianAICup2015Car.Sources.Map {
       }
     }
 
-    private class PrivateCellData {
-      public Cell Cell;
-      public int CheckPointOffset;
-      public int Depth;
-      public bool Alternative;
+    private class CellData {
+      public Cell Cell { get; set; }
+      public int CheckPointOffset { get; set; }
+      public int Depth { get; set; }
+      public bool Alternative { get; set; }
 
-      public PrivateCellData(Cell cell, int checkPoint, int depth, bool alternative) {
+      public CellData(Cell cell, int checkPoint, int depth, bool alternative) {
         this.Cell = cell;
         this.CheckPointOffset = checkPoint;
         this.Depth = depth;
@@ -63,7 +71,7 @@ namespace RussianAICup2015Car.Sources.Map {
     private Car car = null;
     private GlobalMap gmap = null;
 
-    private TilePos posCache = null;
+    private TilePos lastCarTilePos = null;
     private Dictionary<TilePos, int[,]> mapCache = new Dictionary<TilePos, int[,]>();
 
     public void SetupEnvironment(Car car, GlobalMap gmap) {
@@ -72,32 +80,48 @@ namespace RussianAICup2015Car.Sources.Map {
     }
 
     public Cell Transitions(int maxDepth) {
-      TilePos current = new TilePos(car.X, car.Y);
-      if (null == posCache || !posCache.Equals(current)) {
+      TilePos currentCarTilePos = new TilePos(car.X, car.Y);
+      if (null == lastCarTilePos || !lastCarTilePos.Equals(currentCarTilePos)) {
         mapCache.Clear();
-        posCache = current;
+        lastCarTilePos = currentCarTilePos;
       }
 
-      Cell result = createCell(current, 0, maxDepth);
+      Cell result = new Cell(currentCarTilePos, gmap.Dirs(currentCarTilePos));
+      fillCell(result, 0, maxDepth);
 
       HashSet<Cell> visited = new HashSet<Cell>();
-      result = simplifiedCell(result, visited);
+      simplifiedCell(result, visited);
 
       return result;
     }
 
-    private Cell createCell(TilePos beginPos, int beginCheckPointOffset, int maxDepth) {
-      Cell res = new Cell();
-      res.Pos = beginPos;
+    private void simplifiedCell(Cell cell, HashSet<Cell> visited) {
+      List<Transition> transitions = new List<Transition>();
 
-      Dictionary<CellKey, Cell> allCells = new Dictionary<CellKey, Cell>();
+      visited.Add(cell);
 
-      Queue<PrivateCellData> stack = new Queue<PrivateCellData>();
-      stack.Enqueue(new PrivateCellData(res, beginCheckPointOffset, 0, false));
-      allCells.Add(new CellKey(beginPos, beginCheckPointOffset), res);
+      foreach (Transition data in cell.Transitions) {
+        if (null != data.ToCell.Dirs && null != data.ToCell.Transitions) {
+          if (!visited.Contains(data.ToCell)) {
+            simplifiedCell(data.ToCell, visited);
+            
+          }
+          transitions.Add(new Transition(data.ToCell, data.Weight));
+        }
+      }
+
+      cell.setTransitions(transitions);
+    }
+
+    private void fillCell(Cell cell, int beginCheckPointOffset, int maxDepth) {
+      Dictionary<CellKey, Cell> cellsCache = new Dictionary<CellKey, Cell>();
+      cellsCache.Add(new CellKey(cell.Pos, beginCheckPointOffset), cell);
+
+      Queue<CellData> stack = new Queue<CellData>();
+      stack.Enqueue(new CellData(cell, beginCheckPointOffset, 0, false));
 
       while(stack.Count > 0) {
-        PrivateCellData data = stack.Dequeue();
+        CellData data = stack.Dequeue();
 
         if (data.Depth >= maxDepth) {
           continue;
@@ -107,59 +131,36 @@ namespace RussianAICup2015Car.Sources.Map {
           data.CheckPointOffset++;
         }
 
-        fillCell(ref data.Cell, data.CheckPointOffset, allCells, !data.Alternative);
+        fillCell(data, cellsCache);
 
         foreach(Transition subData in data.Cell.Transitions) {
           CellKey key = new CellKey(subData.ToCell.Pos, data.CheckPointOffset);
-          if (!allCells.ContainsKey(key)) {
-            stack.Enqueue(new PrivateCellData(subData.ToCell, data.CheckPointOffset, data.Depth + 1, subData.Weight > 0));
-            allCells.Add(key, subData.ToCell);
+          if (!cellsCache.ContainsKey(key)) {
+            stack.Enqueue(new CellData(subData.ToCell, data.CheckPointOffset, data.Depth + 1, subData.Weight > 0));
+            cellsCache.Add(key, subData.ToCell);
           }
         }
       }
-
-      return res;
     }
 
-    private Cell simplifiedCell(Cell cell, HashSet<Cell> visited) {
-      List<Transition> transitions = new List<Transition>();
-
-      visited.Add(cell);
-
-      foreach (Transition data in cell.Transitions) {
-        if(null != data.ToCell.Dirs && null != data.ToCell.Transitions) {
-          if (visited.Contains(data.ToCell)) {
-            transitions.Add(new Transition(data.ToCell, data.Weight));
-          } else {
-            transitions.Add(new Transition(simplifiedCell(data.ToCell, visited), data.Weight));
-          }
-        }
-      }
-
-      cell.Transitions = transitions;
-
-      return cell;
-    }
-
-    private void fillCell(ref Cell cell, int checkPointOffset, Dictionary<CellKey, Cell> allCells, bool useAlternative) {
-      int[,] map = getMap(checkPointOffset);
-      TilePos pos = cell.Pos;
-
-      cell.Dirs = gmap.Dirs(pos);
+    private void fillCell(CellData data, Dictionary<CellKey, Cell> cellsCache) {
+      int[,] map = getMap(data.CheckPointOffset);
+      TilePos pos = data.Cell.Pos;
 
       List<Transition> transitions = new List<Transition>();
-      foreach (TileDir dir in cell.Dirs) {
+      foreach (TileDir dir in data.Cell.Dirs) {
         TilePos iterPos = pos + dir;
 
-        if (map[iterPos.X, iterPos.Y] < map[pos.X, pos.Y] || (useAlternative && checkToAlternative(map, pos, iterPos))) {
-          CellKey key = new CellKey(iterPos, checkPointOffset);
+        bool alternative = (!data.Alternative && checkToAlternative(map, pos, iterPos));
+
+        if (map[iterPos.X, iterPos.Y] < map[pos.X, pos.Y] || alternative) {
+          CellKey key = new CellKey(iterPos, data.CheckPointOffset);
 
           Cell iterCell = null;
-          if (allCells.ContainsKey(key)) {
-            iterCell = allCells[key];
+          if (cellsCache.ContainsKey(key)) {
+            iterCell = cellsCache[key];
           } else {
-            iterCell = new Cell();
-            iterCell.Pos = iterPos;
+            iterCell = new Cell(iterPos, gmap.Dirs(iterPos));
           }
 
           int length = map[iterPos.X, iterPos.Y] - map[pos.X, pos.Y];
@@ -167,7 +168,7 @@ namespace RussianAICup2015Car.Sources.Map {
         }
       }
 
-      cell.Transitions = transitions;
+      data.Cell.setTransitions(transitions);
     }
 
     private bool checkToAlternative(int[,] map, TilePos currentPos, TilePos alternativePos) {
@@ -189,7 +190,7 @@ namespace RussianAICup2015Car.Sources.Map {
     private int[,] getMap(int offset) {
       TilePos checkPoint = checkpointByOffset(offset);
       if (!mapCache.ContainsKey(checkPoint)) {
-        TilePos lastPos = 0 == offset ? posCache : checkpointByOffset(offset - 1);
+        TilePos lastPos = 0 == offset ? lastCarTilePos : checkpointByOffset(offset - 1);
         mapCache[checkPoint] = createMap(lastPos, checkPoint);
       }
       return mapCache[checkPoint];
