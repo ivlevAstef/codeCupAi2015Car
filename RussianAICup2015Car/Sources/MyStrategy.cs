@@ -55,7 +55,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       setupEnvironments(car, world, game, move);
 
       GlobalMap.Instance.Update();
-      path.CalculatePath(map.Transitions(8));
+      path.CalculatePath(map.FirstCellWithTransitions(8));
 
       IAction callAction = null;
 

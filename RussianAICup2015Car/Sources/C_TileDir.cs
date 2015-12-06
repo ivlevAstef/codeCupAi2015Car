@@ -1,7 +1,9 @@
-﻿using System;
+﻿using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
+using System;
 
 namespace RussianAICup2015Car.Sources.Common {
   public class TileDir : Point<int> {
+    public static readonly TileDir Zero = new TileDir(0, 0);
     public static readonly TileDir Left = new TileDir(-1, 0);
     public static readonly TileDir Right = new TileDir(1, 0);
     public static readonly TileDir Up = new TileDir(0, -1);
@@ -10,6 +12,20 @@ namespace RussianAICup2015Car.Sources.Common {
     public TileDir(int all) : base(all) { }
     public TileDir(int x, int y) : base(x, y) { }
     public TileDir(TileDir p) : base(p) { }
+
+    public static TileDir TileDirByDirection(Direction directionType) {
+      switch (directionType) {
+      case Direction.Left:
+        return Left;
+      case Direction.Right:
+        return Right;
+      case Direction.Up:
+        return Up;
+      case Direction.Down:
+        return Down;
+      }
+      return Zero; 
+    }
 
     public static bool operator ==(TileDir a, TileDir b) {
       if (System.Object.ReferenceEquals(a, b)) {

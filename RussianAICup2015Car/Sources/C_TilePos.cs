@@ -7,10 +7,7 @@ namespace RussianAICup2015Car.Sources.Common {
     public TilePos(int all) : base(all) { }
     public TilePos(int x, int y) : base(x, y) { }
     public TilePos(TilePos p) : base(p) { }
-    public TilePos(double x, double y)
-      : base(0) {
-      X = (int)(x / TileSize);
-      Y = (int)(y / TileSize);
+    public TilePos(double x, double y) : base((int)(x / TileSize), (int)(y / TileSize)) {
     }
 
     public static bool operator ==(TilePos a, TilePos b) {

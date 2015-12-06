@@ -79,7 +79,7 @@ namespace RussianAICup2015Car.Sources.Map {
       this.gmap = gmap;
     }
 
-    public Cell Transitions(int maxDepth) {
+    public Cell FirstCellWithTransitions(int maxDepth) {
       TilePos currentCarTilePos = new TilePos(car.X, car.Y);
       if (null == lastCarTilePos || !lastCarTilePos.Equals(currentCarTilePos)) {
         mapCache.Clear();

@@ -2,8 +2,8 @@
 
 namespace RussianAICup2015Car.Sources.Common {
   public class Point<Type> where Type : struct {
-    public Type X;
-    public Type Y;
+    public readonly Type X;
+    public readonly Type Y;
 
     public Point(Type all) {
       X = all;

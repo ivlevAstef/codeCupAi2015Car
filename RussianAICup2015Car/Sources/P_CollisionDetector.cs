@@ -49,10 +49,9 @@ namespace RussianAICup2015Car.Sources.Physic {
 
       //edge
       if (Math.Abs(distanceFromCenter.X) > minDistanceToSide && Math.Abs(distanceFromCenter.Y) > minDistanceToSide) {
-        Vector edge = tileCenter;
-        edge.X += Math.Sign(distanceFromCenter.X) * game.TrackTileSize * 0.5;
-        edge.Y += Math.Sign(distanceFromCenter.Y) * game.TrackTileSize * 0.5;
-
+        Vector distanceDir = new Vector(Math.Sign(distanceFromCenter.X), Math.Sign(distanceFromCenter.Y));
+        Vector edge = tileCenter + distanceDir * (game.TrackTileSize * 0.5);
+        
         Vector intersectPos = IntersectCircleWithEdge(center, radius, edge, sideRadius);
         if (null != intersectPos) {
           return intersectPos;
@@ -116,9 +115,8 @@ namespace RussianAICup2015Car.Sources.Physic {
       }
       //edge
       if (Math.Abs(distanceFromCenter.X) > minDistanceToSide && Math.Abs(distanceFromCenter.Y) > minDistanceToSide) {
-        Vector edge = center;
-        edge.X += Math.Sign(distanceFromCenter.X) * game.TrackTileSize * 0.5;
-        edge.Y += Math.Sign(distanceFromCenter.Y) * game.TrackTileSize * 0.5;
+        Vector distanceDir = new Vector(Math.Sign(distanceFromCenter.X), Math.Sign(distanceFromCenter.Y));
+        Vector edge = center + distanceDir * (game.TrackTileSize * 0.5);
 
         if (IntersectCarWithCircle(carPos, carDir, edge, sideRadius)) {
           return (carPos - edge).Normalize();
