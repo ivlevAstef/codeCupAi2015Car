@@ -79,23 +79,23 @@ namespace RussianAICup2015Car.Sources.Map {
     }
 
     private TilePos getNextPos(LiMap.Cell mapCell) {
-      Tuple<LiMap.Cell, int> next = null;
-      foreach (Tuple<LiMap.Cell, int> neighboring in mapCell.NeighboringCells) {
-        if (null == next || neighboring.Item2 < next.Item2) {
-          next = neighboring;
+      LiMap.Transition next = null;
+      foreach (LiMap.Transition transition in mapCell.Transitions) {
+        if (null == next || transition.Weight < next.Weight) {
+          next = transition;
         }
       }
 
-      return next.Item1.Pos;
+      return next.ToCell.Pos;
     }
 
     private CellTransition mergePath(Cell lastCell, TileDir dir, CellTransition iter, LiMap.Cell mapCell, int depthCount, int depth) {
       if (null != iter && depthCount > 0) {
         if (iter.Cell.Pos.Equals(mapCell.Pos) && null != iter.Next) {
-          foreach (Tuple<LiMap.Cell, int> neighboring in mapCell.NeighboringCells) {
-            if (iter.Next.Cell.Pos.Equals(neighboring.Item1.Pos)) {
+          foreach (LiMap.Transition transition in mapCell.Transitions) {
+            if (iter.Next.Cell.Pos.Equals(transition.ToCell.Pos)) {
               TileDir nextDir = iter.Next.Cell.Pos - iter.Cell.Pos;
-              iter.Next = mergePath(iter.Cell, nextDir, iter.Next, neighboring.Item1, depthCount - 1, depth + 1);
+              iter.Next = mergePath(iter.Cell, nextDir, iter.Next, transition.ToCell, depthCount - 1, depth + 1);
               return iter;
             }
           }
@@ -155,16 +155,16 @@ namespace RussianAICup2015Car.Sources.Map {
 
       CellTransition max = null;
 
-      foreach(Tuple<LiMap.Cell,int> neighboring in cell.NeighboringCells) {
-        TileDir dir = neighboring.Item1.Pos - cell.Pos;
+      foreach(LiMap.Transition transition in cell.Transitions) {
+        TileDir dir = transition.ToCell.Pos - cell.Pos;
         resultCell.DirOut = dir;
 
-        CellTransition transition = calculatePath(resultCell, neighboring.Item1, dir, visited, depth);
-        if (null != transition) {
-          transition.TransitionPriority = cellTransitionPriority(lastCell, resultCell, neighboring.Item2);
+        CellTransition newTransition = calculatePath(resultCell, transition.ToCell, dir, visited, depth);
+        if (null != newTransition) {
+          newTransition.TransitionPriority = cellTransitionPriority(lastCell, resultCell, transition.Weight);
 
-          if (null == max || transition.Priority > max.Priority) {
-            max = transition;
+          if (null == max || newTransition.Priority > max.Priority) {
+            max = newTransition;
           }
         }
       }

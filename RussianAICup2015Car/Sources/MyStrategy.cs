@@ -55,7 +55,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       setupEnvironments(car, world, game, move);
 
       GlobalMap.Instance.Update();
-      path.CalculatePath(map.cellByMaxDepth(8));
+      path.CalculatePath(map.Transitions(8));
 
       IAction callAction = null;
 
@@ -91,7 +91,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       GlobalMap.InstanceInit(world);
       GlobalMap.Instance.SetupEnvironment(world, game);
 
-      map.setupEnvironment(car, GlobalMap.Instance);
+      map.SetupEnvironment(car, GlobalMap.Instance);
       path.SetupEnvironment(car, world, game);
 
       CollisionDetector.instance.SetupEnvironment(game, GlobalMap.Instance);

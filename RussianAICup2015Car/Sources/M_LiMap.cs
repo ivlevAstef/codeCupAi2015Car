@@ -9,8 +9,18 @@ namespace RussianAICup2015Car.Sources.Map {
       public TilePos Pos { get; set; }
 
       public HashSet<TileDir> Dirs { get; set; }
-      public List<Tuple<Cell, int>> NeighboringCells { get; set; }//int - Value of shortening the distance to checkpoint. default -1.
+      public List<Transition> Transitions { get; set; }//int - Value of shortening the distance to checkpoint. default -1.
       //contains only valid cells -> by which you can get to the checkpoint
+    }
+
+    public class Transition {
+      public readonly Cell ToCell;
+      public readonly int Weight;
+
+      public Transition(Cell toCell, int weight) {
+        this.ToCell = toCell;
+        this.Weight = weight;
+      }
     }
 
     private class CellKey {
@@ -56,12 +66,12 @@ namespace RussianAICup2015Car.Sources.Map {
     private TilePos posCache = null;
     private Dictionary<TilePos, int[,]> mapCache = new Dictionary<TilePos, int[,]>();
 
-    public void setupEnvironment(Car car, GlobalMap gmap) {
+    public void SetupEnvironment(Car car, GlobalMap gmap) {
       this.car = car;
       this.gmap = gmap;
     }
 
-    public Cell cellByMaxDepth(int maxDepth) {
+    public Cell Transitions(int maxDepth) {
       TilePos current = new TilePos(car.X, car.Y);
       if (null == posCache || !posCache.Equals(current)) {
         mapCache.Clear();
@@ -99,11 +109,11 @@ namespace RussianAICup2015Car.Sources.Map {
 
         fillCell(ref data.Cell, data.CheckPointOffset, allCells, !data.Alternative);
 
-        foreach(Tuple<Cell,int> subData in data.Cell.NeighboringCells) {
-          CellKey key = new CellKey(subData.Item1.Pos, data.CheckPointOffset);
+        foreach(Transition subData in data.Cell.Transitions) {
+          CellKey key = new CellKey(subData.ToCell.Pos, data.CheckPointOffset);
           if (!allCells.ContainsKey(key)) {
-            stack.Enqueue(new PrivateCellData(subData.Item1, data.CheckPointOffset, data.Depth + 1, subData.Item2 > 0));
-            allCells.Add(key, subData.Item1);
+            stack.Enqueue(new PrivateCellData(subData.ToCell, data.CheckPointOffset, data.Depth + 1, subData.Weight > 0));
+            allCells.Add(key, subData.ToCell);
           }
         }
       }
@@ -112,21 +122,21 @@ namespace RussianAICup2015Car.Sources.Map {
     }
 
     private Cell simplifiedCell(Cell cell, HashSet<Cell> visited) {
-      List<Tuple<Cell, int>> neighboring = new List<Tuple<Cell,int>>();
+      List<Transition> transitions = new List<Transition>();
 
       visited.Add(cell);
 
-      foreach (Tuple<Cell, int> data in cell.NeighboringCells) {
-        if(null != data.Item1.Dirs && null != data.Item1.NeighboringCells) {
-          if (visited.Contains(data.Item1)) {
-            neighboring.Add(new Tuple<Cell, int>(data.Item1, data.Item2));
+      foreach (Transition data in cell.Transitions) {
+        if(null != data.ToCell.Dirs && null != data.ToCell.Transitions) {
+          if (visited.Contains(data.ToCell)) {
+            transitions.Add(new Transition(data.ToCell, data.Weight));
           } else {
-            neighboring.Add(new Tuple<Cell, int>(simplifiedCell(data.Item1, visited), data.Item2));
+            transitions.Add(new Transition(simplifiedCell(data.ToCell, visited), data.Weight));
           }
         }
       }
 
-      cell.NeighboringCells = neighboring;
+      cell.Transitions = transitions;
 
       return cell;
     }
@@ -137,7 +147,7 @@ namespace RussianAICup2015Car.Sources.Map {
 
       cell.Dirs = gmap.Dirs(pos);
 
-      List<Tuple<Cell, int>> cells = new List<Tuple<Cell, int>>();
+      List<Transition> transitions = new List<Transition>();
       foreach (TileDir dir in cell.Dirs) {
         TilePos iterPos = pos + dir;
 
@@ -153,11 +163,11 @@ namespace RussianAICup2015Car.Sources.Map {
           }
 
           int length = map[iterPos.X, iterPos.Y] - map[pos.X, pos.Y];
-          cells.Add(new Tuple<Cell, int>(iterCell, length));
+          transitions.Add(new Transition(iterCell, length));
         }
       }
 
-      cell.NeighboringCells = cells;
+      cell.Transitions = transitions;
     }
 
     private bool checkToAlternative(int[,] map, TilePos currentPos, TilePos alternativePos) {
@@ -213,7 +223,7 @@ namespace RussianAICup2015Car.Sources.Map {
         foreach (TileDir dir in gmap.Dirs(pos)) {
           TilePos iterPos = pos + dir;
           if (!visited[iterPos.X, iterPos.Y]) {
-            foundUnknown |= (TileType.Unknown == gmap.Type(iterPos));
+            foundUnknown |= (gmap.Dirs(iterPos).Count < 2);
             stack.Enqueue(iterPos);
           }
         }
