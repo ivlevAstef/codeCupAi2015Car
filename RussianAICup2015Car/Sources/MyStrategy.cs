@@ -87,6 +87,14 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
 
     private void setupEnvironments(Car car, World world, Game game, Move move) {
       TilePos.TileSize = game.TrackTileSize;
+      AngleReachEvent.RotationFrictionFactor = game.CarRotationFrictionFactor;
+      AngleReachEvent.WheelTurnChangePerTick = game.CarWheelTurnChangePerTick;
+
+      MoveToAngleFunction.RotationFrictionFactor = game.CarRotationFrictionFactor;
+      MoveToAngleFunction.WheelTurnChangePerTick = game.CarWheelTurnChangePerTick;
+      MoveToAngleFunction.world = world;
+
+      PhysicEventsCalculator.setupEnvironment(game, world);
 
       GlobalMap.InstanceInit(world);
       GlobalMap.Instance.SetupEnvironment(world, game);

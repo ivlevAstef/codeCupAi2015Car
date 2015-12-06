@@ -38,6 +38,10 @@ namespace RussianAICup2015Car.Sources.Common {
       return (X ^ Y).GetHashCode();
     }
 
+    public TilePos Projection(TileDir axis) {
+      return new TilePos(X * Math.Abs(axis.X), Y * Math.Abs(axis.Y));
+    }
+
     public static TilePos operator +(TilePos p, TileDir d) {
       return new TilePos(p.X + d.X, p.Y + d.Y);
     }

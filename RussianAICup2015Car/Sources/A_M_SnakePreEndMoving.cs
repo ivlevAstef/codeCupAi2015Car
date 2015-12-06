@@ -42,7 +42,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       Physic.MovingCalculator calculator = new Physic.MovingCalculator();
       calculator.setupEnvironment(car, game, world);
 
-      Move needMove = calculator.calculateMove(endPos, new Vector(dirMove.X, dirMove.Y), dir, 0.5);
+      Move needMove = calculator.calculateMove(endPos, dirMove, dir, 0.5);
       move.IsBrake = needMove.IsBrake;
       move.EnginePower = needMove.EnginePower;
       //move.WheelTurn = needMove.WheelTurn;

@@ -69,6 +69,9 @@
     <Compile Include="Sources\M_LiMap.cs" />
     <Compile Include="Sources\M_Path.cs" />
     <Compile Include="Sources\P_PhysicCar.cs" />
+    <Compile Include="Sources\P_PhysicEventBase.cs" />
+    <Compile Include="Sources\P_PhysicEvents.cs" />
+    <Compile Include="Sources\P_PhysicEventsCalculator.cs" />
     <Compile Include="Sources\P_PhysicMoveCalculator.cs" />
     <Compile Include="Sources\C_Point.cs" />
     <Compile Include="Sources\A_ShootingAction.cs" />
@@ -76,6 +79,7 @@
     <Compile Include="Sources\A_M_StuckOutMoving.cs" />
     <Compile Include="Sources\A_M_TurnMoving.cs" />
     <Compile Include="Sources\A_UseNitroAction.cs" />
+    <Compile Include="Sources\P_PhysicMoveFunctions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

@@ -36,7 +36,10 @@ namespace RussianAICup2015Car.Sources.Map {
         this.Next = next;
         this.CellPriority = cellPriority;
       }
-    }
+    };
+
+    private static readonly int MaxDepth = 8;
+    private static readonly int MaxDepthUsePhysic = 2;
 
     private Car car = null;
     private World world = null;
@@ -64,7 +67,7 @@ namespace RussianAICup2015Car.Sources.Map {
       }
 
       HashSet<LiMap.Cell> visited = new HashSet<LiMap.Cell>();
-      transition = calculatePath(firstCellWithTransition, pathLastCell, visited, 8);
+      transition = calculatePath(firstCellWithTransition, pathLastCell, visited, 0);
 
       Logger.instance.Assert(null != transition, "Can't find path.");
 
@@ -80,17 +83,6 @@ namespace RussianAICup2015Car.Sources.Map {
       return path[offset];
     }
 
-    private TilePos getNextPos(LiMap.Cell mapCell) {
-      LiMap.Transition next = null;
-      foreach (LiMap.Transition transition in mapCell.Transitions) {
-        if (null == next || transition.Weight < next.Weight) {
-          next = transition;
-        }
-      }
-
-      return next.ToCell.Pos;
-    }
-
     private List<Cell> createPathFromTransition(CellTransition transition) {
       List<Cell> result = new List<Cell>();
       result.Add(transition.Cell);
@@ -98,21 +90,6 @@ namespace RussianAICup2015Car.Sources.Map {
         result.AddRange(createPathFromTransition(transition.Next));
       }
       return result;
-    }
-
-    private TileDir currentDir() {
-      Physic.PCar physicCar = new Physic.PCar(car, game);
-      int ticks = (int)Math.Abs(Math.Round(physicCar.WheelTurn / game.CarWheelTurnChangePerTick));
-
-      physicCar.setWheelTurn(0);
-      physicCar.Iteration(ticks);
-
-
-      if (Math.Abs(physicCar.Dir.X) > Math.Abs(physicCar.Dir.X)) {
-        return new TileDir(Math.Sign(physicCar.Dir.X), 0);
-      } else {
-        return new TileDir(0, Math.Sign(physicCar.Dir.Y));
-      }
     }
 
     private Cell startLastCell() {
@@ -126,11 +103,10 @@ namespace RussianAICup2015Car.Sources.Map {
     }
 
     private CellTransition calculatePath(LiMap.Cell cell, Cell lastCell, HashSet<LiMap.Cell> visited, int depth) {
-      if (visited.Contains(cell) || depth <= 0) {
+      if (visited.Contains(cell) || depth > MaxDepth) {
         return null;
       }
       visited.Add(cell);
-      depth--;
 
       Cell resultCell = new Cell();
       resultCell.Pos = cell.Pos;
@@ -142,9 +118,9 @@ namespace RussianAICup2015Car.Sources.Map {
         TileDir dir = transition.ToCell.Pos - cell.Pos;
         resultCell.DirOut = dir;
 
-        CellTransition newTransition = calculatePath(transition.ToCell, resultCell, visited, depth);
+        CellTransition newTransition = calculatePath(transition.ToCell, resultCell, visited, depth + 1);
         if (null != newTransition) {
-          newTransition.TransitionPriority = cellTransitionPriority(lastCell, resultCell, transition.Weight);
+          newTransition.TransitionPriority = cellTransitionPriority(lastCell, resultCell, newTransition.Cell, transition.Weight, depth < MaxDepthUsePhysic);
 
           if (null == max || newTransition.Priority > max.Priority) {
             max = newTransition;
@@ -201,10 +177,13 @@ namespace RussianAICup2015Car.Sources.Map {
       return priority;
     }
 
-    private double cellTransitionPriority(Cell lastCell, Cell cell, int length) {
+    private double cellTransitionPriority(Cell lastCell, Cell cell, Cell nextCell, int length, bool usePhysic) {
       double priority = ((-length) - 1)*0.5;
 
       priority += tilePriority(lastCell, cell);
+      if (usePhysic && null != nextCell) {
+        priority += physicPriority(nextCell.Pos);
+      }
 
       return priority;
     }
@@ -217,24 +196,28 @@ namespace RussianAICup2015Car.Sources.Map {
     }
 
     private double tilePriority(TileDir dirIn, TileDir dirOut, TileDir nextDirIn, TileDir nextDirOut) {
-      if (dirIn.Negative().Equals(dirOut) || nextDirIn.Negative().Equals(nextDirOut)) {
+      if (dirIn.Negative() == dirOut || nextDirIn.Negative() == nextDirOut) {
         return -8;
       }
 
-      if (dirIn.Equals(dirOut)) {//line
+      if (dirIn == dirOut) {//line
         return 0.42;
       }
 
-      if (null == nextDirOut || nextDirIn.Equals(nextDirOut)) {//turn
+      if (null == nextDirOut || nextDirIn == nextDirOut) {//turn
         return -0.6;
       }
 
-      if (dirIn.Equals(nextDirOut.Negative()) && dirOut.Equals(nextDirIn)) {//around
+      if (dirIn == nextDirOut.Negative() && dirOut == nextDirIn) {//around
         return -5;
-      } else if (dirIn.Equals(nextDirOut) && dirOut.Equals(nextDirIn)) {//snake
+      } else if (dirIn == nextDirOut && dirOut == nextDirIn) {//snake
         return 0.45;
       }
 
+      return 0;
+    }
+
+    private double physicPriority(TilePos pos) {
       return 0;
     }
   }
