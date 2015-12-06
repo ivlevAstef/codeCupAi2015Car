@@ -125,6 +125,23 @@ namespace RussianAICup2015Car.Sources.Map {
             Logger.instance.Assert(types[x, y] == TileType.Unknown, "Dynamic Changed map. Incorrect data from server?");
             types[x, y] = world.TilesXY[x][y];
             dirs[x, y] = TileDirsByTileType[types[x, y]];
+          } else {
+            AddDirsByNeighboring(x, y);
+          }
+        }
+      }
+    }
+
+    private void AddDirsByNeighboring(int x, int y) {
+      TilePos beginPos = new TilePos(x,y);
+      foreach (TileDir dir in TileDirsByTileType[TileType.Crossroads]) {
+        TilePos pos = beginPos + dir;
+
+        if (0 <= pos.X && pos.X < width && 0 <= pos.Y && pos.Y < height) {
+          foreach (TileDir neightborDir in TileDirsByTileType[types[pos.X, pos.Y]]) {
+            if (beginPos == pos + neightborDir) {
+              dirs[x, y].Add(dir);
+            }
           }
         }
       }
@@ -135,8 +152,13 @@ namespace RussianAICup2015Car.Sources.Map {
         TilePos currentPos = new TilePos(car.X, car.Y);
         if (carsTilePos.ContainsKey(car.Id) && carsTilePos[car.Id] != currentPos) {
           TilePos lastPos = carsTilePos[car.Id];
-          dirs[currentPos.X,currentPos.Y].Add(lastPos - currentPos);
-          dirs[lastPos.X,lastPos.Y].Add(currentPos - lastPos);
+          TileDir dir = lastPos - currentPos;
+          if (dir.Correct()) {
+            dirs[currentPos.X, currentPos.Y].Add(dir);
+            dirs[lastPos.X, lastPos.Y].Add(dir.Negative());
+          } else {
+            Logger.instance.Error("car teleportation...");
+          }
         }
         carsTilePos[car.Id] = currentPos;
       }

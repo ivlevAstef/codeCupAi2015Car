@@ -55,6 +55,10 @@ namespace RussianAICup2015Car.Sources.Common {
       return (X ^ Y).GetHashCode();
     }
 
+    public bool Correct() {
+      return (0 == X && 1 == Math.Abs(Y)) || (0 == Y && 1 == Math.Abs(X));
+    }
+
     public static TileDir operator +(TileDir d1, TileDir d2) {
       return new TileDir(d1.X + d2.X, d1.Y + d2.Y);
     }

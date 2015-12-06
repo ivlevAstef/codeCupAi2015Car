@@ -22,8 +22,13 @@ namespace RussianAICup2015Car.Sources.Physic {
   }
 
   public class AngleReachEvent : PhysicEventBase {
-    public static double RotationFrictionFactor = 0;
-    public static double WheelTurnChangePerTick = 0;
+    private static double rotationFrictionFactor = 0;
+    private static double wheelTurnChangePerTick = 0;
+
+    public static void setupEnvironment(Game game) {
+      rotationFrictionFactor = game.CarRotationFrictionFactor;
+      wheelTurnChangePerTick = game.CarWheelTurnChangePerTick;
+    }
 
     private double angle;
 
@@ -35,7 +40,7 @@ namespace RussianAICup2015Car.Sources.Physic {
 
     public override bool Check(PCar car) {
       double angleDeviation = angle.AngleDeviation(car.Angle);
-      return Math.Abs(angleDeviation) < RotationFrictionFactor && Math.Abs(car.WheelTurn) < WheelTurnChangePerTick;
+      return Math.Abs(angleDeviation) < rotationFrictionFactor && Math.Abs(car.WheelTurn) < wheelTurnChangePerTick;
     }
   }
 
@@ -66,11 +71,14 @@ namespace RussianAICup2015Car.Sources.Physic {
     public override PhysicEventType Type { get { return PhysicEventType.MapCrash; } }
 
     public override bool Check(PCar car) {
-      TilePos carPos = new TilePos(car.Pos.X, car.Pos.Y);
-      TilePos endPos = new TilePos(idealPos.X, idealPos.Y);
-      bool isEndPos = carPos.Projection(dirMove) == endPos.Projection(dirMove);
+      TileDir[] additionalDirs = null;
+      if (TileDir.Zero != dirMove) {
+        TilePos carPos = new TilePos(car.Pos.X, car.Pos.Y);
+        TilePos endPos = new TilePos(idealPos.X, idealPos.Y);
+        bool isEndPos = carPos.Projection(dirMove) == endPos.Projection(dirMove);
 
-      TileDir[] additionalDirs = isEndPos ? null : new TileDir[] { dirMove.PerpendicularLeft(), dirMove.PerpendicularRight() };
+        additionalDirs = isEndPos ? null : new TileDir[] { dirMove.PerpendicularLeft(), dirMove.PerpendicularRight() };
+      }
 
       Vector normal = CollisionDetector.instance.IntersectCarWithMap(car.Pos, car.Dir, additionalDirs);
       if (null != normal && car.Speed.Dot(normal) < 0) {
@@ -99,6 +107,21 @@ namespace RussianAICup2015Car.Sources.Physic {
         }
       }
       return false;
+    }
+  }
+
+  public class PassageTileEvent : PhysicEventBase {
+    private TilePos tile;
+
+    public PassageTileEvent(TilePos tile) {
+      this.tile = tile;
+    }
+
+    public override PhysicEventType Type { get { return PhysicEventType.PassageTile; } }
+
+    public override bool Check(PCar car) {
+      TilePos carPos = new TilePos(car.Pos.X, car.Pos.Y);
+      return carPos == tile;
     }
   }
 }

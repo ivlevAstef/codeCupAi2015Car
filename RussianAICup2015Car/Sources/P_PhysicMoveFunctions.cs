@@ -10,9 +10,13 @@ namespace RussianAICup2015Car.Sources.Physic {
   }
 
   public class MoveToAngleFunction : IPhysicMoveFunction {
-    public static World world = null;
-    public static double RotationFrictionFactor = 0;
-    public static double WheelTurnChangePerTick = 0;
+    private static World world = null;
+    private static double rotationFrictionFactor = 0;
+
+    public static void setupEnvironment(World lWorld, Game game) {
+      world = lWorld;
+      rotationFrictionFactor = game.CarRotationFrictionFactor;
+    }
 
     private double angle;
     private IntersectOilStickEvent intersecOildStickEvent;
@@ -28,10 +32,10 @@ namespace RussianAICup2015Car.Sources.Physic {
           car.traveledOnOil(intersecOildStickEvent.InfoForCheck as OilSlick);
         }
 
-        PCar zeroWheelTurn = physicCarForZeroWheelTurn(car);
+        PCar zeroWheelTurn = car.GetZeroWheelTurnCar();
         double angleDeviation = angle.AngleDeviation(zeroWheelTurn.Angle);
 
-        if (Math.Abs(angleDeviation) < RotationFrictionFactor) {
+        if (Math.Abs(angleDeviation) < rotationFrictionFactor) {
           car.setWheelTurn(0);
         } else {
           car.setWheelTurn(Math.Sign(angleDeviation));
@@ -40,15 +44,28 @@ namespace RussianAICup2015Car.Sources.Physic {
         car.Iteration(1);
       }
     }
+  }
 
-    private PCar physicCarForZeroWheelTurn(PCar car) {
-      PCar physicCar = new PCar(car);
-      int ticks = (int)Math.Abs(Math.Round(physicCar.WheelTurn / WheelTurnChangePerTick));
 
-      physicCar.setWheelTurn(0);
-      physicCar.Iteration(ticks);
+  public class MoveToTile : IPhysicMoveFunction {
+    private TilePos tilePos;
 
-      return physicCar;
+    public MoveToTile(TilePos pos) {
+      this.tilePos = pos;
+    }
+
+    public void Iteration(PCar car, int iterationCount) {
+      Vector position = tilePos.ToVector(0.5, 0.5);
+
+      for (int i = 0; i < iterationCount; i++) {
+        Vector dir = position - car.Pos;
+
+        PCar zeroWheelTurn = car.GetZeroWheelTurnCar();
+        double angleDeviation = dir.Angle.AngleDeviation(zeroWheelTurn.Angle);
+        car.setWheelTurn(Math.Sign(angleDeviation));
+
+        car.Iteration(1);
+      }
     }
   }
 }

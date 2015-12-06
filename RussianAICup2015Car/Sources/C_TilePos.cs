@@ -10,6 +10,10 @@ namespace RussianAICup2015Car.Sources.Common {
     public TilePos(double x, double y) : base((int)(x / TileSize), (int)(y / TileSize)) {
     }
 
+    public Vector ToVector(double anchorX, double anchorY) {
+      return new Vector(X + anchorX, Y + anchorY) * TileSize;
+    }
+
     public static bool operator ==(TilePos a, TilePos b) {
       if (System.Object.ReferenceEquals(a, b)) {
         return true;

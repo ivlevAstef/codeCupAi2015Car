@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
+using RussianAICup2015Car.Sources.Physic;
 
 namespace RussianAICup2015Car.Sources.Map {
   public class Path {
@@ -38,7 +39,6 @@ namespace RussianAICup2015Car.Sources.Map {
       }
     };
 
-    private static readonly int MaxDepth = 8;
     private static readonly int MaxDepthUsePhysic = 2;
 
     private Car car = null;
@@ -48,11 +48,14 @@ namespace RussianAICup2015Car.Sources.Map {
     private CellTransition transition = null;
     private Cell[] path = null;
     private Cell pathLastCell = null;
+    private TileDir beginDir = null;
+    private Dictionary<TilePos, double> physicPriorityCache = new Dictionary<TilePos, double>();
 
     public void SetupEnvironment(Car car, World world, Game game) {
       this.car = car;
       this.world = world;
       this.game = game;
+      physicPriorityCache.Clear();
 
       if (null == pathLastCell) {
         pathLastCell = startLastCell();
@@ -65,6 +68,8 @@ namespace RussianAICup2015Car.Sources.Map {
       if (null != transition && !transition.Cell.Pos.Equals(firstCellWithTransition.Pos)) {
         pathLastCell = transition.Cell;
       }
+
+      beginDir = new TilePos(car.X, car.Y) - pathLastCell.Pos;
 
       HashSet<LiMap.Cell> visited = new HashSet<LiMap.Cell>();
       transition = calculatePath(firstCellWithTransition, pathLastCell, visited, 0);
@@ -103,7 +108,7 @@ namespace RussianAICup2015Car.Sources.Map {
     }
 
     private CellTransition calculatePath(LiMap.Cell cell, Cell lastCell, HashSet<LiMap.Cell> visited, int depth) {
-      if (visited.Contains(cell) || depth > MaxDepth) {
+      if (visited.Contains(cell) || depth > Constant.PathMaxDepth) {
         return null;
       }
       visited.Add(cell);
@@ -178,11 +183,17 @@ namespace RussianAICup2015Car.Sources.Map {
     }
 
     private double cellTransitionPriority(Cell lastCell, Cell cell, Cell nextCell, int length, bool usePhysic) {
-      double priority = ((-length) - 1)*0.5;
+      double priority = ((-length) - 1)*1.5;
 
       priority += tilePriority(lastCell, cell);
       if (usePhysic && null != nextCell) {
-        priority += physicPriority(nextCell.Pos);
+        if (physicPriorityCache.ContainsKey(nextCell.Pos)) {
+          priority += physicPriorityCache[nextCell.Pos];
+        } else {
+          double pPriority = physicPriority(nextCell.Pos);
+          priority += physicPriority(nextCell.Pos);
+          physicPriorityCache.Add(nextCell.Pos, pPriority);
+        }
       }
 
       return priority;
@@ -201,7 +212,7 @@ namespace RussianAICup2015Car.Sources.Map {
       }
 
       if (dirIn == dirOut) {//line
-        return 0.42;
+        return 0.15;
       }
 
       if (null == nextDirOut || nextDirIn == nextDirOut) {//turn
@@ -209,16 +220,44 @@ namespace RussianAICup2015Car.Sources.Map {
       }
 
       if (dirIn == nextDirOut.Negative() && dirOut == nextDirIn) {//around
-        return -5;
+        return -1.5;
       } else if (dirIn == nextDirOut && dirOut == nextDirIn) {//snake
-        return 0.45;
+        return 0.5;
       }
 
       return 0;
     }
 
     private double physicPriority(TilePos pos) {
+      PCar physicCar = new PCar(car, game);
+      physicCar.setEnginePower(1.0);
+
+      HashSet<IPhysicEvent> pEvents = new HashSet<IPhysicEvent> {
+        new MapCrashEvent(pos.ToVector(0.5,0.5), TileDir.Zero),
+        new PassageTileEvent(pos)
+      };
+
+      PhysicEventsCalculator.calculateEvents(physicCar, new MoveToTile(pos), pEvents, calculateEventCheckEnd);
+
+      if (pEvents.ComeContaints(PhysicEventType.PassageTile)) {
+        Vector dirBegin = new Vector(car.SpeedX, car.SpeedY).Normalize();
+        Vector dirEnd = pEvents.GetEvent(PhysicEventType.PassageTile).CarCome.Dir;
+        return 0.15 + 0.35 * dirBegin.Dot(dirEnd);
+      }
+
+      if (pEvents.ComeContaints(PhysicEventType.MapCrash)) {
+        return -5.5;
+      }
+
       return 0;
+    }
+
+    private bool calculateEventCheckEnd(PCar physicCar, HashSet<IPhysicEvent> pEvents, int tick) {
+      if (tick > 100) {
+        return true;
+      }
+
+      return pEvents.ComeContaints(PhysicEventType.MapCrash) || pEvents.ComeContaints(PhysicEventType.PassageTile);
     }
   }
 }

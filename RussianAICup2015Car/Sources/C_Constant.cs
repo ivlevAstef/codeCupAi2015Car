@@ -2,6 +2,7 @@
 using System;
 
 namespace RussianAICup2015Car.Sources.Common {
-  class Constant {
+  public static class Constant {
+    public static readonly int PathMaxDepth = 6;
   }
 }

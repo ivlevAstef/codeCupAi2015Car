@@ -7,6 +7,7 @@ using RussianAICup2015Car.Sources.Common;
 namespace RussianAICup2015Car.Sources.Physic {
   public enum PhysicEventType {
     PassageLine,
+    PassageTile,
     AngleReach,
     SpeedReach,
     MapCrash,

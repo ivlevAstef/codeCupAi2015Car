@@ -92,6 +92,9 @@ namespace RussianAICup2015Car.Sources.Map {
       HashSet<Cell> visited = new HashSet<Cell>();
       simplifiedCell(result, visited);
 
+      visited.Clear();
+      Logger.instance.Assert(MaxDepth(result, visited) >= 3, "Can't create full path (first cell with trasitions)");
+
       return result;
     }
 
@@ -111,6 +114,19 @@ namespace RussianAICup2015Car.Sources.Map {
       }
 
       cell.setTransitions(transitions);
+    }
+
+    private int MaxDepth(Cell cell, HashSet<Cell> visited) {
+      visited.Add(cell);
+
+      int max = 0;
+      foreach (Transition data in cell.Transitions) {
+        if (null != data.ToCell && !visited.Contains(data.ToCell)) {
+          max = Math.Max(max, MaxDepth(data.ToCell, visited)+1);
+        }
+      }
+
+      return max;
     }
 
     private void fillCell(Cell cell, int beginCheckPointOffset, int maxDepth) {
@@ -153,6 +169,8 @@ namespace RussianAICup2015Car.Sources.Map {
 
         bool alternative = (!data.Alternative && checkToAlternative(map, pos, iterPos));
 
+        Logger.instance.Assert(0 <= iterPos.X && iterPos.X < gmap.Width && 0 <= iterPos.Y && iterPos.Y < gmap.Height, "WTF?");
+
         if (map[iterPos.X, iterPos.Y] < map[pos.X, pos.Y] || alternative) {
           CellKey key = new CellKey(iterPos, data.CheckPointOffset);
 
@@ -183,14 +201,14 @@ namespace RussianAICup2015Car.Sources.Map {
     }
 
     private TilePos checkpointByOffset(int offset) {
-      int checkPointIndex = (car.NextWaypointIndex + offset) % gmap.WayPoints.Length;
+      int checkPointIndex = (car.NextWaypointIndex + offset + gmap.WayPoints.Length) % gmap.WayPoints.Length;
       return new TilePos(gmap.WayPoints[checkPointIndex].X, gmap.WayPoints[checkPointIndex].Y);
     }
 
     private int[,] getMap(int offset) {
       TilePos checkPoint = checkpointByOffset(offset);
       if (!mapCache.ContainsKey(checkPoint)) {
-        TilePos lastPos = 0 == offset ? lastCarTilePos : checkpointByOffset(offset - 1);
+        TilePos lastPos = 0 == (offset) ? lastCarTilePos : checkpointByOffset(offset - 1);
         mapCache[checkPoint] = createMap(lastPos, checkPoint);
       }
       return mapCache[checkPoint];
@@ -213,34 +231,41 @@ namespace RussianAICup2015Car.Sources.Map {
           continue;
         }
 
+        visited[pos.X, pos.Y] = true;
+
         if (pos.Equals(end)) {
           result[pos.X, pos.Y] = 0;
           backStack.Enqueue(pos);
+        } else if (gmap.Type(pos) == TileType.Unknown) {
+          result[pos.X, pos.Y] = (Math.Abs(pos.X - end.X) + Math.Abs(pos.Y - end.Y));
+          continue;
         }
 
-        visited[pos.X, pos.Y] = true;
-
-        bool foundUnknown = false;
+        bool findUnknown = false;
         foreach (TileDir dir in gmap.Dirs(pos)) {
           TilePos iterPos = pos + dir;
+
           if (!visited[iterPos.X, iterPos.Y]) {
-            foundUnknown |= (gmap.Dirs(iterPos).Count < 2);
+            findUnknown |= (gmap.Type(iterPos) == TileType.Unknown);
             stack.Enqueue(iterPos);
           }
         }
 
-        if (foundUnknown) {
+        if (findUnknown) {
           backUnknownStack.Enqueue(pos);
         }
       }
 
-      int unknownMult = (backStack.Count > 0) ? 2 : 1;
       while (backUnknownStack.Count > 0) {
         TilePos pos = backUnknownStack.Dequeue();
-        result[pos.X, pos.Y] = unknownMult * (Math.Abs(pos.X - end.X) + Math.Abs(pos.Y - end.Y));
+
+        foreach (TileDir dir in gmap.Dirs(pos)) {
+          TilePos nextPos = pos + dir;
+          result[pos.X, pos.Y] = Math.Min(result[nextPos.X, nextPos.Y], result[pos.X, pos.Y]);
+        }
+        result[pos.X, pos.Y]++;
         backStack.Enqueue(pos);
       }
-
 
       while (backStack.Count > 0) {
         TilePos pos = backStack.Dequeue();
