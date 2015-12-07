@@ -20,16 +20,17 @@ namespace RussianAICup2015Car.Sources.Map {
       public readonly double CellPriority;
       public double TransitionPriority { get; set; }
 
-      public double NextPriority {
-        get {
-          return (null != Next) ? Next.Priority : 0;
-        }
+      public double NextPriority(int depth) {
+        return (null != Next) ? Next.Priority(depth) : 0;
       }
 
-      public double Priority {
-        get {
-          return CellPriority + NextPriority + TransitionPriority;
+      public double Priority(int depth) {
+        if (depth > 0) {
+          return CellPriority + NextPriority(depth - 1) + TransitionPriority;
+        } else {
+          return CellPriority + TransitionPriority;
         }
+        
       }
 
       public CellTransition(Cell cell, CellTransition next, double cellPriority) {
@@ -127,7 +128,7 @@ namespace RussianAICup2015Car.Sources.Map {
         if (null != newTransition) {
           newTransition.TransitionPriority = cellTransitionPriority(lastCell, resultCell, newTransition.Cell, transition.Weight, depth < MaxDepthUsePhysic);
 
-          if (null == max || newTransition.Priority > max.Priority) {
+          if (null == max || newTransition.Priority(3) > max.Priority(3)) {
             max = newTransition;
           }
         }
@@ -222,7 +223,7 @@ namespace RussianAICup2015Car.Sources.Map {
       }
 
       if (dirIn == nextDirOut.Negative() && dirOut == nextDirIn) {//around
-        return -2.0;
+        return -1.5;
       } else if (dirIn == nextDirOut && dirOut == nextDirIn) {//snake
         return 0.45;
       }
