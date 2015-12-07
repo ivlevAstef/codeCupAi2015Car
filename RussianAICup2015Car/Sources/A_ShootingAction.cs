@@ -141,8 +141,11 @@ namespace RussianAICup2015Car.Sources.Actions {
 
           Vector collisionNormal = null; ;
           if (tireCollisionWithCar(tirePos, physicCar, out collisionNormal, 0.25)) {
-            double angle = tireSpd.Normalize().Cross(collisionNormal);
+            if (null == collisionNormal) {
+              return false;
+            }
 
+            double angle = tireSpd.Normalize().Cross(collisionNormal);
             return angle < maxAngle && physicCar.Car.Durability > 1.0e-9 && !physicCar.Car.IsFinishedTrack;
           }
         }

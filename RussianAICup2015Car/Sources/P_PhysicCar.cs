@@ -7,8 +7,8 @@ using RussianAICup2015Car.Sources.Common;
 namespace RussianAICup2015Car.Sources.Physic {
   public class PCar {
     private const double dt = 1;
-    private const double oilFrictionMult = 0.3;
-    private const double oilBrakeFactor = 0.3;
+    private const double oilFrictionMult = 0.25;
+    private const double oilBrakeFactor = 0.25;
 
     public double WheelTurn { get { return wheelTurn; } }
     public double EnginePower { get { return enginePower; } }
@@ -115,6 +115,7 @@ namespace RussianAICup2015Car.Sources.Physic {
     }
 
     public void Iteration(int ticks) {
+      lastPos = pos;
       for (int i = 0; i < ticks / dt; i++) {
         wheelTurn = signLimitChange(idealWheelTurn, wheelTurn, game.CarWheelTurnChangePerTick);
         enginePower = signLimitChange(idealEnginePower, enginePower, game.CarEnginePowerChangePerTick);
@@ -143,7 +144,6 @@ namespace RussianAICup2015Car.Sources.Physic {
 
         Vector accel = dir * (enginePower * (1 - brakeV) * carAccel);
 
-        lastPos = pos;
         pos = pos + spd * dt;
         spd = (spd + accel) * frictionMove;
 

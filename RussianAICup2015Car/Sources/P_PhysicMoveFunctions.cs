@@ -65,7 +65,7 @@ namespace RussianAICup2015Car.Sources.Physic {
 
         car.setWheelTurn(Math.Sign(angleDeviation));
         car.setBrake(car.Speed.Length > Constant.MinBrakeSpeed);
-        car.Iteration(1);
+        car.Iteration(2);
       }
     }
   }

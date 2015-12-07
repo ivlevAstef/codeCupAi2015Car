@@ -40,7 +40,7 @@ namespace RussianAICup2015Car.Sources.Map {
       }
     };
 
-    private static readonly int MaxDepthUsePhysic = 2;
+    private static readonly int MaxDepthUsePhysic = 1;
 
     private Car car = null;
     private World world = null;
@@ -194,7 +194,7 @@ namespace RussianAICup2015Car.Sources.Map {
           priority += physicPriorityCache[nextCell.Pos];
         } else {
           double pPriority = physicPriority(nextCell.Pos);
-          priority += physicPriority(nextCell.Pos);
+          priority += pPriority;
           physicPriorityCache.Add(nextCell.Pos, pPriority);
         }
       }
@@ -250,14 +250,14 @@ namespace RussianAICup2015Car.Sources.Map {
       }
 
       if (pEvents.ComeContaints(PhysicEventType.MapCrash)) {
-        return -3.0;
+        return -1.8;
       }
 
       return 0;
     }
 
     private bool calculateEventCheckEnd(PCar physicCar, HashSet<IPhysicEvent> pEvents, int tick) {
-      if (tick > 100) {
+      if (tick > 40) {
         return true;
       }
 
