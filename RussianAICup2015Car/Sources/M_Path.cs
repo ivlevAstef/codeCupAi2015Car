@@ -183,7 +183,7 @@ namespace RussianAICup2015Car.Sources.Map {
     }
 
     private double cellTransitionPriority(Cell lastCell, Cell cell, Cell nextCell, int length, bool usePhysic) {
-      double priority = ((-length) - 1)*1.5;
+      double priority = ((-length) - 1)*2.5;
 
       priority += tilePriority(lastCell, cell);
       if (usePhysic && null != nextCell) {
@@ -231,6 +231,7 @@ namespace RussianAICup2015Car.Sources.Map {
     private double physicPriority(TilePos pos) {
       PCar physicCar = new PCar(car, game);
       physicCar.setEnginePower(1.0);
+      physicCar.disableNitro();
 
       HashSet<IPhysicEvent> pEvents = new HashSet<IPhysicEvent> {
         new MapCrashEvent(pos.ToVector(0.5,0.5), TileDir.Zero),
@@ -246,7 +247,7 @@ namespace RussianAICup2015Car.Sources.Map {
       }
 
       if (pEvents.ComeContaints(PhysicEventType.MapCrash)) {
-        return -5.5;
+        return -4.5;
       }
 
       return 0;

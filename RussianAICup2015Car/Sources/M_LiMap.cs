@@ -236,9 +236,6 @@ namespace RussianAICup2015Car.Sources.Map {
         if (pos.Equals(end)) {
           result[pos.X, pos.Y] = 0;
           backStack.Enqueue(pos);
-        } else if (gmap.Type(pos) == TileType.Unknown) {
-          result[pos.X, pos.Y] = (Math.Abs(pos.X - end.X) + Math.Abs(pos.Y - end.Y));
-          continue;
         }
 
         bool findUnknown = false;
@@ -256,28 +253,36 @@ namespace RussianAICup2015Car.Sources.Map {
         }
       }
 
-      while (backUnknownStack.Count > 0) {
-        TilePos pos = backUnknownStack.Dequeue();
+      int unknownMult = backStack.Count > 0 ? 2 : 1;
 
-        foreach (TileDir dir in gmap.Dirs(pos)) {
-          TilePos nextPos = pos + dir;
-          result[pos.X, pos.Y] = Math.Min(result[nextPos.X, nextPos.Y], result[pos.X, pos.Y]);
-        }
-        result[pos.X, pos.Y]++;
-        backStack.Enqueue(pos);
-      }
+      while (backStack.Count + backUnknownStack.Count > 0) {
+        while (backStack.Count > 0) {
+          TilePos pos = backStack.Dequeue();
 
-      while (backStack.Count > 0) {
-        TilePos pos = backStack.Dequeue();
-
-        foreach (TileDir dir in gmap.Dirs(pos)) {
-          TilePos nextPos = pos + dir;
-          if (result[nextPos.X, nextPos.Y] > result[pos.X, pos.Y] + 1) {
-            result[nextPos.X, nextPos.Y] = result[pos.X, pos.Y] + 1;
-            if (!nextPos.Equals(begin)) {
-              backStack.Enqueue(nextPos);
+          foreach (TileDir dir in gmap.Dirs(pos)) {
+            TilePos nextPos = pos + dir;
+            if (result[nextPos.X, nextPos.Y] > result[pos.X, pos.Y] + 1) {
+              result[nextPos.X, nextPos.Y] = result[pos.X, pos.Y] + 1;
+              if (!nextPos.Equals(begin)) {
+                backStack.Enqueue(nextPos);
+              }
             }
           }
+        }
+
+        while (backUnknownStack.Count > 0) {
+          TilePos pos = backUnknownStack.Dequeue();
+
+          foreach (TileDir dir in gmap.Dirs(pos)) {
+            TilePos nextPos = pos + dir;
+
+            if (gmap.Type(nextPos) == TileType.Unknown) {
+              result[nextPos.X, nextPos.Y] = unknownMult * (Math.Abs(nextPos.X - end.X) + Math.Abs(nextPos.Y - end.Y));
+            }
+
+            result[pos.X, pos.Y] = Math.Min(result[nextPos.X, nextPos.Y] + 1, result[pos.X, pos.Y]);
+          }
+          backStack.Enqueue(pos);
         }
       }
 

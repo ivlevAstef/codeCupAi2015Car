@@ -21,7 +21,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
     }
 
     public override void execute(Move move) {
-      move.IsBrake = true;
+      move.IsBrake = car.Speed() > Constant.MinBrakeSpeed;
     }
 
     private bool checkSideHit(Physic.PCar self, List<Physic.PCar> enemies) {
@@ -41,7 +41,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
           Vector distance = enemy.Pos - self.Pos;
           double angle = Math.Abs(distance.Normalize().Cross(self.Dir));
           double angleSpeed = Math.Abs(self.Dir.Dot(enemy.Dir));
-          if (distance.Length < checkRadius && angle < maxAngle && angleSpeed < maxAngle) {
+          if (i > 5 && distance.Length < checkRadius && angle < maxAngle && angleSpeed < maxAngle) {
             return true;
           }
 

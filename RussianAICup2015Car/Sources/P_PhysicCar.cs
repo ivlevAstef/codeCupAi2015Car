@@ -99,6 +99,11 @@ namespace RussianAICup2015Car.Sources.Physic {
       nitroTicks = game.NitroDurationTicks;
     }
 
+    public void disableNitro() {
+      nitroTicks = 0;
+      enginePower = 1.0;
+    }
+
     public void traveledOnOil(OilSlick oil = null) {
       if (oilTicks > 0) {
         return;

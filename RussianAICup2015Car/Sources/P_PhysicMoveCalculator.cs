@@ -38,7 +38,7 @@ namespace RussianAICup2015Car.Sources.Physic {
         Vector posSpeedReach = null != speedReach ? speedReach.CarCome.Pos : null;
 
         if (null == posSpeedReach || (posSpeedReach - idealPos).Dot(dir) > lineCount * oneLineWidth) {
-          result.IsBrake = car.Speed() > 9;
+          result.IsBrake = car.Speed() > Constant.MinBrakeSpeed;
         }
 
         int tickToSpeedReach = (null != speedReach) ? speedReach.TickCome : maxIterationCount;
@@ -62,7 +62,7 @@ namespace RussianAICup2015Car.Sources.Physic {
           bool isParallel = Math.Abs(physicCar.Dir.Dot(sideNormal)) < Math.Sin(Math.PI/9);//20 degrees
 
           if (!isParallel && mapCrash.TickCome < 20 && speedSign > 0) {
-            result.IsBrake = car.Speed() > 8;
+            result.IsBrake = car.Speed() > Constant.MinBrakeSpeed;
           }
         }
       }
