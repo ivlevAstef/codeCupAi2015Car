@@ -59,33 +59,36 @@ namespace RussianAICup2015Car.Sources.Physic {
   }
 
   public class MapCrashEvent : PhysicEventBase {
-    private Vector idealPos;
-    private TileDir dirMove;
+    private readonly List<ICollisionObject> collisionObjects;
 
     //TODO: need set collision object
-    public MapCrashEvent(Vector idealPos, TileDir dirMove) {
-      this.idealPos = idealPos;
-      this.dirMove = dirMove;
+    public MapCrashEvent(List<ICollisionObject> additionalCollisionObjects) {
+      this.collisionObjects = additionalCollisionObjects;
     }
 
     public override PhysicEventType Type { get { return PhysicEventType.MapCrash; } }
 
     public override bool Check(PCar car) {
-      TileDir[] additionalDirs = null;
-      if (TileDir.Zero != dirMove) {
-        TilePos carPos = new TilePos(car.Pos.X, car.Pos.Y);
-        TilePos endPos = new TilePos(idealPos.X, idealPos.Y);
-        bool isEndPos = carPos.Projection(dirMove) == endPos.Projection(dirMove);
+      CollisionRect carRect = new CollisionRect(car);
 
-        additionalDirs = isEndPos ? null : new TileDir[] { dirMove.PerpendicularLeft(), dirMove.PerpendicularRight() };
+      List<CollisionInfo> collisions = new List<CollisionInfo>();
+      if (null != collisionObjects) {
+        collisions.AddRange(CollisionDetector.CheckCollision(carRect, collisionObjects));
       }
 
-      Vector normal = CollisionDetectorOld.instance.IntersectCarWithMap(car.Pos, car.Dir, additionalDirs);
-      if (null != normal && car.Speed.Dot(normal) < 0) {
-        checkInfo = normal;
-        return true;
+      collisions.AddRange(CollisionDetector.CollisionsWithMap(carRect));
+
+      if (!collisions.HasCollision()) {
+        return false;
       }
-      return false;
+
+      Vector normal = collisions.AverageNormalObj1();
+      if (car.Speed.Dot(normal) > 0) {
+        return false;
+      }
+
+      checkInfo = normal;
+      return true;
     }
   }
 

@@ -237,7 +237,7 @@ namespace RussianAICup2015Car.Sources.Map {
       physicCar.disableNitro();
 
       HashSet<IPhysicEvent> pEvents = new HashSet<IPhysicEvent> {
-        new MapCrashEvent(pos.ToVector(0.5, 0.5), TileDir.Zero),
+        new MapCrashEvent(null),
         new PassageTileEvent(pos)
       };
 

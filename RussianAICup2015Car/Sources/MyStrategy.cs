@@ -88,6 +88,9 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
     private void setupEnvironments(Car car, World world, Game game, Move move) {
       TilePos.TileSize = game.TrackTileSize;
 
+      GlobalMap.InstanceInit(world);
+      GlobalMap.Instance.SetupEnvironment(world, game);
+
       AngleReachEvent.setupEnvironment(game);
 
       MoveToAngleFunction.setupEnvironment(world, game);
@@ -95,13 +98,11 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       PhysicExtensions.setupEnvironment(game);
       PhysicEventsCalculator.setupEnvironment(game, world);
 
-      GlobalMap.InstanceInit(world);
-      GlobalMap.Instance.SetupEnvironment(world, game);
+      CollisionSide.SetupEnvironment(game);
+      CollisionDetector.SetupEnvironment(game, GlobalMap.Instance);
 
       map.SetupEnvironment(car, GlobalMap.Instance);
       path.SetupEnvironment(car, world, game);
-
-      CollisionDetectorOld.instance.SetupEnvironment(game, GlobalMap.Instance);
 
       foreach (IAction action in actions.Values) {
         action.setupEnvironment(car, world, game, map, path);

@@ -35,7 +35,7 @@ namespace RussianAICup2015Car.Sources.Common {
     public void Info(String message, params object[] args) {
     }
 
-    public void Assert(bool condition) {
+    public void Assert(bool condition, String message) {
     }
 
 #endif

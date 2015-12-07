@@ -12,7 +12,6 @@ namespace RussianAICup2015Car.Sources.Common {
       return new Vector(Math.Cos(angle), Math.Sin(angle)).Normalize();
     }
 
-
     public static bool operator ==(Vector a, Vector b) {
       if (System.Object.ReferenceEquals(a, b)) {
         return true;

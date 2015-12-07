@@ -2,6 +2,7 @@
 using System;
 
 using RussianAICup2015Car.Sources.Common;
+using System.Collections.Generic;
 
 namespace RussianAICup2015Car.Sources.Physic {
   public static class PhysicExtensions {
@@ -19,6 +20,46 @@ namespace RussianAICup2015Car.Sources.Physic {
       physicCar.Iteration(ticks);
 
       return physicCar;
+    }
+
+
+    public static bool HasCollision(this List<CollisionInfo> collisions) {
+      foreach (CollisionInfo info in collisions) {
+        if (info.CollisionDeletected) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    public static Vector AverageNormalObj1(this List<CollisionInfo> collisions) {
+      if (!collisions.HasCollision()) {
+        return null;
+      }
+
+      Vector normal = new Vector(0, 0);
+      foreach (CollisionInfo info in collisions) {
+        if (info.CollisionDeletected && !info.Inside) {
+          normal = normal + info.NormalObj1;
+        }
+      }
+
+      return normal.Normalize();
+    }
+
+    public static Vector AverageNormalObj2(this List<CollisionInfo> collisions) {
+      if (!collisions.HasCollision()) {
+        return null;
+      }
+
+      Vector normal = new Vector(0, 0);
+      foreach (CollisionInfo info in collisions) {
+        if (info.CollisionDeletected && !info.Inside) {
+          normal = normal + info.NormalObj2;
+        }
+      }
+
+      return normal.Normalize();
     }
   }
 }

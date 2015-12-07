@@ -31,12 +31,14 @@ namespace RussianAICup2015Car.Sources.Physic {
     public readonly Vector Dir;
     public readonly double Width;
     public readonly double Height;
+    public readonly Vector[] Points;
 
     public CollisionRect(Vector rectCenter, Vector rectDir, double width, double height) {
       this.Center = rectCenter;
       this.Dir = rectDir;
       this.Width = width;
       this.Height = height;
+      this.Points = calculatePoints();
     }
 
     public CollisionRect(Car car) {
@@ -44,9 +46,29 @@ namespace RussianAICup2015Car.Sources.Physic {
       this.Dir = Vector.sincos(car.Angle);
       this.Width = car.Width;
       this.Height = car.Height;
+      this.Points = calculatePoints();
+    }
+
+    public CollisionRect(PCar car) {
+      this.Center = car.Pos;
+      this.Dir = car.Dir;
+      this.Width = car.Car.Width;
+      this.Height = car.Car.Height;
+      this.Points = calculatePoints();
     }
 
     public CollisionObjectType Type { get { return CollisionObjectType.Rect; } }
+    public double MaxRadius { get { return Math.Sqrt(0.25 * (this.Width * this.Width + this.Height * this.Height)); } }
+
+    private Vector[] calculatePoints() {
+      return new Vector[4] {
+        Center + (Dir * Width + Dir.Perpendicular() * Height) * 0.5,
+        Center + (Dir * Width + Dir.Perpendicular() * -Height) * 0.5,
+        Center + (Dir * -Width + Dir.Perpendicular() * -Height) * 0.5,
+        Center + (Dir * -Width + Dir.Perpendicular() * Height) * 0.5
+      };
+    }
+
   }
 
   public class CollisionSide : ICollisionObject {
@@ -80,21 +102,33 @@ namespace RussianAICup2015Car.Sources.Physic {
     public readonly ICollisionObject obj2;
 
     public Vector Point { get { return point; } }
-    public Vector NormalObj1 { get { return point; } }
-    public Vector NormalObj2 { get { return point; } }
+    public Vector NormalObj1 { get { return normalObj1; } }
+    public Vector NormalObj2 { get { return normalObj2; } }
     public bool Inside { get { return inside; } }
+    public bool CollisionDeletected { get { return collisionDeletected; } }
 
     private Vector point = null;
     private Vector normalObj1 = null;
     private Vector normalObj2 = null;
     private bool inside = false;
+    private bool collisionDeletected = false;
 
     public CollisionInfo(ICollisionObject obj1, ICollisionObject obj2) {
       this.obj1 = obj1;
       this.obj2 = obj2;
     }
 
+    public void setCollisionData(CollisionInfo info) {
+      this.collisionDeletected = info.collisionDeletected;
+      this.point = info.point;
+      this.normalObj1 = info.normalObj1;
+      this.normalObj2 = info.normalObj2;
+      this.inside = info.inside;
+    }
+
     public void setCollisionData(Vector point, Vector normalObj1, Vector normalObj2) {
+      Logger.instance.Assert(null != normalObj1 && null != normalObj2, "Incorrect input");
+      this.collisionDeletected = true;
       this.point = point;
       this.normalObj1 = normalObj1;
       this.normalObj2 = normalObj2;
@@ -102,8 +136,15 @@ namespace RussianAICup2015Car.Sources.Physic {
     }
 
     public void setCollisionDataForInside(Vector point) {
+      this.collisionDeletected = true;
       this.point = point;
       this.inside = true;
+    }
+
+    public void collisionDataInverse() {
+      if (!inside) {
+        setCollisionData(point, normalObj2, normalObj1);
+      }
     }
   }
 }

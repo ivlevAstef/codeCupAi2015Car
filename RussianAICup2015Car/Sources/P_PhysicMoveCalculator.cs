@@ -6,7 +6,7 @@ using RussianAICup2015Car.Sources.Common;
 
 namespace RussianAICup2015Car.Sources.Physic {
   public class MovingCalculator {
-    private const int maxIterationCount = 250;
+    private const int maxIterationCount = 180;
     private double oneLineWidth;
 
     private Car car;
@@ -75,7 +75,7 @@ namespace RussianAICup2015Car.Sources.Physic {
       HashSet<IPhysicEvent> pEvents = new HashSet<IPhysicEvent> {
         new PassageLineEvent(dirMove, idealPos),
         new AngleReachEvent(idealDir.Angle),
-        new MapCrashEvent(idealPos, dirMove)
+        new MapCrashEvent(null)
       };
 
       PCar physicCar = new PCar(car, game);
@@ -89,7 +89,7 @@ namespace RussianAICup2015Car.Sources.Physic {
     }
 
     private bool calculateEventCheckEnd(PCar physicCar, HashSet<IPhysicEvent> pEvents, int tick) {
-      if (tick > maxIterationCount) {
+      if (tick > maxIterationCount) { 
         return true;
       }
 
