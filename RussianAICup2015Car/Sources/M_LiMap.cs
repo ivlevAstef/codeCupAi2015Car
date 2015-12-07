@@ -14,6 +14,7 @@ namespace RussianAICup2015Car.Sources.Map {
       public Cell(TilePos pos, HashSet<TileDir> dirs) {
         this.Pos = pos;
         this.Dirs = dirs;
+        this.transitions = new Transition[0];
       }
 
       public void setTransitions(List<Transition> transitions) {
@@ -90,30 +91,9 @@ namespace RussianAICup2015Car.Sources.Map {
       fillCell(result, 0, maxDepth);
 
       HashSet<Cell> visited = new HashSet<Cell>();
-      simplifiedCell(result, visited);
-
-      visited.Clear();
       Logger.instance.Assert(MaxDepth(result, visited) >= 3, "Can't create full path (first cell with trasitions)");
 
       return result;
-    }
-
-    private void simplifiedCell(Cell cell, HashSet<Cell> visited) {
-      List<Transition> transitions = new List<Transition>();
-
-      visited.Add(cell);
-
-      foreach (Transition data in cell.Transitions) {
-        if (null != data.ToCell.Dirs && null != data.ToCell.Transitions) {
-          if (!visited.Contains(data.ToCell)) {
-            simplifiedCell(data.ToCell, visited);
-            
-          }
-          transitions.Add(new Transition(data.ToCell, data.Weight));
-        }
-      }
-
-      cell.setTransitions(transitions);
     }
 
     private int MaxDepth(Cell cell, HashSet<Cell> visited) {
@@ -139,11 +119,11 @@ namespace RussianAICup2015Car.Sources.Map {
       while(stack.Count > 0) {
         CellData data = stack.Dequeue();
 
-        if (data.Depth >= maxDepth) {
+        if (data.Depth >= maxDepth || TileType.Unknown == gmap.Type(data.Cell.Pos)) {
           continue;
         }
 
-        while (data.Cell.Pos.Equals(checkpointByOffset(data.CheckPointOffset))) {
+        while (data.Cell.Pos == checkpointByOffset(data.CheckPointOffset)) {
           data.CheckPointOffset++;
         }
 
@@ -168,10 +148,11 @@ namespace RussianAICup2015Car.Sources.Map {
         TilePos iterPos = pos + dir;
 
         bool alternative = (!data.Alternative && checkToAlternative(map, pos, iterPos));
+        bool unknown = checkToUnknown(pos, iterPos, 2);
 
         Logger.instance.Assert(0 <= iterPos.X && iterPos.X < gmap.Width && 0 <= iterPos.Y && iterPos.Y < gmap.Height, "WTF?");
 
-        if (map[iterPos.X, iterPos.Y] < map[pos.X, pos.Y] || alternative) {
+        if (map[iterPos.X, iterPos.Y] < map[pos.X, pos.Y] || unknown || alternative) {
           CellKey key = new CellKey(iterPos, data.CheckPointOffset);
 
           Cell iterCell = null;
@@ -198,6 +179,29 @@ namespace RussianAICup2015Car.Sources.Map {
       }
 
       return false;
+    }
+
+    private bool checkToUnknown(TilePos lastPos, TilePos pos, int depth) {
+      if (depth <= 0) {
+        return false;
+      }
+
+      if (gmap.Type(pos) == TileType.Unknown) {
+        return true;
+      }
+
+      bool allUnknown = true;
+      int count = 0;
+      foreach (TileDir dir in gmap.Dirs(pos)) {
+        if (pos + dir == lastPos) {
+          continue;
+        }
+
+        allUnknown &= checkToUnknown(pos, pos + dir, depth - 1);
+        count++;
+      }
+
+      return count > 0 && allUnknown;
     }
 
     private TilePos checkpointByOffset(int offset) {

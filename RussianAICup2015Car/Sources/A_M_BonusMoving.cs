@@ -27,7 +27,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
 
       Vector dir = new Vector(dirMove.X, dirMove.Y);
 
-      Move needMove = calculator.calculateMove(endPos, dirMove, dir, 0.05);
+      Move needMove = calculator.calculateMove(endPos, dirMove, dir, 0.0);
       move.EnginePower = needMove.EnginePower;
       move.WheelTurn = needMove.WheelTurn;
     }
@@ -70,7 +70,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
           continue;
         }
 
-        if (!isNextTile(tilePos(bonus.X, bonus.Y))) {
+        if (!isNextTile(new TilePos(bonus.X, bonus.Y))) {
           continue;
         }
 
@@ -82,17 +82,13 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       return priorityBonus;
     }
 
-    private bool isNextTile(TileDir checkTile) {
+    private bool isNextTile(TilePos checkTile) {
       for (int i = 0; i < Math.Min(3, path.Count); i++) {
-        if (path[i].Pos.Equals(checkTile)) {
+        if (path[i].Pos == checkTile) {
           return true;
         }
       }
       return false;
-    }
-
-    private TileDir tilePos(double x, double y) {
-      return new TileDir((int)(x / game.TrackTileSize), (int)(y / game.TrackTileSize));
     }
   }
 }

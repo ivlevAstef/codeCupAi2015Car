@@ -135,7 +135,7 @@ namespace RussianAICup2015Car.Sources.Map {
 
       List<TileDir> dirOuts = new List<TileDir>();
       foreach(TileDir dir in cell.Dirs) {
-        if (!dir.Equals(resultCell.DirIn.Negative())) {
+        if (dir == resultCell.DirIn.Negative()) {
           dirOuts.Add(dir);
         }
       }
@@ -143,6 +143,8 @@ namespace RussianAICup2015Car.Sources.Map {
 
       if (null != max) {
         resultCell.DirOut = max.Cell.Pos - cell.Pos;
+      } else if (1 == dirOuts.Count) {
+        resultCell.DirOut = dirOuts[0];
       }
 
       CellTransition result = new CellTransition(resultCell, max, cellPriority(resultCell));
@@ -183,7 +185,7 @@ namespace RussianAICup2015Car.Sources.Map {
     }
 
     private double cellTransitionPriority(Cell lastCell, Cell cell, Cell nextCell, int length, bool usePhysic) {
-      double priority = ((-length) - 1)*2.5;
+      double priority = ((-length) - 1);
 
       priority += tilePriority(lastCell, cell);
       if (usePhysic && null != nextCell) {
@@ -208,21 +210,21 @@ namespace RussianAICup2015Car.Sources.Map {
 
     private double tilePriority(TileDir dirIn, TileDir dirOut, TileDir nextDirIn, TileDir nextDirOut) {
       if (dirIn.Negative() == dirOut || nextDirIn.Negative() == nextDirOut) {
-        return -8;
+        return -10;
       }
 
       if (dirIn == dirOut) {//line
-        return 0.15;
+        return 0.42;
       }
 
       if (null == nextDirOut || nextDirIn == nextDirOut) {//turn
-        return -0.6;
+        return -0.1;
       }
 
       if (dirIn == nextDirOut.Negative() && dirOut == nextDirIn) {//around
-        return -1.5;
+        return -2.0;
       } else if (dirIn == nextDirOut && dirOut == nextDirIn) {//snake
-        return 0.5;
+        return 0.45;
       }
 
       return 0;
@@ -234,7 +236,7 @@ namespace RussianAICup2015Car.Sources.Map {
       physicCar.disableNitro();
 
       HashSet<IPhysicEvent> pEvents = new HashSet<IPhysicEvent> {
-        new MapCrashEvent(pos.ToVector(0.5,0.5), TileDir.Zero),
+        new MapCrashEvent(pos.ToVector(0.5, 0.5), TileDir.Zero),
         new PassageTileEvent(pos)
       };
 
@@ -243,11 +245,11 @@ namespace RussianAICup2015Car.Sources.Map {
       if (pEvents.ComeContaints(PhysicEventType.PassageTile)) {
         Vector dirBegin = new Vector(car.SpeedX, car.SpeedY).Normalize();
         Vector dirEnd = pEvents.GetEvent(PhysicEventType.PassageTile).CarCome.Dir;
-        return 0.15 + 0.35 * dirBegin.Dot(dirEnd);
+        return 0.15 + 0.5 * dirBegin.Dot(dirEnd);
       }
 
       if (pEvents.ComeContaints(PhysicEventType.MapCrash)) {
-        return -4.5;
+        return -3.0;
       }
 
       return 0;
