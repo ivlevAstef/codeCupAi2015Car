@@ -145,7 +145,7 @@ namespace RussianAICup2015Car.Sources.Actions {
           }
         }
 
-        Vector itersectWithMap = Physic.CollisionDetector.instance.IntersectCircleWithMap(tirePos, game.TireRadius);
+        Vector itersectWithMap = Physic.CollisionDetectorOld.instance.IntersectCircleWithMap(tirePos, game.TireRadius);
         if (null != itersectWithMap) {
           ignored = null;
           tireSpd = calcTireSpeedAfterKick(tireSpd, (tirePos - itersectWithMap).Normalize());
@@ -161,7 +161,7 @@ namespace RussianAICup2015Car.Sources.Actions {
     }
 
     private bool itersectTireWithCar(Vector tirePos, Vector tireSpd, Physic.PCar car, double multR = 1) {
-      return Physic.CollisionDetector.instance.IntersectCarWithCircle(car.Pos, car.Dir, tirePos, game.TireRadius * multR);
+      return Physic.CollisionDetectorOld.instance.IntersectCarWithCircle(car.Pos, car.Dir, tirePos, game.TireRadius * multR);
     }
 
     private Vector intersectCarNormal(Physic.PCar car, Vector pos) {

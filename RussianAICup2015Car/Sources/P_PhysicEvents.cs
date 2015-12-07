@@ -80,7 +80,7 @@ namespace RussianAICup2015Car.Sources.Physic {
         additionalDirs = isEndPos ? null : new TileDir[] { dirMove.PerpendicularLeft(), dirMove.PerpendicularRight() };
       }
 
-      Vector normal = CollisionDetector.instance.IntersectCarWithMap(car.Pos, car.Dir, additionalDirs);
+      Vector normal = CollisionDetectorOld.instance.IntersectCarWithMap(car.Pos, car.Dir, additionalDirs);
       if (null != normal && car.Speed.Dot(normal) < 0) {
         checkInfo = normal;
         return true;

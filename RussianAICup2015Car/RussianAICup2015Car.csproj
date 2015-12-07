@@ -68,6 +68,7 @@
     <Compile Include="Sources\A_M_OvertakeMoving.cs" />
     <Compile Include="Sources\M_LiMap.cs" />
     <Compile Include="Sources\M_Path.cs" />
+    <Compile Include="Sources\P_CollisionObjects.cs" />
     <Compile Include="Sources\P_PhysicCar.cs" />
     <Compile Include="Sources\P_PhysicEventBase.cs" />
     <Compile Include="Sources\P_PhysicEvents.cs" />
