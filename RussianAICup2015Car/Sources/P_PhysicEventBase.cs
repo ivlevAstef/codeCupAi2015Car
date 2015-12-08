@@ -8,6 +8,7 @@ namespace RussianAICup2015Car.Sources.Physic {
   public enum PhysicEventType {
     PassageLine,
     PassageTile,
+    OutFromTile,
     AngleReach,
     SpeedReach,
     MapCrash,
@@ -46,31 +47,24 @@ namespace RussianAICup2015Car.Sources.Physic {
     }
 
     public bool IsCome { get { return null != car; } }
-
     public int TickCome { get { return tick; } }
-
     public PCar CarCome { get { return car; } }
-
     public object infoCome { get { return info; } }
-
-    public override bool Equals(object obj) {
-      IPhysicEvent pEvent = obj as IPhysicEvent;
-      if (null == pEvent) {
-        return false;
-      }
-
-      return this.Type == pEvent.Type;
-    }
-
-    public override int GetHashCode() {
-      return this.Type.GetHashCode();
-    }
   }
 
   public static class PhysicEventExtensions {
     public static bool ComeContaints(this HashSet<IPhysicEvent> data, PhysicEventType pType) {
       foreach (IPhysicEvent pEvent in data) {
         if (pEvent.IsCome && pEvent.Type == pType) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    public static bool Containts(this HashSet<IPhysicEvent> data, PhysicEventType pType) {
+      foreach (IPhysicEvent pEvent in data) {
+        if (pEvent.Type == pType) {
           return true;
         }
       }

@@ -73,7 +73,7 @@ namespace RussianAICup2015Car.Sources.Physic {
         double angleDeviation = dir.Angle.AngleDeviation(zeroWheelTurn.Angle);
 
         car.setWheelTurn(Math.Sign(angleDeviation));
-        car.setBrake(car.Speed.Length > Constant.MinBrakeSpeed);
+        //car.setBrake(car.Speed.Length > Constant.MinBrakeSpeed);
         car.Iteration(2);
       }
     }

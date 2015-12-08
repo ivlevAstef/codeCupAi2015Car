@@ -76,7 +76,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
 
       TileDir dir = new TileDir(posOut.X - posIn.X, posOut.Y - posIn.Y);
 
-      return dirIn.Equals(dirOut) && (dir.Equals(dirIn.PerpendicularLeft()) || dir.Equals(dirIn.PerpendicularRight()));
+      return dirIn == dirOut && (dir == dirIn.PerpendicularLeft() || dir == dirIn.PerpendicularRight());
     }
   }
 }

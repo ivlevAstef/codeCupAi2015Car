@@ -164,7 +164,7 @@ namespace RussianAICup2015Car.Sources.Physic {
       double distanceCross = TileDir.Cross(rect.Dir);
 
       //inside
-      if (Math.Abs(distanceLength) < rect.Width * 0.5 && Math.Abs(distanceCross) < rect.Height * 0.5) {
+      if (Math.Abs(distanceLength) < rect.Width * 0.5 - circle.Radius && Math.Abs(distanceCross) < rect.Height * 0.5 - circle.Radius) {
         collision.setCollisionDataForInside(circle.Center);
         return true;
       }
@@ -217,6 +217,7 @@ namespace RussianAICup2015Car.Sources.Physic {
 
         Vector collisionPoint = circle.Center + side.DirOut * distanceToInfinity;
         collision.setCollisionData(collisionPoint, side.DirOut.Negative(), side.DirOut);
+        return true;
       }
 
       return false;

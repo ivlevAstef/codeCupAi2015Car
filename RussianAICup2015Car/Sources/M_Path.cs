@@ -128,7 +128,8 @@ namespace RussianAICup2015Car.Sources.Map {
         if (null != newTransition) {
           newTransition.TransitionPriority = cellTransitionPriority(lastCell, resultCell, newTransition.Cell, transition.Weight, depth < MaxDepthUsePhysic);
 
-          if (null == max || newTransition.Priority(3) > max.Priority(3)) {
+          int checkDepth = transition.isCheckpoint ? 0 : 3;
+          if (null == max || newTransition.Priority(checkDepth) > max.Priority(checkDepth)) {
             max = newTransition;
           }
         }
@@ -136,16 +137,18 @@ namespace RussianAICup2015Car.Sources.Map {
 
       List<TileDir> dirOuts = new List<TileDir>();
       foreach(TileDir dir in cell.Dirs) {
-        if (dir == resultCell.DirIn.Negative()) {
+        if (dir != resultCell.DirIn.Negative()) {
           dirOuts.Add(dir);
         }
       }
       resultCell.DirOuts = dirOuts.ToArray();
 
-      if (null != max) {
-        resultCell.DirOut = max.Cell.Pos - cell.Pos;
-      } else if (1 == dirOuts.Count) {
-        resultCell.DirOut = dirOuts[0];
+      if (0 != dirOuts.Count) {
+        if (null != max) {
+          resultCell.DirOut = max.Cell.Pos - cell.Pos;
+        } else if (1 == dirOuts.Count) {
+          resultCell.DirOut = dirOuts[0];
+        }
       }
 
       CellTransition result = new CellTransition(resultCell, max, cellPriority(resultCell));
@@ -160,7 +163,7 @@ namespace RussianAICup2015Car.Sources.Map {
       foreach (Bonus bonus in world.Bonuses) {
         TilePos pos = new TilePos(bonus.X, bonus.Y);
         if (pos.Equals(cell.Pos)) {
-          priority += 0.1;
+          priority += 0.15;
         }
       }
 
@@ -180,7 +183,7 @@ namespace RussianAICup2015Car.Sources.Map {
         }
       }
 
-      priority -= countAccidentCarInCell;
+      priority -= 0.5 * countAccidentCarInCell;
 
       return priority;
     }
@@ -210,8 +213,12 @@ namespace RussianAICup2015Car.Sources.Map {
     }
 
     private double tilePriority(TileDir dirIn, TileDir dirOut, TileDir nextDirIn, TileDir nextDirOut) {
-      if (dirIn.Negative() == dirOut || nextDirIn.Negative() == nextDirOut) {
+      if (nextDirIn.Negative() == nextDirOut) {
         return -6.5;
+      }
+
+      if (dirIn.Negative() == dirOut) {
+        return -1;
       }
 
       if (dirIn == dirOut) {//line
@@ -237,7 +244,7 @@ namespace RussianAICup2015Car.Sources.Map {
       physicCar.disableNitro();
 
       HashSet<IPhysicEvent> pEvents = new HashSet<IPhysicEvent> {
-        new MapCrashEvent(null),
+        new OutFromTileEvent(new TilePos(car.X, car.Y)),
         new PassageTileEvent(pos)
       };
 
@@ -246,10 +253,10 @@ namespace RussianAICup2015Car.Sources.Map {
       if (pEvents.ComeContaints(PhysicEventType.PassageTile)) {
         Vector dirBegin = new Vector(car.SpeedX, car.SpeedY).Normalize();
         Vector dirEnd = pEvents.GetEvent(PhysicEventType.PassageTile).CarCome.Dir;
-        return 0.15 + 0.5 * dirBegin.Dot(dirEnd);
+        return 0.15 + 0.5 * Math.Abs(dirBegin.Dot(dirEnd));
       }
 
-      if (pEvents.ComeContaints(PhysicEventType.MapCrash)) {
+      if (pEvents.ComeContaints(PhysicEventType.OutFromTile)) {
         return -1.8;
       }
 
@@ -261,7 +268,18 @@ namespace RussianAICup2015Car.Sources.Map {
         return true;
       }
 
-      return pEvents.ComeContaints(PhysicEventType.MapCrash) || pEvents.ComeContaints(PhysicEventType.PassageTile);
+
+      if (pEvents.ComeContaints(PhysicEventType.OutFromTile)) {
+        PCar car = pEvents.GetEvent(PhysicEventType.OutFromTile).CarCome;
+        TilePos edgePos = new TilePos(car.Pos.X, car.Pos.Y);
+        Vector edge = edgePos.ToVector(Math.Round(car.Pos.X), Math.Round(car.Pos.Y));
+
+        if ((physicCar.Pos - edge).Length > game.TrackTileMargin) {
+          return true;
+        }
+      }
+
+      return pEvents.ComeContaints(PhysicEventType.PassageTile);
     }
   }
 }

@@ -25,10 +25,12 @@ namespace RussianAICup2015Car.Sources.Map {
     public class Transition {
       public readonly Cell ToCell;
       public readonly int Weight;
+      public readonly bool isCheckpoint;
 
-      public Transition(Cell toCell, int weight) {
+      public Transition(Cell toCell, int weight, bool isCheckpoint) {
         this.ToCell = toCell;
         this.Weight = weight;
+        this.isCheckpoint = isCheckpoint;
       }
     }
 
@@ -163,7 +165,9 @@ namespace RussianAICup2015Car.Sources.Map {
           }
 
           int length = map[iterPos.X, iterPos.Y] - map[pos.X, pos.Y];
-          transitions.Add(new Transition(iterCell, length));
+          if (gmap.Width * gmap.Height != map[iterPos.X, iterPos.Y]) {
+            transitions.Add(new Transition(iterCell, length, checkpointByOffset(data.CheckPointOffset) == iterPos)); 
+          }
         }
       }
 
@@ -173,7 +177,7 @@ namespace RussianAICup2015Car.Sources.Map {
     private bool checkToAlternative(int[,] map, TilePos currentPos, TilePos alternativePos) {
       foreach (TileDir dir in gmap.Dirs(alternativePos)) {
         TilePos pos = alternativePos + dir;
-        if (!pos.Equals(currentPos) && map[pos.X, pos.Y] < map[alternativePos.X, alternativePos.Y]) {
+        if (pos != currentPos && map[pos.X, pos.Y] < map[alternativePos.X, alternativePos.Y]) {
           return true;
         }
       }
@@ -231,13 +235,13 @@ namespace RussianAICup2015Car.Sources.Map {
       while (stack.Count > 0) {
         TilePos pos = stack.Dequeue();
 
-        if (visited[pos.X, pos.Y]) {
+        if (visited[pos.X, pos.Y] || gmap.Type(pos) == TileType.Unknown) {
           continue;
         }
 
         visited[pos.X, pos.Y] = true;
 
-        if (pos.Equals(end)) {
+        if (pos == end) {
           result[pos.X, pos.Y] = 0;
           backStack.Enqueue(pos);
         }
@@ -267,7 +271,7 @@ namespace RussianAICup2015Car.Sources.Map {
             TilePos nextPos = pos + dir;
             if (result[nextPos.X, nextPos.Y] > result[pos.X, pos.Y] + 1) {
               result[nextPos.X, nextPos.Y] = result[pos.X, pos.Y] + 1;
-              if (!nextPos.Equals(begin)) {
+              if (nextPos != begin) {
                 backStack.Enqueue(nextPos);
               }
             }

@@ -63,11 +63,18 @@ namespace RussianAICup2015Car.Sources.Physic {
           double angle = dir.Angle.AngleDeviation(sideNormal.Angle);
           result.WheelTurn = car.WheelTurn - speedSign * Math.Sign(angle) * game.CarWheelTurnChangePerTick;
 
-          bool isParallel = Math.Abs(Vector.sincos(car.Angle).Dot(sideNormal)) < Math.Sin(Math.PI / 18);//10 degrees
-          isParallel |= Math.Abs(physicCar.Dir.Dot(sideNormal)) < Math.Sin(Math.PI / 18);//10 degrees
+          bool isStrongParallel = Math.Abs(Vector.sincos(car.Angle).Dot(sideNormal)) < Math.Sin(Math.PI / 18);//10 degrees
+          if (isStrongParallel) {
+            result.WheelTurn = 0;
+          }
 
-          if (!isParallel && speedSign > 0) {
+          bool isParallel = Math.Abs(Vector.sincos(car.Angle).Dot(sideNormal)) < Math.Sin(Math.PI / 9);//20 degrees
+          isParallel |= Math.Abs(physicCar.Dir.Dot(sideNormal)) < Math.Sin(Math.PI / 9);//20 degrees
+
+          int ticksToZeroEnginePower = (int)(car.EnginePower / game.CarEnginePowerChangePerTick);
+          if (!isParallel && speedSign > 0 && mapCrash.TickCome < ticksToZeroEnginePower) {
             result.IsBrake = car.Speed() > Constant.MinBrakeSpeed;
+            result.EnginePower = 0;
           }
         }
       }
@@ -107,7 +114,7 @@ namespace RussianAICup2015Car.Sources.Physic {
         return true;
       }
 
-      if (pEvents.ComeContaints(PhysicEventType.AngleReach)) {
+      if (pEvents.ComeContaints(PhysicEventType.AngleReach) && !pEvents.Containts(PhysicEventType.SpeedReach)) {
         pEvents.Add(new SpeedReachEvent());
       }
 
@@ -115,9 +122,11 @@ namespace RussianAICup2015Car.Sources.Physic {
     }
 
     private HashSet<IPhysicEvent> calculateForwardEvents(Vector idealPos, TileDir dirMove, Vector idealDir) {
+
+
       HashSet<IPhysicEvent> pEvents = new HashSet<IPhysicEvent> {
         new PassageLineEvent(dirMove, idealPos),
-        new MapCrashEvent(null)
+        new MapCrashEvent(additionalSideToTileByDir(dirMove, new TilePos(idealPos.X - dirMove.X, idealPos.Y - dirMove.Y)))
       };
 
       PCar physicCar = new PCar(car, game);
@@ -127,7 +136,7 @@ namespace RussianAICup2015Car.Sources.Physic {
       double angleDeviation = idealAngle.AngleDeviation(physicCar.Angle);
 
       if (Math.Abs(angleDeviation) > game.CarRotationFrictionFactor) {
-        physicCar.setWheelTurn(physicCar.WheelTurn + 2 * game.CarWheelTurnChangePerTick * Math.Sign(angleDeviation));
+        physicCar.setWheelTurn(physicCar.WheelTurn + 0.5 * game.CarWheelTurnChangePerTick * Math.Sign(angleDeviation));
       }
 
       PhysicEventsCalculator.calculateEvents(physicCar, new MoveWithOutChange(), pEvents, calculateForwardEventCheckEnd);
@@ -143,6 +152,21 @@ namespace RussianAICup2015Car.Sources.Physic {
       return pEvents.ComeContaints(PhysicEventType.PassageLine) || pEvents.ComeContaints(PhysicEventType.MapCrash);
     }
 
+    private List<ICollisionObject> additionalSideToTileByDir(TileDir dir, TilePos pos) {
+
+      TilePos current = new TilePos(car.X, car.Y);
+
+      int distance = (pos - current).X * dir.X + (pos - current).Y * dir.Y;
+
+      List<ICollisionObject> result = new List<ICollisionObject>();
+      for (int i = 0; i < distance; i++) {
+        result.Add(new CollisionSide(current + dir * i, dir.PerpendicularLeft()));
+        result.Add(new CollisionSide(current + dir * i, dir.PerpendicularRight()));
+      }
+
+      return result;
+    }
+
     private static double WheelTurnForEndZeroWheelTurn(Car car, Game game, double finalAngle, double sign) {
       PCar physicCar = new PCar(car, game);
       int ticks = (int)Math.Abs(Math.Round(physicCar.WheelTurn / game.CarWheelTurnChangePerTick));
@@ -156,7 +180,7 @@ namespace RussianAICup2015Car.Sources.Physic {
         return 0;
       }
 
-      return car.WheelTurn + sign * game.CarWheelTurnChangePerTick * Math.Sign(angleDeviation);
+      return car.WheelTurn + /*sign **/ game.CarWheelTurnChangePerTick * Math.Sign(angleDeviation);
     }
   }
 }

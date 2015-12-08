@@ -196,7 +196,7 @@ namespace RussianAICup2015Car.Sources.Actions {
       const double magicFriction = 0.02;
 
       double friction = Math.Min(magicFriction, -speed.Dot(normal));
-      return normal.Negative() * (2 * speed.Dot(normal)) + speed - (normal * friction);
+      return normal.Negative() * (2 * speed.Dot(normal)) + speed;
 
       /*const double momentumTransferFactor = 1;
       double denominatorC = (speed.Negative().Cross(normal) / game.AngularMass!!!);

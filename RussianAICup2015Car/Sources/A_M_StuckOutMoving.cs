@@ -5,9 +5,8 @@ using System;
 
 namespace RussianAICup2015Car.Sources.Actions.Moving {
   class StuckOutMoving : MovingBase {
-    private const double maxTicks = 100;
+    private const double maxTicks = 80;
 
-    private int ignoreTicks = 10;
     private int zeroSpeedTicks = 0;
     private int outStuckTicks = 0;
     private int sign = -1;
@@ -20,12 +19,6 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
           sign *= -1;
         }
         return true;
-      }
-
-      if (ignoreTicks > 0) {
-        ignoreTicks--;
-        zeroSpeedTicks = 0;
-        return false;
       }
 
       if (speedCheck()) {
@@ -47,13 +40,13 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
     }
 
     private bool speedCheck() {
-      if (car.Speed2() < 0.05 && Math.Abs(car.EnginePower) > 5 * game.CarEnginePowerChangePerTick) {
+      if (car.Speed2() < 0.1) {
         zeroSpeedTicks++;
       } else {
         zeroSpeedTicks = 0;
       }
 
-      if (zeroSpeedTicks > 5) {
+      if (zeroSpeedTicks > 10) {
         zeroSpeedTicks = 0;
         outStuckTicks = 1;
         return true;
@@ -68,13 +61,12 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       }
 
       if (outStuckTicks > maxTicks) {
-        ignoreTicks = 10;
         outStuckTicks = 0;
         return;
       }
 
       double timePower = Math.Sin((Math.PI * 0.5) * (double)(maxTicks - outStuckTicks) / maxTicks);
-      timePower = 1.1 * timePower - 0.1;
+      timePower = 1.2 * timePower - 0.2;
       move.EnginePower = sign * timePower;
       if (timePower < 1.0e-3) {
         move.IsBrake = true;
@@ -83,7 +75,6 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       TileDir dir = path[0].DirOut;
 
       double angle = sign * car.GetAngleTo(car.X + dir.X, car.Y + dir.Y) * timePower;
-
       move.WheelTurn = (25 * angle / Math.PI);
     }
   }

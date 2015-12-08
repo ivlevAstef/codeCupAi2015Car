@@ -127,4 +127,19 @@ namespace RussianAICup2015Car.Sources.Physic {
       return carPos == tile;
     }
   }
+
+  public class OutFromTileEvent : PhysicEventBase {
+    private TilePos tile;
+
+    public OutFromTileEvent(TilePos tile) {
+      this.tile = tile;
+    }
+
+    public override PhysicEventType Type { get { return PhysicEventType.OutFromTile; } }
+
+    public override bool Check(PCar car) {
+      TilePos carPos = new TilePos(car.Pos.X, car.Pos.Y);
+      return carPos != tile;
+    }
+  }
 }

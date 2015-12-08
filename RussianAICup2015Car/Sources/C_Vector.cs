@@ -84,6 +84,9 @@ namespace RussianAICup2015Car.Sources.Common {
 
     public Vector Normalize() {
       double len = Math.Sqrt(X * X + Y * Y);
+      if (len < 1.0e-9) {
+        return new Vector(X, Y);
+      }
       return new Vector(X / len, Y / len);
     }
 

@@ -27,7 +27,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
 
       Vector dir = new Vector(dirMove.X, dirMove.Y);
 
-      Move needMove = calculator.calculateMove(endPos, dirMove, dir, 0.0);
+      Move needMove = calculator.calculateMove(endPos, dirMove, dir, 2.0);
       move.EnginePower = needMove.EnginePower;
       move.WheelTurn = needMove.WheelTurn;
     }
@@ -41,14 +41,6 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
 
     private Bonus findBonus() {
       Vector dir = new Vector(path[0].DirOut.X, path[0].DirOut.Y);
-
-      Dictionary<BonusType, int> priority = new Dictionary<BonusType, int> {
-        { BonusType.AmmoCrate , Math.Min(10, 70 - 10 * car.ProjectileCount) },
-        { BonusType.NitroBoost , Math.Min(10, 80 - 10 * car.NitroChargeCount) },
-        { BonusType.OilCanister , Math.Min(10, 50 - 10 * car.OilCanisterCount) },
-        { BonusType.PureScore , 100 },
-        { BonusType.RepairKit , (int)(150 * (1.0 - car.Durability)) }
-      };
 
       if (car.Speed() < 1) {
         return null;
@@ -74,12 +66,26 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
           continue;
         }
 
-        if (null == priorityBonus || priority[priorityBonus.Type] < priority[bonus.Type]) {
+        if (null == priorityBonus || bonusPriorityFor(priorityBonus) < bonusPriorityFor(bonus)) {
           priorityBonus = bonus;
         }
       }
 
       return priorityBonus;
+    }
+
+    private double bonusPriorityFor(Bonus bonus) {
+      Dictionary<BonusType, int> priority = new Dictionary<BonusType, int> {
+        { BonusType.AmmoCrate , Math.Min(10, 70 - 10 * car.ProjectileCount) },
+        { BonusType.NitroBoost , Math.Min(10, 80 - 10 * car.NitroChargeCount) },
+        { BonusType.OilCanister , Math.Min(10, 50 - 10 * car.OilCanisterCount) },
+        { BonusType.PureScore , 100 },
+        { BonusType.RepairKit , (int)(150 * (1.0 - car.Durability)) }
+      };
+
+      double distance = car.GetDistanceTo(bonus);
+
+      return priority[bonus.Type] - (distance * 0.05);
     }
 
     private bool isNextTile(TilePos checkTile) {
