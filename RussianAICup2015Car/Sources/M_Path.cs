@@ -180,7 +180,7 @@ namespace RussianAICup2015Car.Sources.Map {
         }
       }
 
-      priority -= countAccidentCarInCell * countAccidentCarInCell;
+      priority -= countAccidentCarInCell;
 
       return priority;
     }
@@ -211,7 +211,7 @@ namespace RussianAICup2015Car.Sources.Map {
 
     private double tilePriority(TileDir dirIn, TileDir dirOut, TileDir nextDirIn, TileDir nextDirOut) {
       if (dirIn.Negative() == dirOut || nextDirIn.Negative() == nextDirOut) {
-        return -10;
+        return -6.5;
       }
 
       if (dirIn == dirOut) {//line
@@ -219,11 +219,11 @@ namespace RussianAICup2015Car.Sources.Map {
       }
 
       if (null == nextDirOut || nextDirIn == nextDirOut) {//turn
-        return -0.1;
+        return -0.6;
       }
 
       if (dirIn == nextDirOut.Negative() && dirOut == nextDirIn) {//around
-        return -1.5;
+        return -1.0;
       } else if (dirIn == nextDirOut && dirOut == nextDirIn) {//snake
         return 0.45;
       }

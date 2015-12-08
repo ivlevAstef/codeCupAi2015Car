@@ -46,6 +46,15 @@ namespace RussianAICup2015Car.Sources.Physic {
     }
   }
 
+  public class MoveWithOutChange : IPhysicMoveFunction {
+    public MoveWithOutChange() {
+    }
+
+    public void Iteration(PCar car, int iterationCount) {
+      car.Iteration(iterationCount);
+    }
+  }
+
 
   public class MoveToTile : IPhysicMoveFunction {
     private TilePos tilePos;
