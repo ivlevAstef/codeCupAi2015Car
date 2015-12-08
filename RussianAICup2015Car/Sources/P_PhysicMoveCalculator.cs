@@ -61,11 +61,10 @@ namespace RussianAICup2015Car.Sources.Physic {
           Logger.instance.Assert(null != sideNormal, "Can't get side normal");
 
           double angle = dir.Angle.AngleDeviation(sideNormal.Angle);
-          result.WheelTurn = car.WheelTurn - speedSign * Math.Sign(angle) * game.CarWheelTurnChangePerTick;
 
           bool isStrongParallel = Math.Abs(Vector.sincos(car.Angle).Dot(sideNormal)) < Math.Sin(Math.PI / 18);//10 degrees
-          if (isStrongParallel) {
-            result.WheelTurn = 0;
+          if (!isStrongParallel) {
+            result.WheelTurn = car.WheelTurn - speedSign * Math.Sign(angle) * game.CarWheelTurnChangePerTick;
           }
 
           bool isParallel = Math.Abs(Vector.sincos(car.Angle).Dot(sideNormal)) < Math.Sin(Math.PI / 9);//20 degrees

@@ -31,10 +31,6 @@ namespace RussianAICup2015Car.Sources.Actions {
 
     private bool isShootingWasher() {
       foreach (Car carIter in world.Cars) {
-        if (carIter.IsTeammate || carIter.IsFinishedTrack || carIter.Durability <= 1.0e-9) {
-          continue;
-        }
-
         if (isEnemyOnWasherLine(carIter)) {
           return true;
         }
@@ -75,7 +71,7 @@ namespace RussianAICup2015Car.Sources.Actions {
           double distance = Math.Sqrt(Math.Pow(fullDistance, 2) - Math.Pow(distanceByDir,2));
 
           if (distance < radius) {
-            return true;
+            return !(enemy.IsTeammate || enemy.IsFinishedTrack || enemy.Durability < 1.0e-9);
           }
 
           return false;
