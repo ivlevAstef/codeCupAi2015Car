@@ -56,7 +56,6 @@ namespace RussianAICup2015Car.Sources.Map {
       Logger.instance.Assert(width == this.world.Width && height == this.world.Height, "Incorrect world size.");
 
       updateUseWorldTilesData();
-      updateUseWorldCarsData();
     }
 
     public TileType Type(TilePos pos) {
@@ -146,23 +145,5 @@ namespace RussianAICup2015Car.Sources.Map {
         }
       }
     }
-
-    private void updateUseWorldCarsData() {
-      foreach (Car car in world.Cars) {
-        TilePos currentPos = new TilePos(car.X, car.Y);
-        if (carsTilePos.ContainsKey(car.Id) && carsTilePos[car.Id] != currentPos) {
-          TilePos lastPos = carsTilePos[car.Id];
-          TileDir dir = lastPos - currentPos;
-          if (dir.Correct()) {
-            dirs[currentPos.X, currentPos.Y].Add(dir);
-            dirs[lastPos.X, lastPos.Y].Add(dir.Negative());
-          } else {
-            Logger.instance.Error("car teleportation...");
-          }
-        }
-        carsTilePos[car.Id] = currentPos;
-      }
-    }
-
   }
 }
