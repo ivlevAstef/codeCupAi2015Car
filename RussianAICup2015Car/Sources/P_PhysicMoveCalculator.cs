@@ -35,7 +35,7 @@ namespace RussianAICup2015Car.Sources.Physic {
 
     private void move(Move moveResult, Vector idealPos, TileDir dirMove, Vector idealDir, double lineCount = 1.25) {
       HashSet<IPhysicEvent> events = calculateRotateEvents(idealPos, dirMove, idealDir);
-      HashSet<IPhysicEvent> eventsBrake = calculateRotateWithBrakeEvents(idealDir);
+      HashSet<IPhysicEvent> eventsBrake = calculateRotateWithBrakeEvents(idealPos, dirMove, idealDir);
 
       IPhysicEvent passageLine = events.ComeContaints(PhysicEventType.PassageLine) ? events.GetEvent(PhysicEventType.PassageLine) : null;
       IPhysicEvent speedReach = eventsBrake.ComeContaints(PhysicEventType.SpeedReach) ? eventsBrake.GetEvent(PhysicEventType.SpeedReach) : null;
@@ -85,10 +85,10 @@ namespace RussianAICup2015Car.Sources.Physic {
             angle = car.Angle.AngleDeviation(sideNormal.Angle);
           }
 
-          bool isStrongParallel = Math.Abs(Vector.sincos(car.Angle).Dot(sideNormal)) < Math.Sin(Math.PI / 18);//10 degrees
-          if (!isStrongParallel) {
-            moveResult.WheelTurn = car.WheelTurn - speedSign * Math.Sign(angle) * game.CarWheelTurnChangePerTick;
-          }
+          //bool isStrongParallel = Math.Abs(Vector.sincos(car.Angle).Dot(sideNormal)) < Math.Sin(Math.PI / 18);//10 degrees
+          //if (!isStrongParallel) {
+          moveResult.WheelTurn = car.WheelTurn - speedSign * Math.Sign(angle) * game.CarWheelTurnChangePerTick;
+          //}
 
           bool isParallel = Math.Abs(Vector.sincos(car.Angle).Dot(sideNormal)) < Math.Sin(Math.PI / 9);//20 degrees
           isParallel |= Math.Abs(physicCar.Dir.Dot(sideNormal)) < Math.Sin(Math.PI / 9);//20 degrees
@@ -106,7 +106,7 @@ namespace RussianAICup2015Car.Sources.Physic {
     private IPhysicEvent calculateRotateMapCrashEvents(Vector idealPos, TileDir dirMove, Vector idealDir, bool useBrake) {
       HashSet<IPhysicEvent> pEvents = new HashSet<IPhysicEvent> {
         new PassageLineEvent(dirMove, idealPos),
-        new MapCrashEvent(additionalSideToTileByDir(dirMove, new TilePos(idealPos.X - dirMove.X, idealPos.Y - dirMove.Y)))
+        new MapCrashEvent(additionalSideToTileByDir(dirMove, new TilePos(idealPos.X, idealPos.Y)))
       };
 
       PCar physicCar = new PCar(car, game);
@@ -164,7 +164,9 @@ namespace RussianAICup2015Car.Sources.Physic {
     }
 
     /// Rotate With Brake
-    private HashSet<IPhysicEvent> calculateRotateWithBrakeEvents(Vector idealDir) {
+    private TilePos calcRotateWithBrakeEndPos = null;
+    private TileDir calcRotateWithBrakeDir = null;
+    private HashSet<IPhysicEvent> calculateRotateWithBrakeEvents(Vector idealPos, TileDir dirMove, Vector idealDir) {
       HashSet<IPhysicEvent> pEvents = new HashSet<IPhysicEvent> {
         new AngleReachEvent(idealDir.Angle),
       };
@@ -173,7 +175,12 @@ namespace RussianAICup2015Car.Sources.Physic {
       physicCar.setEnginePower(1.0);
 
       double idealAngle = Math.Atan2(idealDir.Y, idealDir.X);
+
+      calcRotateWithBrakeEndPos = new TilePos(idealPos.X, idealPos.Y);
+      calcRotateWithBrakeDir = dirMove;
       PhysicEventsCalculator.calculateEvents(physicCar, new MoveToAngleFunction(idealAngle), pEvents, calculateRotateWithBrakeEventCheckEnd);
+      calcRotateWithBrakeEndPos = null;
+      calcRotateWithBrakeDir = null;
 
       if (!pEvents.Containts(PhysicEventType.SpeedReach)) {
         pEvents.Add(new SpeedReachEvent());
@@ -192,7 +199,11 @@ namespace RussianAICup2015Car.Sources.Physic {
       }
 
       if (!pEvents.ComeContaints(PhysicEventType.AngleReach)) {
-        physicCar.setBrake(physicCar.Speed.Length > Constant.MinBrakeSpeed);
+        TilePos current = new TilePos(physicCar.Pos.X, physicCar.Pos.Y);
+        int distance = (calcRotateWithBrakeEndPos - current).X * calcRotateWithBrakeDir.X + (calcRotateWithBrakeEndPos - current).Y * calcRotateWithBrakeDir.Y;
+        bool isEndPos = distance <= 0;
+
+        physicCar.setBrake(!isEndPos && physicCar.Speed.Length > Constant.MinBrakeSpeed);
       }
 
       return pEvents.ComeContaints(PhysicEventType.SpeedReach);
