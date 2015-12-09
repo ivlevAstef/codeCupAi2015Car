@@ -5,17 +5,23 @@ using System;
 
 namespace RussianAICup2015Car.Sources.Actions.Moving {
   class SnakeMoving : MovingBase {
-    public override bool valid() {
-      Logger.instance.Assert(3 <= path.Count, "incorrect way cells count.");
+    private int offset = 0;
 
-      return validSnakeWithOffset(0);
+    public override bool valid() {
+      for (offset = 0; offset <= 1; offset++) {
+        if (PathCheckResult.Yes == checkSnakeWithOffset(offset)) {
+          return true;
+        }
+      }
+
+      return false;
     }
 
     public override void execute(Move move) {
-      TileDir dirMove = path[0].DirOut;
-      TileDir dirEnd = path[1].DirOut;
+      TileDir dirMove = path[offset].DirOut;
+      TileDir dirEnd = path[1 + offset].DirOut;
 
-      Vector endPos = GetWayEnd(path[1].Pos, dirEnd);
+      Vector endPos = GetWayEnd(path[1 + offset].Pos, dirEnd);
       Vector dir = new Vector(dirMove.X + dirEnd.X, dirMove.Y + dirEnd.Y).Normalize();
 
       Physic.MovingCalculator calculator = new Physic.MovingCalculator();
@@ -38,7 +44,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       double maxAngle = Math.Sin(Math.PI / 18);
       double angleDiff = Math.Abs(dir.Cross(Vector.sincos(car.Angle)));
 
-      if (validSnakeWithOffset(1) && validSnakeWithOffset(2) && angleDiff < maxAngle) {
+      if (PathCheckResult.Yes == checkSnakeWithOffset(1) && PathCheckResult.Yes == checkSnakeWithOffset(2) && angleDiff < maxAngle) {
         result.Add(ActionType.UseNitro);
       }
 
@@ -57,26 +63,6 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       }
 
       return false;
-    }
-
-    private bool validSnakeWithOffset(int offset) {
-      if (3 + offset >= path.Count) {
-        return true;
-      }
-
-      TilePos posIn = path[1 + offset].Pos;
-      TilePos posOut = path[2 + offset].Pos;
-
-      TileDir dirIn = path[1 + offset].DirIn;
-      TileDir dirOut = path[2 + offset].DirOut;
-
-      if (null == dirOut || dirOut.Equals(new TileDir(0))) {
-        return false;
-      }
-
-      TileDir dir = new TileDir(posOut.X - posIn.X, posOut.Y - posIn.Y);
-
-      return dirIn == dirOut && (dir == dirIn.PerpendicularLeft() || dir == dirIn.PerpendicularRight());
     }
   }
 }

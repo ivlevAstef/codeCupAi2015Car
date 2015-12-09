@@ -8,27 +8,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
     private const int offset = 1;
 
     public override bool valid() {
-      return !validSnakeWithOffset(offset);
-    }
-
-    private bool validSnakeWithOffset(int offset) {
-      if (3 + offset >= path.Count) {
-        return true;
-      }
-
-      TilePos posIn = path[1 + offset].Pos;
-      TilePos posOut = path[2 + offset].Pos;
-
-      TileDir dirIn = path[1 + offset].DirIn;
-      TileDir dirOut = path[2 + offset].DirOut;
-
-      if (null == dirOut || dirOut.Equals(new TileDir(0))) {
-        return false;
-      }
-
-      TileDir dir = new TileDir(posOut.X - posIn.X, posOut.Y - posIn.Y);
-
-      return dirIn == dirOut && (dir == dirIn.PerpendicularLeft() || dir == dirIn.PerpendicularRight());
+      return PathCheckResult.No == checkSnakeWithOffset(offset);
     }
 
     public override void execute(Move move) {
@@ -36,16 +16,16 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       TileDir dirEnd = path[1 + offset].DirOut;
 
       Vector endPos = GetWayEnd(path[1 + offset].Pos, dirEnd);
-      Vector dir = new Vector(dirMove.X + dirEnd.X, dirMove.Y + dirEnd.Y).Normalize();
       dirMove = path[0].DirOut;
 
       Physic.MovingCalculator calculator = new Physic.MovingCalculator();
       calculator.setupEnvironment(car, game, world);
 
-      Move needMove = calculator.calculateMove(endPos, dirMove, dir, 0.5);
+      Vector dir = new Vector(dirEnd.X, dirEnd.Y);
+      Move needMove = calculator.calculateMove(endPos, dirMove, dir, 0.0);
       move.IsBrake = needMove.IsBrake;
       move.EnginePower = needMove.EnginePower;
-      //move.WheelTurn = needMove.WheelTurn;
+      move.WheelTurn = needMove.WheelTurn;
     }
   }
 }

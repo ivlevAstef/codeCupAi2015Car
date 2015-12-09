@@ -20,16 +20,18 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
 
       TileDir dirMove = path[0].DirOut;
 
-      Vector endPos = new Vector(findedBonus.X, findedBonus.Y);
+      Vector endPos = bonusEndPos(findedBonus, dirMove);
 
       Physic.MovingCalculator calculator = new Physic.MovingCalculator();
       calculator.setupEnvironment(car, game, world);
 
       Vector dir = new Vector(dirMove.X, dirMove.Y);
 
-      Move needMove = calculator.calculateMove(endPos, dirMove, dir, 2.0);
-      move.EnginePower = needMove.EnginePower;
-      move.WheelTurn = needMove.WheelTurn;
+      Move needMove = calculator.calculateMove(endPos, dirMove, dir, 0.05);
+      if (!needMove.IsBrake) {
+        move.EnginePower = needMove.EnginePower;
+        move.WheelTurn = needMove.WheelTurn;
+      }
     }
 
     public override List<ActionType> GetParallelsActions() {
@@ -37,6 +39,18 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
         ActionType.PreTurn,
         ActionType.Shooting
       };
+    }
+
+    private Vector bonusEndPos(Bonus bonus, TileDir dirMove) {
+      Vector center = new TilePos(bonus.X, bonus.Y).ToVector(0.5, 0.5);
+      Vector endPos = new Vector(findedBonus.X, findedBonus.Y);
+
+      Vector perpendicular = new Vector(dirMove.X, dirMove.Y).Perpendicular();
+      double sign = Math.Sign((endPos - center).Dot(perpendicular));
+
+      endPos = endPos - perpendicular * (sign * game.CarHeight * 0.5);
+
+      return endPos;
     }
 
     private Bonus findBonus() {

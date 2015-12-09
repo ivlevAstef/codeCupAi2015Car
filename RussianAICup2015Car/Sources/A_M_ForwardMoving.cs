@@ -19,7 +19,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       Physic.MovingCalculator calculator = new Physic.MovingCalculator();
       calculator.setupEnvironment(car, game, world);
 
-      Move needMove = calculator.calculateMove(endPos, dirMove, new Vector(dirMove.X, dirMove.Y));
+      Move needMove = calculator.calculateMove(endPos, dirMove, new Vector(dirMove.X, dirMove.Y), 64/*ignore*/);
       move.IsBrake = needMove.IsBrake;
       move.EnginePower = needMove.EnginePower;
       move.WheelTurn = needMove.WheelTurn;
@@ -28,7 +28,8 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
     public override List<ActionType> GetParallelsActions() {
       List<ActionType> result = new List<ActionType>() {
         ActionType.PreTurn,
-        ActionType.Shooting
+        ActionType.Shooting,
+        ActionType.MoveToBonus,
       };
 
       Vector dir = new Vector(path[0].DirOut.X, path[0].DirOut.Y);
@@ -45,19 +46,6 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       return result;
     }
 
-    private bool isStraight() {
-      int straightCount = 0;
-      for (int i = 0; i < Math.Min(3, path.Count); i++) {
-        if (path[i].DirIn.Equals(path[i].DirOut)) {
-          straightCount++;
-        } else {
-          break;
-        }
-      }
-
-      return straightCount >= 3;
-    }
-
     private bool nearCrossRoad() {
       for (int i = 1; i < Math.Min(3, path.Count); i++) {
         if (path[i].DirOuts.Length == 3) {//because one dir it's IN
@@ -67,7 +55,6 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
 
       return false;
     }
-
 
     private Vector EndSidePos() {
       TilePos pos = path[0].Pos;

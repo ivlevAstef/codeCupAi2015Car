@@ -54,7 +54,7 @@ namespace RussianAICup2015Car.Sources.Physic {
     public override PhysicEventType Type { get { return PhysicEventType.SpeedReach; } }
 
     public override bool Check(PCar car) {
-      return (car.Speed.Normalize() - car.Dir).Length < accuracy;
+      return Math.Abs(car.Speed.Normalize().Cross(car.Dir)) < accuracy;
     }
   }
 

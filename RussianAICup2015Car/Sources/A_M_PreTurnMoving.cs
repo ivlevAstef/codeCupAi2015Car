@@ -12,14 +12,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
         return false;
       }
 
-      TileDir dirIn = path[2].DirIn;
-      TileDir dirOut = path[2].DirOut;
-
-      if (null == dirOut) {
-        return false;
-      }
-
-      return dirIn.Equals(dirOut.PerpendicularLeft()) || dirIn.Equals(dirOut.PerpendicularRight()); 
+      return PathCheckResult.Yes == checkTurn(1);
     }
 
     public override void execute(Move move) {

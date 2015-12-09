@@ -47,7 +47,6 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       ActionType.Around,
       ActionType.Snake,
       ActionType.Turn,
-      ActionType.MoveToBonus,//moved to dont base
       ActionType.Forward,
     };
 
