@@ -75,13 +75,17 @@ namespace RussianAICup2015Car.Sources.Physic {
 
         if (mapCrash.TickCome < tickToPassageLine) {
           double speedSign = Math.Sign(Vector.sincos(car.Angle).Dot(new Vector(car.SpeedX, car.SpeedY)));
-
+          Vector dir = new Vector(dirMove.X, dirMove.Y);
           PCar physicCar = mapCrash.CarCome;
           Vector sideNormal = mapCrash.infoCome as Vector;
           Logger.instance.Assert(null != sideNormal, "Can't get side normal");
 
-          double angleSign = Vector.sincos(car.Angle).Dot(new Vector(dirMove.X, dirMove.Y));
-          double angle = angleSign * car.Angle.AngleDeviation(sideNormal.Angle);
+          double angle = 0;
+          if (Vector.sincos(car.Angle).Dot(dir) > 0) {
+            angle = car.Angle.AngleDeviation(sideNormal.Angle);
+          } else {
+            angle = dir.Angle.AngleDeviation(sideNormal.Angle);
+          }
 
           bool isStrongParallel = Math.Abs(Vector.sincos(car.Angle).Dot(sideNormal)) < Math.Sin(Math.PI / 18);//10 degrees
           if (!isStrongParallel) {
@@ -201,18 +205,11 @@ namespace RussianAICup2015Car.Sources.Physic {
     private HashSet<IPhysicEvent> calculateForwardEvents(Vector idealPos, TileDir dirMove, Vector idealDir) {
       HashSet<IPhysicEvent> pEvents = new HashSet<IPhysicEvent> {
         new PassageLineEvent(dirMove, idealPos),
-        new MapCrashEvent(additionalSideToTileByDir(dirMove, new TilePos(idealPos.X - dirMove.X, idealPos.Y - dirMove.Y)))
+        new MapCrashEvent(additionalSideToTileByDir(dirMove, new TilePos(idealPos.X, idealPos.Y)))
       };
 
       PCar physicCar = new PCar(car, game);
       physicCar.setEnginePower(1.0);
-
-      double idealAngle = Math.Atan2(idealDir.Y, idealDir.X);
-      double angleDeviation = idealAngle.AngleDeviation(physicCar.Angle);
-
-      if (Math.Abs(angleDeviation) > game.CarRotationFrictionFactor) {
-        physicCar.setWheelTurn(physicCar.WheelTurn + 0.5 * game.CarWheelTurnChangePerTick * Math.Sign(angleDeviation));
-      }
 
       PhysicEventsCalculator.calculateEvents(physicCar, new MoveWithOutChange(), pEvents, calculateForwardEventCheckEnd);
 
