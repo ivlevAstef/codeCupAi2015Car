@@ -47,8 +47,8 @@ namespace RussianAICup2015Car.Sources.Physic {
   public class SpeedReachEvent : PhysicEventBase {
     private double accuracy;
 
-    public SpeedReachEvent(double accuracy = 1.0e-3) {
-      this.accuracy = accuracy;
+    public SpeedReachEvent(double accuracyAngleRad = Math.PI/32) {
+      this.accuracy = Math.Sin(accuracyAngleRad);
     }
 
     public override PhysicEventType Type { get { return PhysicEventType.SpeedReach; } }

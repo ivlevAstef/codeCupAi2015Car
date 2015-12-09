@@ -40,7 +40,7 @@ namespace RussianAICup2015Car.Sources.Map {
       }
     };
 
-    private static readonly int MaxDepthUsePhysic = 1;
+    private static readonly int PhysicTickCheck = 100;//800/8 = 100 tile_size/car_speed = time
 
     private Car car = null;
     private World world = null;
@@ -50,13 +50,11 @@ namespace RussianAICup2015Car.Sources.Map {
     private Cell[] path = null;
     private Cell pathLastCell = null;
     private TileDir beginDir = null;
-    private Dictionary<TilePos, double> physicPriorityCache = new Dictionary<TilePos, double>();
 
     public void SetupEnvironment(Car car, World world, Game game) {
       this.car = car;
       this.world = world;
       this.game = game;
-      physicPriorityCache.Clear();
 
       if (null == pathLastCell) {
         pathLastCell = startLastCell();
@@ -126,7 +124,7 @@ namespace RussianAICup2015Car.Sources.Map {
 
         CellTransition newTransition = calculatePath(transition.ToCell, resultCell, visited, depth + 1);
         if (null != newTransition) {
-          newTransition.TransitionPriority = cellTransitionPriority(lastCell, resultCell, newTransition.Cell, transition.Weight, depth < MaxDepthUsePhysic);
+          newTransition.TransitionPriority = cellTransitionPriority(lastCell, resultCell, newTransition.Cell, transition.Weight);
 
           int checkDepth = transition.isCheckpoint ? 0 : 3;
           if (null == max || newTransition.Priority(checkDepth) > max.Priority(checkDepth)) {
@@ -163,7 +161,7 @@ namespace RussianAICup2015Car.Sources.Map {
       foreach (Bonus bonus in world.Bonuses) {
         TilePos pos = new TilePos(bonus.X, bonus.Y);
         if (pos.Equals(cell.Pos)) {
-          priority += 0.15;
+          priority += 0.2;
         }
       }
 
@@ -188,19 +186,10 @@ namespace RussianAICup2015Car.Sources.Map {
       return priority;
     }
 
-    private double cellTransitionPriority(Cell lastCell, Cell cell, Cell nextCell, int length, bool usePhysic) {
+    private double cellTransitionPriority(Cell lastCell, Cell cell, Cell nextCell, int length) {
       double priority = ((-length) - 1);
 
       priority += tilePriority(lastCell, cell);
-      if (usePhysic && null != nextCell) {
-        if (physicPriorityCache.ContainsKey(nextCell.Pos)) {
-          priority += physicPriorityCache[nextCell.Pos];
-        } else {
-          double pPriority = physicPriority(nextCell.Pos);
-          priority += pPriority;
-          physicPriorityCache.Add(nextCell.Pos, pPriority);
-        }
-      }
 
       return priority;
     }
@@ -230,56 +219,12 @@ namespace RussianAICup2015Car.Sources.Map {
       }
 
       if (dirIn == nextDirOut.Negative() && dirOut == nextDirIn) {//around
-        return -1.0;
+        return -1.5;
       } else if (dirIn == nextDirOut && dirOut == nextDirIn) {//snake
         return 0.45;
       }
 
       return 0;
-    }
-
-    private double physicPriority(TilePos pos) {
-      PCar physicCar = new PCar(car, game);
-      physicCar.setEnginePower(1.0);
-      physicCar.disableNitro();
-
-      HashSet<IPhysicEvent> pEvents = new HashSet<IPhysicEvent> {
-        new OutFromTileEvent(new TilePos(car.X, car.Y)),
-        new PassageTileEvent(pos)
-      };
-
-      PhysicEventsCalculator.calculateEvents(physicCar, new MoveToTile(pos), pEvents, calculateEventCheckEnd);
-
-      if (pEvents.ComeContaints(PhysicEventType.PassageTile)) {
-        Vector dirBegin = new Vector(car.SpeedX, car.SpeedY).Normalize();
-        Vector dirEnd = pEvents.GetEvent(PhysicEventType.PassageTile).CarCome.Dir;
-        return 0.15 + 0.5 * Math.Abs(dirBegin.Dot(dirEnd));
-      }
-
-      if (pEvents.ComeContaints(PhysicEventType.OutFromTile)) {
-        return -1.8;
-      }
-
-      return 0;
-    }
-
-    private bool calculateEventCheckEnd(PCar physicCar, HashSet<IPhysicEvent> pEvents, int tick) {
-      if (tick > 40) {
-        return true;
-      }
-
-
-      if (pEvents.ComeContaints(PhysicEventType.OutFromTile)) {
-        PCar car = pEvents.GetEvent(PhysicEventType.OutFromTile).CarCome;
-        TilePos edgePos = new TilePos(car.Pos.X, car.Pos.Y);
-        Vector edge = edgePos.ToVector(Math.Round(car.Pos.X), Math.Round(car.Pos.Y));
-
-        if ((physicCar.Pos - edge).Length > game.TrackTileMargin) {
-          return true;
-        }
-      }
-
-      return pEvents.ComeContaints(PhysicEventType.PassageTile);
     }
   }
 }

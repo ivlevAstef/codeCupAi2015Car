@@ -5,7 +5,7 @@ using System;
 
 namespace RussianAICup2015Car.Sources.Actions.Moving {
   class StuckOutMoving : MovingBase {
-    private const double maxTicks = 80;
+    private const double maxTicks = 110;
 
     private int zeroSpeedTicks = 0;
     private int outStuckTicks = 0;

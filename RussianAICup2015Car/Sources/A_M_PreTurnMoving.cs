@@ -19,7 +19,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       TileDir dirMove = path[0].DirOut;
       TileDir dirEnd = path[2].DirOut;
 
-      Vector endPos = GetWayEnd(path[2].Pos, dirEnd.Negative(), 0.25);
+      Vector endPos = GetWayEnd(path[2].Pos, TileDir.Zero);
 
       Physic.MovingCalculator calculator = new Physic.MovingCalculator();
       calculator.setupEnvironment(car, game, world);

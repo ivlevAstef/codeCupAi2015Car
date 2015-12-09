@@ -21,7 +21,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       TileDir dirMove = path[offset].DirOut;
       TileDir dirEnd = path[1 + offset].DirOut;
 
-      Vector endPos = GetWayEnd(path[1 + offset].Pos, dirEnd, 0.49);
+      Vector endPos = GetWayEnd(path[1 + offset].Pos, dirEnd);
       Vector dir = new Vector(dirMove.X + dirEnd.X, dirMove.Y + dirEnd.Y).Normalize();
 
       Physic.MovingCalculator calculator = new Physic.MovingCalculator();
