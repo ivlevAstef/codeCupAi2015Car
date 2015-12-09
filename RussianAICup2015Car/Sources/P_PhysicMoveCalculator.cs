@@ -80,11 +80,9 @@ namespace RussianAICup2015Car.Sources.Physic {
           Vector sideNormal = mapCrash.infoCome as Vector;
           Logger.instance.Assert(null != sideNormal, "Can't get side normal");
 
-          double angle = 0;
-          if (Vector.sincos(car.Angle).Dot(dir) > 0) {
+          double angle = dir.Angle.AngleDeviation(sideNormal.Angle);
+          if (Vector.sincos(car.Angle).Dot(dir) > 0 || 0 == angle) {
             angle = car.Angle.AngleDeviation(sideNormal.Angle);
-          } else {
-            angle = dir.Angle.AngleDeviation(sideNormal.Angle);
           }
 
           bool isStrongParallel = Math.Abs(Vector.sincos(car.Angle).Dot(sideNormal)) < Math.Sin(Math.PI / 18);//10 degrees
