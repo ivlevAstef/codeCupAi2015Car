@@ -40,8 +40,6 @@ namespace RussianAICup2015Car.Sources.Map {
       }
     };
 
-    private static readonly int PhysicTickCheck = 100;//800/8 = 100 tile_size/car_speed = time
-
     private Car car = null;
     private World world = null;
     private Game game = null;

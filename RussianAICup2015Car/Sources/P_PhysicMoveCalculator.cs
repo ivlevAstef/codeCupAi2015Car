@@ -47,13 +47,10 @@ namespace RussianAICup2015Car.Sources.Physic {
 
         Vector posSpeedReach = null != speedReach ? speedReach.CarCome.Pos : null;
 
-        IPhysicEvent mapCrash = null;
         if (null == posSpeedReach || (posSpeedReach - idealPos).Dot(dir) > lineCount * oneLineWidth) {
           moveResult.IsBrake = car.Speed() > Constant.MinBrakeSpeed;
-          mapCrash = calculateRotateMapCrashEvents(idealPos, dirMove, idealDir, true);
-        } else {
-          mapCrash = calculateRotateMapCrashEvents(idealPos, dirMove, idealDir, false);
-        }
+        } 
+        IPhysicEvent mapCrash = calculateRotateMapCrashEvents(idealPos, dirMove, idealDir, moveResult.IsBrake);
 
         int tickToMapCrash = (null != mapCrash) ? mapCrash.TickCome : maxIterationCount;
         if (tickToMapCrash > passageLine.TickCome) {
@@ -112,13 +109,10 @@ namespace RussianAICup2015Car.Sources.Physic {
 
       double idealAngle = Math.Atan2(idealDir.Y, idealDir.X);
 
-      if (useBrake) {
-        PhysicEventsCalculator.calculateEvents(physicCar, new MoveToAngleFunction(idealAngle), pEvents, calculateRotateMapCrashEventWithBrakeCheckEnd);
-      } else {
-        PhysicEventsCalculator.calculateEvents(physicCar, new MoveToAngleFunction(idealAngle), pEvents, calculateRotateMapCrashEventCheckEnd);
-      }
+      physicCar.setBrake(useBrake);
+      PhysicEventsCalculator.calculateEvents(physicCar, new MoveToAngleFunction(idealAngle), pEvents, calculateRotateMapCrashEventCheckEnd);
 
-      return pEvents.ComeContaints(PhysicEventType.MapCrash) ? pEvents.GetEvent(PhysicEventType.MapCrash) : null; ;
+      return pEvents.ComeContaints(PhysicEventType.MapCrash) ? pEvents.GetEvent(PhysicEventType.MapCrash) : null;
     }
 
     private bool calculateRotateMapCrashEventCheckEnd(PCar physicCar, HashSet<IPhysicEvent> pEvents, int tick) {
@@ -126,15 +120,7 @@ namespace RussianAICup2015Car.Sources.Physic {
         return true;
       }
 
-      return pEvents.ComeContaints(PhysicEventType.PassageLine) || pEvents.ComeContaints(PhysicEventType.MapCrash);
-    }
-
-    private bool calculateRotateMapCrashEventWithBrakeCheckEnd(PCar physicCar, HashSet<IPhysicEvent> pEvents, int tick) {
-      if (tick > maxIterationCount) {
-        return true;
-      }
-
-      physicCar.setBrake(physicCar.Speed.Length > Constant.MinBrakeSpeed);
+      physicCar.setBrake(false);
       return pEvents.ComeContaints(PhysicEventType.PassageLine) || pEvents.ComeContaints(PhysicEventType.MapCrash);
     }
 
