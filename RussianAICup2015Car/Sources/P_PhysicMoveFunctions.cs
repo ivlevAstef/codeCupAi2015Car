@@ -46,6 +46,37 @@ namespace RussianAICup2015Car.Sources.Physic {
     }
   }
 
+  public class MoveToPoint : IPhysicMoveFunction {
+    private static double rotationFrictionFactor = 0;
+
+    public static void setupEnvironment(World lWorld, Game game) {
+      rotationFrictionFactor = game.CarRotationFrictionFactor;
+    }
+
+    private Vector point;
+
+    public MoveToPoint(Vector point) {
+      this.point = point;
+    }
+
+    public void Iteration(PCar car, int iterationCount) {
+      for (int i = 0; i < iterationCount; i++) {
+        double angle = (point - car.Pos).Angle;
+
+        PCar zeroWheelTurn = car.GetZeroWheelTurnCar();
+        double angleDeviation = angle.AngleDeviation(zeroWheelTurn.Angle);
+
+        if (Math.Abs(angleDeviation) < rotationFrictionFactor) {
+          car.setWheelTurn(0);
+        } else {
+          car.setWheelTurn(Math.Sign(angleDeviation));
+        }
+
+        car.Iteration(1);
+      }
+    }
+  }
+
   public class MoveWithOutChange : IPhysicMoveFunction {
     public MoveWithOutChange() {
     }

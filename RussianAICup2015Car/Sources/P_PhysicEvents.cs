@@ -9,15 +9,15 @@ namespace RussianAICup2015Car.Sources.Physic {
     private Vector dir;
     private Vector pos;
 
-    public PassageLineEvent(TileDir dirMove, Vector pos) {
-      this.dir = new Vector(dirMove.X, dirMove.Y);
+    public PassageLineEvent(TileDir dirMove/* Vector idealDir*/, Vector pos) {
+      this.dir = new Vector(dirMove.Y, -dirMove.X);// idealDir;
       this.pos = pos;
     }
 
     public override PhysicEventType Type { get { return PhysicEventType.PassageLine; } }
 
     public override bool Check(PCar car) {
-      return Math.Sign((car.Pos - pos).Dot(dir)) != Math.Sign((car.LastPos - pos).Dot(dir));
+      return Math.Sign((car.Pos - pos).Cross(dir)) != Math.Sign((car.LastPos - pos).Cross(dir));
     }
   }
 
@@ -42,7 +42,7 @@ namespace RussianAICup2015Car.Sources.Physic {
 
     public override bool Check(PCar car) {
       double angleDeviation = angle.AngleDeviation(car.Angle);
-      return Math.Abs(angleDeviation) < accuracy && Math.Abs(car.WheelTurn) < wheelTurnChangePerTick;
+      return Math.Abs(angleDeviation) < accuracy && Math.Abs(car.WheelTurn) < wheelTurnChangePerTick && car.AngularSpeed < rotationFrictionFactor;
     }
   }
 

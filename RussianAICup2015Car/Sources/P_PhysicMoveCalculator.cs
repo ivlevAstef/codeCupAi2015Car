@@ -94,17 +94,25 @@ namespace RussianAICup2015Car.Sources.Physic {
 
         Tuple<Vector, Vector> crashInfo = mapCrash.infoCome as Tuple<Vector, Vector>;
         Logger.instance.Assert(null != crashInfo, "Can't get crash info");
-        double distance = (endPoint - crashInfo.Item1).Dot(dir);
-        while (distance > 0) {
-          MoveToAngleFunction mover = new MoveToAngleFunction((idealPos - iterCar.Pos).Angle);
-          int ticks = (int)Math.Max(1, 0.5 * distance / Math.Max(1, Math.Abs(iterCar.Speed.Dot(dir))));
+
+        MoveToPoint mover = new MoveToPoint(idealPos);
+        double distance = (endPoint - crashInfo.Item1).Length;
+        int ticksCountSave = ticksCount;
+        while (distance > 0 && ticksCountSave + mapCrash.TickCome > ticksCount) {
+          double speedL = iterCar.Speed.Length;
+          double decreminant = 4 * speedL * speedL + 8 * iterCar.Assel * distance;
+
+          int ticks = (int)Math.Max(1, (- 2 * speedL + Math.Sqrt(decreminant)) / (2 * iterCar.Assel));
+          ticks = Math.Min(ticksCountSave + mapCrash.TickCome - ticksCount, ticks);
+
           if (ticksCount + ticks > maxIterationCount) {/*save function*/
             i = 3;
             break;
           }
+
           Vector lastPos = iterCar.Pos;
           mover.Iteration(iterCar, ticks);
-          distance -= (iterCar.Pos - lastPos).Dot(dir);
+          distance -= (iterCar.Pos - lastPos).Length;
 
           ticksCount += ticks;
         }
