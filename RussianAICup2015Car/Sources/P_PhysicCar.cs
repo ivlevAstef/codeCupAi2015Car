@@ -140,7 +140,9 @@ namespace RussianAICup2015Car.Sources.Physic {
         spd = (spd + accel) * frictionMove;
 
         double lengthFriction = (1 - brakeV) * frictionLenght + brakeV * frictionCross;
-        spd = spd - dir * limit(spd.Dot(dir), lengthFriction * frictionMult) - dir.PerpendicularLeft() * limit(spd.Cross(dir), frictionCross * frictionMult);
+        Vector frictionLengthV = dir * limit(spd.Dot(dir), lengthFriction * frictionMult);
+        Vector frictionCrossV = dir.PerpendicularLeft() * limit(spd.Cross(dir), frictionCross * frictionMult);
+        spd = spd - frictionLengthV - frictionCrossV;
 
         double baseAngleSpeed = wheelTurn * game.CarAngularSpeedFactor * spd.Dot(dir);
 

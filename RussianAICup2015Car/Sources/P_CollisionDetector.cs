@@ -51,6 +51,15 @@ namespace RussianAICup2015Car.Sources.Physic {
       return false;
     }
 
+    public static CollisionInfo CheckCollision(ICollisionObject obj, ICollisionObject obj2) {
+      CollisionInfo info = new CollisionInfo(obj, obj2);
+      if (CheckCollision(info)) {
+        return info;
+      }
+
+      return null;
+    }
+
     public static List<CollisionInfo> CheckCollision(ICollisionObject obj, List<ICollisionObject> objects) {
       List<CollisionInfo> result = new List<CollisionInfo>();
 

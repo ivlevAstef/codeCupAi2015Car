@@ -31,16 +31,18 @@ namespace RussianAICup2015Car.Sources.Physic {
     }
 
     private double angle;
+    private double accuracy;
 
-    public AngleReachEvent(double angle) {
+    public AngleReachEvent(double angle, double accuracyAngleRad = Math.PI/32) {
       this.angle = angle;
+      this.accuracy = accuracyAngleRad;
     }
 
     public override PhysicEventType Type { get { return PhysicEventType.AngleReach; } }
 
     public override bool Check(PCar car) {
       double angleDeviation = angle.AngleDeviation(car.Angle);
-      return Math.Abs(angleDeviation) < rotationFrictionFactor && Math.Abs(car.WheelTurn) < wheelTurnChangePerTick;
+      return Math.Abs(angleDeviation) < accuracy && Math.Abs(car.WheelTurn) < wheelTurnChangePerTick;
     }
   }
 
