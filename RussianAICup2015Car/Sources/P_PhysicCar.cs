@@ -16,6 +16,7 @@ namespace RussianAICup2015Car.Sources.Physic {
     public Vector Pos { get { return pos; } }
     public Vector LastPos { get { return lastPos; } }
     public Vector Speed { get { return spd; } }
+    public double Assel { get { return carAccel * enginePower; } }
     public Vector Dir { get { return dir; } }
     public double Angle { get { return angle; } }
     public double AngularSpeed { get { return angleSpeed; } }

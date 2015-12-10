@@ -6,7 +6,7 @@ using RussianAICup2015Car.Sources.Common;
 
 namespace RussianAICup2015Car.Sources.Physic {
   public class MovingCalculator {
-    private const int maxIterationCount = 250;
+    private const int maxIterationCount = 80;
     private const int maxCheckCrashIterationCount = 28;//800/28 = 28
     private double oneLineWidth;
 
@@ -37,11 +37,10 @@ namespace RussianAICup2015Car.Sources.Physic {
       PCar iterCar = new PCar(car, game);
       iterCar.setWheelTurn(1);
 
+      Vector endPoint = new TilePos(idealPos.X, idealPos.Y).ToVector(1 - dirMove.X, 1 - dirMove.Y);
+      endPoint = endPoint + new Vector(dirMove.X, dirMove.Y) * game.TrackTileMargin;
+
       Vector dir = new Vector(dirMove.X, dirMove.Y);
-
-      double idealAngle = Math.Atan2(idealDir.Y, idealDir.X);
-      MoveToAngleFunction mover = new MoveToAngleFunction(idealAngle);
-
       for(int i =0; i < 5; i++) {
         IPhysicEvent mapCrash = calculateRotateMapCrashEvents(iterCar, idealPos, dirMove, idealDir);
 
@@ -68,13 +67,14 @@ namespace RussianAICup2015Car.Sources.Physic {
           break;
         }
 
+        MoveToAngleFunction mover = new MoveToAngleFunction((idealPos - iterCar.Pos).Angle);
         Tuple<Vector, Vector> crashInfo = mapCrash.infoCome as Tuple<Vector, Vector>;
         Logger.instance.Assert(null != crashInfo, "Can't get crash info");
-        Vector intersectPoint = crashInfo.Item1;
-
-        double distance = (intersectPoint - iterCar.Pos).Dot(dir);
-        int ticksToDistance = (int)(distance / iterCar.Speed.Dot(dir));
-        mover.Iteration(iterCar, ticksToDistance);
+        double distance = (endPoint - crashInfo.Item1).Dot(dir);
+        while (distance > 0) {
+          mover.Iteration(iterCar, 1);
+          distance -= Math.Abs((iterCar.Pos - iterCar.LastPos).Dot(dir));
+        }
       }
     }
 

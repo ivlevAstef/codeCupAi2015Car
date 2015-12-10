@@ -117,13 +117,14 @@ namespace RussianAICup2015Car.Sources.Actions {
 
       int tireRebound = maxTireRebound + 1;
       for (int i = 0; i < tireCalculateTicks; i++) {
+        Vector lastTirePos = tirePos;
         tirePos += tireSpd;
 
         foreach (PCar physicCar in their) {
           physicCar.Iteration(1);
 
           Vector collisionNormal = null;
-          if (tireCollisionWithCar(tirePos, physicCar, out collisionNormal, 2)) {
+          if (tireCollisionWithCar(tirePos, lastTirePos, physicCar, out collisionNormal, 2)) {
             if (ignored == physicCar) {
               continue;
             }
@@ -136,7 +137,7 @@ namespace RussianAICup2015Car.Sources.Actions {
           physicCar.Iteration(1);
 
           Vector collisionNormal = null;
-          if (tireCollisionWithCar(tirePos, physicCar, out collisionNormal, 0.25)) {
+          if (tireCollisionWithCar(tirePos, lastTirePos, physicCar, out collisionNormal, 0.25)) {
             if (null == collisionNormal) {
               return false;
             }
@@ -146,7 +147,7 @@ namespace RussianAICup2015Car.Sources.Actions {
           }
         }
 
-        Vector collisionNormalWithMap = tireCollisionWithMap(tirePos);
+        Vector collisionNormalWithMap = tireCollisionWithMap(tirePos, lastTirePos);
         if (null != collisionNormalWithMap) {
           ignored = null;
           tireSpd = calcTireSpeedAfterKick(tireSpd, collisionNormalWithMap);
@@ -161,8 +162,8 @@ namespace RussianAICup2015Car.Sources.Actions {
       return false;
     }
 
-    private Vector tireCollisionWithMap(Vector pos) {
-      CollisionCircle collisionTire = new CollisionCircle(pos, game.TireRadius);
+    private Vector tireCollisionWithMap(Vector pos, Vector lastPos) {
+      CollisionCircle collisionTire = new CollisionCircle(pos, lastPos, game.TireRadius);
 
       List<CollisionInfo> collisions = CollisionDetector.CollisionsWithMap(collisionTire);
 
@@ -173,8 +174,8 @@ namespace RussianAICup2015Car.Sources.Actions {
       return collisions.AverageNormalObj1();
     }
 
-    private bool tireCollisionWithCar(Vector tirePos, PCar car, out Vector normal, double multR = 1) {
-      CollisionCircle collisionTire = new CollisionCircle(tirePos, game.TireRadius * multR);
+    private bool tireCollisionWithCar(Vector tirePos, Vector tirePosLast, PCar car, out Vector normal, double multR = 1) {
+      CollisionCircle collisionTire = new CollisionCircle(tirePos, tirePosLast, game.TireRadius * multR);
       CollisionRect collisionCar = new CollisionRect(car);
 
       CollisionInfo collision = new CollisionInfo(collisionTire, collisionCar);
