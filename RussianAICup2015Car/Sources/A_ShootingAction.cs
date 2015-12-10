@@ -135,7 +135,7 @@ namespace RussianAICup2015Car.Sources.Actions {
         foreach (PCar physicCar in enemies) {
           physicCar.Iteration(1);
 
-          Vector collisionNormal = null; ;
+          Vector collisionNormal = null;
           if (tireCollisionWithCar(tirePos, physicCar, out collisionNormal, 0.25)) {
             if (null == collisionNormal) {
               return false;

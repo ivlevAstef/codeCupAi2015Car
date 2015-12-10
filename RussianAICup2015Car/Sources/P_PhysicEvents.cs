@@ -82,13 +82,21 @@ namespace RussianAICup2015Car.Sources.Physic {
         return false;
       }
 
-      Vector normal = collisions.AverageNormalObj1();
-      if (car.Speed.Dot(normal) > 0) {
-        return false;
+      foreach (CollisionInfo info in collisions) {
+        if (!info.CollisionDeletected) {
+          continue;
+        }
+
+        Vector normal = info.NormalObj1;
+        if (car.Speed.Dot(normal) > 0) {
+          continue;
+        }
+
+        checkInfo = new Tuple<Vector, Vector>(info.Point, normal);
+        return true;
       }
 
-      checkInfo = normal;
-      return true;
+      return false;
     }
   }
 
