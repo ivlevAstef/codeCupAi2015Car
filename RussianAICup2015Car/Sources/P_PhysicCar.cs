@@ -6,7 +6,7 @@ using RussianAICup2015Car.Sources.Common;
 
 namespace RussianAICup2015Car.Sources.Physic {
   public class PCar {
-    private const double dt = 1;
+    private static readonly double dt = 1;
     private const double oilFrictionMult = 0.25;
     private const double oilBrakeFactor = 0.25;
 
@@ -117,7 +117,7 @@ namespace RussianAICup2015Car.Sources.Physic {
 
     public void Iteration(int ticks) {
       lastPos = pos;
-      for (int i = 0; i < ticks / dt; i++) {
+      for (int i = 0; i < ticks; i++) {
         wheelTurn = signLimitChange(idealWheelTurn, wheelTurn, game.CarWheelTurnChangePerTick);
         enginePower = signLimitChange(idealEnginePower, enginePower, game.CarEnginePowerChangePerTick);
 

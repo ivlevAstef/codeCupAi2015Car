@@ -54,28 +54,4 @@ namespace RussianAICup2015Car.Sources.Physic {
       car.Iteration(iterationCount);
     }
   }
-
-
-  public class MoveToTile : IPhysicMoveFunction {
-    private TilePos tilePos;
-
-    public MoveToTile(TilePos pos) {
-      this.tilePos = pos;
-    }
-
-    public void Iteration(PCar car, int iterationCount) {
-      Vector position = tilePos.ToVector(0.5, 0.5);
-
-      for (int i = 0; i < iterationCount; i++) {
-        Vector dir = position - car.Pos;
-
-        PCar zeroWheelTurn = car.GetZeroWheelTurnCar();
-        double angleDeviation = dir.Angle.AngleDeviation(zeroWheelTurn.Angle);
-
-        car.setWheelTurn(Math.Sign(angleDeviation));
-        //car.setBrake(car.Speed.Length > Constant.MinBrakeSpeed);
-        car.Iteration(2);
-      }
-    }
-  }
 }

@@ -11,11 +11,11 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       Yes
     }
 
-    protected Vector GetWayEnd(TilePos wayPos, TileDir dir) {
-      double distanceToSide = game.TrackTileSize * 0.5 - game.CarHeight * 0.55 - game.TrackTileMargin;
+    protected Vector GetWayEnd(TilePos wayPos, TileDir dir, double mult = 1) {
+      double distanceToSide = game.TrackTileSize * 0.5 - game.CarHeight * 0.5 - game.TrackTileMargin;
 
-      double nextWaypointX = (wayPos.X + 0.5) * game.TrackTileSize + dir.X * distanceToSide;
-      double nextWaypointY = (wayPos.Y + 0.5) * game.TrackTileSize + dir.Y * distanceToSide;
+      double nextWaypointX = (wayPos.X + 0.5) * game.TrackTileSize + dir.X * mult * distanceToSide;
+      double nextWaypointY = (wayPos.Y + 0.5) * game.TrackTileSize + dir.Y * mult * distanceToSide;
       return new Vector(nextWaypointX, nextWaypointY);
     }
 

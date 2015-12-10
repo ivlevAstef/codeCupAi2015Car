@@ -16,12 +16,10 @@ namespace RussianAICup2015Car.Sources.Physic {
 
   public class CollisionCircle : ICollisionObject {
     public readonly Vector Center;
-    public readonly Vector LastCenter;
     public readonly double Radius;
 
-    public CollisionCircle(Vector center, Vector last, double radius) {
+    public CollisionCircle(Vector center, double radius) {
       this.Center = center;
-      this.LastCenter = last;
       this.Radius = radius;
     }
 
@@ -36,9 +34,8 @@ namespace RussianAICup2015Car.Sources.Physic {
     public readonly double Height;
     public readonly Vector[] Points;
 
-    public CollisionRect(Vector rectCenter, Vector lastCenter, Vector rectDir, double width, double height) {
+    public CollisionRect(Vector rectCenter, Vector rectDir, double width, double height) {
       this.Center = rectCenter;
-      this.LastCenter = lastCenter;
       this.Dir = rectDir;
       this.Width = width;
       this.Height = height;
@@ -47,7 +44,6 @@ namespace RussianAICup2015Car.Sources.Physic {
 
     public CollisionRect(Car car) {
       this.Center = new Vector(car.X, car.Y);
-      this.LastCenter = this.Center;
       this.Dir = Vector.sincos(car.Angle);
       this.Width = car.Width;
       this.Height = car.Height;
@@ -56,7 +52,6 @@ namespace RussianAICup2015Car.Sources.Physic {
 
     public CollisionRect(PCar car) {
       this.Center = car.Pos;
-      this.LastCenter = car.LastPos;
       this.Dir = car.Dir;
       this.Width = car.Car.Width;
       this.Height = car.Car.Height;
