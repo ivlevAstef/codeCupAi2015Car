@@ -56,13 +56,10 @@ namespace RussianAICup2015Car.Sources.Physic {
             double speedSign = Math.Sign(Vector.sincos(car.Angle).Dot(new Vector(car.SpeedX, car.SpeedY)));
 
             Vector posSpeedReach = null != speedReach ? speedReach.CarCome.Pos : null;
-            int tickSpeedReach = null != speedReach ? speedReach.TickCome : maxIterationCount;
-            int tickAngleReach = null != angleReach ? angleReach.TickCome : 0;
-            int ticksForBrake = tickSpeedReach - tickAngleReach;
             double overMove = null != speedReach ? ((posSpeedReach - idealPos).Dot(dir) - lineCount * oneLineWidth) : 0;
-            int overMoveTicks = (int)(Math.Sign(overMove) * Math.Sqrt(2 * Math.Abs(overMove) / game.CarCrosswiseMovementFrictionFactor));
+            double overMoveTicks = Math.Sign(overMove) * Math.Sqrt(2 * Math.Abs(overMove) / game.CarCrosswiseMovementFrictionFactor);
 
-            if (ticksForBrake + overMoveTicks > ticksCount + passageLine.TickCome) {
+            if (overMoveTicks > ticksCount + passageLine.TickCome) {
               moveResult.IsBrake = car.Speed() > Constant.MinBrakeSpeed;
             }
 
@@ -80,7 +77,7 @@ namespace RussianAICup2015Car.Sources.Physic {
         while (distance > 0) {
           MoveToAngleFunction mover = new MoveToAngleFunction((idealPos - iterCar.Pos).Angle);
           int ticks = (int)Math.Max(1, 0.5 * distance / Math.Max(1, Math.Abs(iterCar.Speed.Dot(dir))));
-          if (ticksCount + ticks > 180) {/*save function*/
+          if (ticksCount + ticks > maxIterationCount) {/*save function*/
             i = 3;
             break;
           }
