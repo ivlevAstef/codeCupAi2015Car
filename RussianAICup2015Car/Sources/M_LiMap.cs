@@ -76,10 +76,12 @@ namespace RussianAICup2015Car.Sources.Map {
 
     private TilePos lastCarTilePos = null;
     private Dictionary<TilePos, int[,]> mapCache = new Dictionary<TilePos, int[,]>();
+    private bool hasUnknown = false;
 
     public void SetupEnvironment(Car car, GlobalMap gmap) {
       this.car = car;
       this.gmap = gmap;
+      hasUnknown = false;
     }
 
     public Cell FirstCellWithTransitions(int maxDepth) {
@@ -97,6 +99,8 @@ namespace RussianAICup2015Car.Sources.Map {
 
       return result;
     }
+
+    public bool HasUnknown { get {return hasUnknown; } }
 
     private int MaxDepth(Cell cell, HashSet<Cell> visited) {
       visited.Add(cell);
@@ -166,7 +170,8 @@ namespace RussianAICup2015Car.Sources.Map {
 
           int length = map[iterPos.X, iterPos.Y] - map[pos.X, pos.Y];
           if (gmap.Width * gmap.Height != map[iterPos.X, iterPos.Y]) {
-            transitions.Add(new Transition(iterCell, length, checkpointByOffset(data.CheckPointOffset) == iterPos)); 
+            transitions.Add(new Transition(iterCell, length, checkpointByOffset(data.CheckPointOffset) == iterPos));
+            hasUnknown |= unknown;
           }
         }
       }
@@ -261,7 +266,7 @@ namespace RussianAICup2015Car.Sources.Map {
         }
       }
 
-      int unknownMult = backStack.Count > 0 ? 2 : 1;
+      int unknownMult = 2;// backStack.Count > 0 ? 2 : 1;
 
       while (backStack.Count + backUnknownStack.Count > 0) {
         while (backStack.Count > 0) {

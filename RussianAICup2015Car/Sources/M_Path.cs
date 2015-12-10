@@ -47,6 +47,7 @@ namespace RussianAICup2015Car.Sources.Map {
     private Cell[] path = null;
     private Cell pathLastCell = null;
     private TileDir beginDir = null;
+    private bool hasUnknown = false;
 
     public void SetupEnvironment(Car car, World world, Game game) {
       this.car = car;
@@ -58,9 +59,10 @@ namespace RussianAICup2015Car.Sources.Map {
       }
     }
 
-    public void CalculatePath(LiMap.Cell firstCellWithTransition) {
+    public void CalculatePath(LiMap.Cell firstCellWithTransition, bool hasUnknown) {
       Logger.instance.Assert(null != pathLastCell, "Don't set last cell. Please call SetupEnvironment");
 
+      this.hasUnknown = hasUnknown;
       if (null != transition && !transition.Cell.Pos.Equals(firstCellWithTransition.Pos)) {
         pathLastCell = transition.Cell;
         transition = transition.Next;
@@ -70,7 +72,10 @@ namespace RussianAICup2015Car.Sources.Map {
 
       HashSet<LiMap.Cell> visited = new HashSet<LiMap.Cell>();
       //transition = calculatePath(firstCellWithTransition, pathLastCell, visited, 0);
-      transition = mergePath(firstCellWithTransition, pathLastCell, transition, Math.Min(2, (int)(car.Speed()/10)));
+      int depth = Math.Min(2, (int)(car.Speed()/10));
+      //depth = hasUnknown ? Math.Min(depth, 1) : depth;
+
+      transition = mergePath(firstCellWithTransition, pathLastCell, transition, depth);
 
       Logger.instance.Assert(null != transition, "Can't find path.");
 
@@ -172,30 +177,32 @@ namespace RussianAICup2015Car.Sources.Map {
     private double cellPriority(Cell cell) {
       double priority = 0;
 
-      foreach (Bonus bonus in world.Bonuses) {
-        TilePos pos = new TilePos(bonus.X, bonus.Y);
-        if (pos.Equals(cell.Pos)) {
-          priority += 0.2;
+      if (!hasUnknown) {
+        foreach (Bonus bonus in world.Bonuses) {
+          TilePos pos = new TilePos(bonus.X, bonus.Y);
+          if (pos.Equals(cell.Pos)) {
+            priority += 0.2;
+          }
         }
+
+        int countAccidentCarInCell = 0;
+        foreach (Car car in world.Cars) {
+          if (car.IsTeammate) {
+            continue;
+          }
+
+          TilePos carPos = new TilePos(car.X, car.Y);
+          if (!carPos.Equals(cell.Pos)) {
+            continue;
+          }
+
+          if (car.Speed() < 1) {
+            countAccidentCarInCell++;
+          }
+        }
+
+        priority -= 0.5 * countAccidentCarInCell;
       }
-
-      int countAccidentCarInCell = 0;
-      foreach (Car car in world.Cars) {
-        if (car.IsTeammate) {
-          continue;
-        }
-
-        TilePos carPos = new TilePos(car.X, car.Y);
-        if (!carPos.Equals(cell.Pos)) {
-          continue;
-        }
-
-        if (car.Speed() < 1) {
-          countAccidentCarInCell++;
-        }
-      }
-
-      priority -= 0.5 * countAccidentCarInCell;
 
       return priority;
     }
