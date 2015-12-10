@@ -217,8 +217,7 @@ namespace RussianAICup2015Car.Sources.Map {
 
     private double tilePriority(TileDir dirIn, TileDir dirOut, TileDir nextDirIn, TileDir nextDirOut) {
       if (nextDirIn.Negative() == nextDirOut) {
-        return 0;
-        //return -6.5;
+        return -6.5;
       }
 
       if (dirIn.Negative() == dirOut) {
