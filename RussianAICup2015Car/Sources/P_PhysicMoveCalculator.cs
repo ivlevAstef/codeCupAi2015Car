@@ -6,7 +6,8 @@ using RussianAICup2015Car.Sources.Common;
 
 namespace RussianAICup2015Car.Sources.Physic {
   public class MovingCalculator {
-    private static readonly int maxIterationCount = 80;
+    private static readonly int maxCheckRotateIterationCount = 80;
+    private static readonly int maxIterationCount = 180;
     private static readonly int maxCheckCrashIterationCount = 28;//800/28 = 28
     private double oneLineWidth;
 
@@ -59,9 +60,9 @@ namespace RussianAICup2015Car.Sources.Physic {
             int tickAngleReach = null != angleReach ? angleReach.TickCome : 0;
             int ticksForBrake = tickSpeedReach - tickAngleReach;
             double overMove = null != speedReach ? ((posSpeedReach - idealPos).Dot(dir) - lineCount * oneLineWidth) : 0;
-            int overMoveTicks = (int)(1 + (2 * overMove / game.CarCrosswiseMovementFrictionFactor));
+            int overMoveTicks = (int)(Math.Sign(overMove) * Math.Sqrt(2 * Math.Abs(overMove) / game.CarCrosswiseMovementFrictionFactor));
 
-            if (ticksForBrake + overMoveTicks > ticksCount && (null == posSpeedReach || overMove > 0)) {
+            if (ticksForBrake + overMoveTicks > ticksCount + passageLine.TickCome) {
               moveResult.IsBrake = car.Speed() > Constant.MinBrakeSpeed;
             }
 
@@ -145,7 +146,7 @@ namespace RussianAICup2015Car.Sources.Physic {
     }
 
     private bool calculateRotateMapCrashEventCheckEnd(PCar physicCar, HashSet<IPhysicEvent> pEvents, int tick) {
-      if (tick > maxIterationCount) {
+      if (tick > maxCheckRotateIterationCount) {
         return true;
       }
 
