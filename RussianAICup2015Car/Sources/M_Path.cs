@@ -16,7 +16,7 @@ namespace RussianAICup2015Car.Sources.Map {
 
     private class CellTransition {
       public readonly Cell Cell;
-      public readonly CellTransition Next;
+      public CellTransition Next;
       public readonly double CellPriority;
       public double TransitionPriority { get; set; }
 
@@ -29,8 +29,7 @@ namespace RussianAICup2015Car.Sources.Map {
           return CellPriority + NextPriority(depth - 1) + TransitionPriority;
         } else {
           return CellPriority + TransitionPriority;
-        }
-        
+        } 
       }
 
       public CellTransition(Cell cell, CellTransition next, double cellPriority) {
@@ -64,12 +63,14 @@ namespace RussianAICup2015Car.Sources.Map {
 
       if (null != transition && !transition.Cell.Pos.Equals(firstCellWithTransition.Pos)) {
         pathLastCell = transition.Cell;
+        transition = transition.Next;
       }
 
       beginDir = new TilePos(car.X, car.Y) - pathLastCell.Pos;
 
       HashSet<LiMap.Cell> visited = new HashSet<LiMap.Cell>();
-      transition = calculatePath(firstCellWithTransition, pathLastCell, visited, 0);
+      //transition = calculatePath(firstCellWithTransition, pathLastCell, visited, 0);
+      transition = mergePath(firstCellWithTransition, pathLastCell, transition, Math.Min(2, (int)(car.Speed()/10)));
 
       Logger.instance.Assert(null != transition, "Can't find path.");
 
@@ -83,6 +84,22 @@ namespace RussianAICup2015Car.Sources.Map {
     public Cell Get(int offset) {
       Logger.instance.Assert(0 <= offset && offset < path.Length, "Offset out of range.");
       return path[offset];
+    }
+
+    private CellTransition mergePath(LiMap.Cell mapCell, Cell lastCell, CellTransition iter, int depth) {
+      if (null != iter && depth > 0) {
+        if (iter.Cell.Pos == mapCell.Pos && null != iter.Next) {
+          foreach (LiMap.Transition transition in mapCell.Transitions) {
+            if (iter.Next.Cell.Pos.Equals(transition.ToCell.Pos)) {
+              iter.Next = mergePath(transition.ToCell, iter.Cell, iter.Next, depth - 1);
+              return iter;
+            }
+          }
+        }
+      }
+
+      HashSet<LiMap.Cell> visited = new HashSet<LiMap.Cell>();
+      return calculatePath(mapCell, lastCell, visited, 0);
     }
 
     private List<Cell> createPathFromTransition(CellTransition transition) {
@@ -139,11 +156,10 @@ namespace RussianAICup2015Car.Sources.Map {
       }
       resultCell.DirOuts = dirOuts.ToArray();
 
+      resultCell.DirOut = null;
       if (0 != dirOuts.Count) {
         if (null != max) {
           resultCell.DirOut = max.Cell.Pos - cell.Pos;
-        } else if (1 == dirOuts.Count) {
-          resultCell.DirOut = dirOuts[0];
         }
       }
 
@@ -217,7 +233,7 @@ namespace RussianAICup2015Car.Sources.Map {
       }
 
       if (dirIn == nextDirOut.Negative() && dirOut == nextDirIn) {//around
-        return -1.5;
+        return -5;
       } else if (dirIn == nextDirOut && dirOut == nextDirIn) {//snake
         return 0.45;
       }

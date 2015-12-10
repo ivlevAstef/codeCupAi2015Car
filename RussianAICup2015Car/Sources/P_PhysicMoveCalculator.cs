@@ -35,7 +35,7 @@ namespace RussianAICup2015Car.Sources.Physic {
 
     private void move(Move moveResult, Vector idealPos, TileDir dirMove, Vector idealDir, double lineCount = 1.25) {
       PCar iterCar = new PCar(car, game);
-      iterCar.setWheelTurn(1);
+      iterCar.setEnginePower(1);
 
       Vector endPoint = new TilePos(idealPos.X, idealPos.Y).ToVector(1 - dirMove.X, 1 - dirMove.Y);
       endPoint = endPoint + new Vector(dirMove.X, dirMove.Y) * game.TrackTileMargin;
@@ -48,6 +48,7 @@ namespace RussianAICup2015Car.Sources.Physic {
           HashSet<IPhysicEvent> events = calculateRotateEvents(iterCar, idealPos, dirMove, idealDir);
 
           IPhysicEvent passageLine = events.ComeContaints(PhysicEventType.PassageLine) ? events.GetEvent(PhysicEventType.PassageLine) : null;
+          IPhysicEvent angleReach = events.ComeContaints(PhysicEventType.AngleReach) ? events.GetEvent(PhysicEventType.AngleReach) : null;
           IPhysicEvent speedReach = events.ComeContaints(PhysicEventType.SpeedReach) ? events.GetEvent(PhysicEventType.SpeedReach) : null;
 
           if (null != passageLine) {
@@ -55,9 +56,12 @@ namespace RussianAICup2015Car.Sources.Physic {
 
             Vector posSpeedReach = null != speedReach ? speedReach.CarCome.Pos : null;
             int tickSpeedReach = null != speedReach ? speedReach.TickCome : maxIterationCount;
-            int ticksForBrake = tickSpeedReach - passageLine.TickCome;
+            int tickAngleReach = null != angleReach ? angleReach.TickCome : 0;
+            int ticksForBrake = tickSpeedReach - tickAngleReach;
+            double overMove = null != speedReach ? ((posSpeedReach - idealPos).Dot(dir) - lineCount * oneLineWidth) : 0;
+            int overMoveTicks = (int)(1 + (2 * overMove / game.CarCrosswiseMovementFrictionFactor));
 
-            if (ticksForBrake > ticksCount && (null == posSpeedReach || (posSpeedReach - idealPos).Dot(dir) > lineCount * oneLineWidth)) {
+            if (ticksForBrake + overMoveTicks > ticksCount && (null == posSpeedReach || overMove > 0)) {
               moveResult.IsBrake = car.Speed() > Constant.MinBrakeSpeed;
             }
 

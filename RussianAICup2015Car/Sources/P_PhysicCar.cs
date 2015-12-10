@@ -133,15 +133,6 @@ namespace RussianAICup2015Car.Sources.Physic {
           frictionMult = oilFrictionMult;
           oilTicks--;
         }
-        
-        double baseAngleSpeed = wheelTurn * game.CarAngularSpeedFactor * spd.Dot(dir);
-
-        angle += angleSpeed * dt;
-        angle = angle.AngleNormalize();
-        angleSpeed = baseAngleSpeed + (angleSpeed - baseAngleSpeed) * frictionAngle;
-        angleSpeed -= limit(angleSpeed - baseAngleSpeed, frictionMaxAngleSpeed);
-
-        dir = Vector.sincos(angle);
 
         Vector accel = dir * (enginePower * (1 - brakeV) * carAccel);
 
@@ -150,6 +141,15 @@ namespace RussianAICup2015Car.Sources.Physic {
 
         double lengthFriction = (1 - brakeV) * frictionLenght + brakeV * frictionCross;
         spd = spd - dir * limit(spd.Dot(dir), lengthFriction * frictionMult) - dir.PerpendicularLeft() * limit(spd.Cross(dir), frictionCross * frictionMult);
+
+        double baseAngleSpeed = wheelTurn * game.CarAngularSpeedFactor * spd.Dot(dir);
+
+        angle += angleSpeed * dt;
+        angle = angle.AngleNormalize();
+        angleSpeed = baseAngleSpeed + (angleSpeed - baseAngleSpeed) * frictionAngle;
+        angleSpeed -= limit(angleSpeed - baseAngleSpeed, frictionMaxAngleSpeed);
+
+        dir = Vector.sincos(angle);
       }
     }
 
