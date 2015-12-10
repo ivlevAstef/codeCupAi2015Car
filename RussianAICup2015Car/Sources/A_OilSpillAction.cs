@@ -10,6 +10,10 @@ namespace RussianAICup2015Car.Sources.Actions {
         return false;
       }
 
+      if (isBackward()) {
+        return false;
+      }
+
       if (isFindAroundOils()) {
         return false;
       }
@@ -48,6 +52,10 @@ namespace RussianAICup2015Car.Sources.Actions {
       }
 
       return false;
+    }
+
+    private bool isBackward() {
+      return Math.Sign(Vector.sincos(car.Angle).Dot(new Vector(car.SpeedX, car.SpeedY))) <= 0;
     }
   }
 }

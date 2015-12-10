@@ -5,95 +5,77 @@ using System;
 
 namespace RussianAICup2015Car.Sources.Actions.Moving {
   class BackwardMoving : MovingBase {
-    private TileDir movedDir = null;
+    private int offset = 0;
 
     public override bool valid() {
-      Logger.instance.Assert(3 <= path.Count, "incorrect way cells count.");
+      offset = 0;
+      TileDir dir = path[offset].DirOut;
 
-      TileDir dir = path[0].DirOut;
-
-      if (null != movedDir && !dir.Equals(movedDir)) {
+      double angle = car.GetAngleTo(car.X + dir.X, car.Y + dir.Y);
+      if (Math.Abs(angle) > (2 * Math.PI / 3)) {
         return true;
       }
 
-      movedDir = null;
+      offset = 1;
+      TileDir dirIn = path[offset].DirIn;
+      TileDir dirOut = path[offset].DirOut;
 
-      double angle = car.GetAngleTo(car.X + dir.X, car.Y + dir.Y);
+      if (dirIn == dirOut.Negative()) {
+        return true;
+      }
 
-      return Math.Abs(angle) > (2 * Math.PI / 3) && car.Speed() < 5;///120 degrees
+      return false;
     }
 
     public override void execute(Move move) {
-      /*move.EnginePower = -1.0;
+      TileDir dirMove = path[offset].DirOut;
 
-      if (null == movedDir) {
-        movedDir = path[0].DirOut;
-      }
+      Vector dir = new Vector(dirMove.X, dirMove.Y);
 
-      PointInt currentDir = path[0].DirOut;
+      Vector carPos = new Vector(car.X, car.Y);
+      Vector endPos = GetWayEnd(path[offset].Pos, TileDir.Zero);
+      endPos.set(car.X * Math.Abs(dir.X) + endPos.X * Math.Abs(dir.Y), car.Y * Math.Abs(dir.Y) + endPos.Y * Math.Abs(dir.X));
+      
 
-      Vector wayEnd = GetWayEnd(path[0].Pos, movedDir);
-      double procentToEnd = car.GetDistanceTo(wayEnd.X, wayEnd.Y) / game.TrackTileSize;
-      bool perpendicular = currentDir.Equals(movedDir.Perpendicular()) || currentDir.Equals(movedDir.Perpendicular().Negative());
+      Physic.MovingCalculator calculator = new Physic.MovingCalculator();
+      calculator.setupEnvironment(car, game, world);
 
-      double magnitedAngle = 0;
-      if (movedSign(movedDir) < 0) {
-        move.IsBrake = true;
+      if (0 == offset) {
+        TileDir nextDirOut = path[1 + offset].DirOut;
+        Vector nextDir = new Vector(nextDirOut.X, nextDirOut.Y);
 
-        magnitedAngle = magniteToCenter(movedDir);
-      } else {
-        if (procentToEnd < 0.5 && perpendicular) {
-          magnitedAngle = magniteToEnd(movedDir, currentDir.Negative());
-          move.EnginePower = -Math.Max(0.1, procentToEnd);
+        bool needBrake = false;
+        double speedSign = Math.Sign(Vector.sincos(car.Angle).Dot(new Vector(car.SpeedX, car.SpeedY)));
+        if (speedSign > 0 || nextDirOut == dirMove) {
+          endPos -= dir * game.TrackTileSize;
+          needBrake = (nextDirOut != dirMove && speedSign > 0);
         } else {
-          magnitedAngle = 0.25 * magniteToCenter(movedDir);
+          Vector tileEnd = path[offset].Pos.ToVector(0.5 * (1 + dir.X), 0.5 * (1 + dir.Y));
+          endPos = GetWayEnd(path[1 + offset].Pos, nextDirOut.Negative() - dirMove);
+          endPos += nextDir * (tileEnd - carPos).Dot(dir);
+          endPos = carPos + (carPos - endPos);
+          needBrake = car.Speed() > 8;
         }
+
+        Move needMove = calculator.calculateBackMove(endPos, dirMove, nextDir);
+        move.IsBrake = needMove.IsBrake || needBrake;
+        move.EnginePower = needMove.EnginePower;
+        move.WheelTurn = needMove.WheelTurn;
+      } else {
+        endPos -= dir * game.TrackTileSize;
+        double distance = (carPos - GetWayEnd(path[offset].Pos, dirMove)).Dot(dir);
+
+        Move needMove = calculator.calculateMove(endPos, dirMove, dir);
+        move.IsBrake = needMove.IsBrake;
+        move.EnginePower = game.CarEnginePowerChangePerTick + distance / game.TrackTileSize;
+        move.WheelTurn = needMove.WheelTurn;
       }
-
-      if (procentToEnd < 0.05 && perpendicular) {
-        movedDir = null;
-        move.IsBrake = true;
-        move.EnginePower = 0;
-      }
-
-      double magnitedForce = car.WheelTurnForAngle(magnitedAngle, game);
-
-      Logger.instance.Debug("Angle {0} wheelTurn {1}", magnitedAngle, magnitedForce);
-
-      move.WheelTurn = magnitedForce;*/
     }
 
     public override List<ActionType> GetParallelsActions() {
       return new List<ActionType>() {
         ActionType.Shooting
       };
-    } 
-
-    /*
-    private double magniteToCenter(PointInt dir) {
-      double powerTilt = movedSign(dir) * game.TrackTileSize * 1;
-
-      double centerX = (Math.Floor(car.X / game.TrackTileSize) + 0.5) * game.TrackTileSize;
-      double centerY = (Math.Floor(car.Y / game.TrackTileSize) + 0.5) * game.TrackTileSize;
-
-      return car.GetAngleTo(new Vector(centerX, centerY), dir, powerTilt);
     }
-
-    private double magniteToEnd(PointInt dir, PointInt normal) {
-      PointInt pos = new PointInt((int)(car.X / game.TrackTileSize), (int)(car.Y / game.TrackTileSize));
-      Vector endPoint = GetWaySideEnd(pos, dir, normal);
-
-      return car.GetAngleTo(endPoint.X, endPoint.Y);
-    }
-
-    private double movedSign(PointInt dir) {
-      double speed = car.SpeedX * dir.X + car.SpeedY * dir.Y;
-      if (Math.Abs(speed) < 1.0e-3) {
-        return 0;
-      }
-
-      return Math.Sign(speed);
-    }
-     */
   }
 }

@@ -43,7 +43,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       ActionType.Death,
 
       ActionType.StuckOut,
-      //ActionType.Backward,
+      ActionType.Backward,
       ActionType.Around,
       ActionType.Snake,
       ActionType.Turn,
