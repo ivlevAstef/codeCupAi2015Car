@@ -233,7 +233,7 @@ namespace RussianAICup2015Car.Sources.Map {
       }
 
       if (dirIn == nextDirOut.Negative() && dirOut == nextDirIn) {//around
-        return -5;
+        return -1.5;
       } else if (dirIn == nextDirOut && dirOut == nextDirIn) {//snake
         return 0.45;
       }
