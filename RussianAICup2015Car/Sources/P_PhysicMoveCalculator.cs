@@ -74,7 +74,11 @@ namespace RussianAICup2015Car.Sources.Physic {
         double distance = (endPoint - crashInfo.Item1).Dot(dir);
         while (distance > 0) {
           MoveToAngleFunction mover = new MoveToAngleFunction((idealPos - iterCar.Pos).Angle);
-          int ticks = (int)Math.Max(1, 0.5 * distance / Math.Max(1.0e-3, Math.Abs(iterCar.Speed.Dot(dir))));
+          int ticks = (int)Math.Max(1, 0.5 * distance / Math.Max(1, Math.Abs(iterCar.Speed.Dot(dir))));
+          if (ticksCount + ticks > 180) {/*save function*/
+            i = 3;
+            break;
+          }
           Vector lastPos = iterCar.Pos;
           mover.Iteration(iterCar, ticks);
           distance -= (iterCar.Pos - lastPos).Dot(dir);
