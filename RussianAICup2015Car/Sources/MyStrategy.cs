@@ -53,6 +53,8 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
     public void Move(Car car, World world, Game game, Move move) {
       setupEnvironments(car, world, game, move);
 
+      CarMovedPath.Instance.Update(car);
+
       GlobalMap.Instance.Update();
       path.CalculatePath(map.FirstCellWithTransitions(Constant.PathMaxDepth), map.HasUnknown);
 

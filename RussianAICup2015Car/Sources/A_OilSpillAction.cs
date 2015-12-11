@@ -10,6 +10,10 @@ namespace RussianAICup2015Car.Sources.Actions {
         return false;
       }
 
+      if (!centering()) {
+        return false;
+      }
+
       if (isBackward()) {
         return false;
       }
@@ -18,7 +22,15 @@ namespace RussianAICup2015Car.Sources.Actions {
         return false;
       }
 
-      return centering();
+      if (isBackSelfCar()) {
+        return false;
+      }
+
+      if (!isBackEnemyCar()) {
+        return false;
+      }
+
+      return true;
     }
 
     public override void execute(Move move) {
@@ -48,6 +60,34 @@ namespace RussianAICup2015Car.Sources.Actions {
       foreach(OilSlick oil in world.OilSlicks) {
         if (oil.GetDistanceTo(center.X, center.Y) < game.TrackTileSize * 0.75) {
           return true;
+        }
+      }
+
+      return false;
+    }
+
+    private bool isBackSelfCar() {
+      foreach (Car iterCar in world.Cars) {
+        if (iterCar.IsTeammate && iterCar.Id != car.Id) {
+          TilePos tile = new TilePos(iterCar.X, iterCar.Y);
+          int index = CarMovedPath.Instance.TilePosIndexForCar(tile, car);
+          if (index < 5) {
+            return true;
+          }
+        }
+      }
+
+      return false;
+    }
+
+    private bool isBackEnemyCar() {
+      foreach (Car iterCar in world.Cars) {
+        if (!iterCar.IsTeammate) {
+          TilePos tile = new TilePos(iterCar.X, iterCar.Y);
+          int index = CarMovedPath.Instance.TilePosIndexForCar(tile, car);
+          if (0 < index && index <= 8) {
+            return true;
+          }
         }
       }
 

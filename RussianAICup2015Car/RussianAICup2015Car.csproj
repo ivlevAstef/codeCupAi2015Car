@@ -53,6 +53,7 @@
     <Compile Include="Sources\A_IAction.cs" />
     <Compile Include="Sources\A_M_PreTurnMoving.cs" />
     <Compile Include="Sources\A_M_SnakePreEndMoving.cs" />
+    <Compile Include="Sources\C_CarMovedPath.cs" />
     <Compile Include="Sources\C_TileDir.cs" />
     <Compile Include="Sources\C_TilePos.cs" />
     <Compile Include="Sources\C_Vector.cs" />
