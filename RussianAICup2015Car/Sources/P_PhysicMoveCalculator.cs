@@ -257,6 +257,10 @@ namespace RussianAICup2015Car.Sources.Physic {
         new MapCrashEvent()
       };
 
+      if (null != moverSelfMapCrashEvent) {
+        pEvents.Add(moverSelfMapCrashEvent);
+      }
+
       PCar physicCar = new PCar(iterCar);
       PhysicEventsCalculator.calculateEvents(physicCar, new MoveToAngleFunction(Math.Atan2(dirMove.Y, dirMove.X)), pEvents, calculateMoveEventCheckEnd);
 

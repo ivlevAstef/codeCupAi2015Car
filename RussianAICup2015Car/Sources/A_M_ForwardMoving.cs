@@ -21,6 +21,18 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       calculator.setupAngleReach(new Vector(dirMove.X, dirMove.Y));
       calculator.setupDefaultAction(EndSidePos());
 
+      Dictionary<TilePos, TileDir[]> selfMap = new Dictionary<TilePos, TileDir[]>();
+      for (int i = 0; i <= 2; i++) {
+        if (path[i].DirIn == path[i].DirOut) {
+          selfMap.Add(path[i].Pos, new TileDir[2] { dirMove.PerpendicularLeft(), dirMove.PerpendicularRight() });
+        } else if (0 == i) {
+          selfMap.Add(path[i].Pos, new TileDir[1] { path[i].DirIn });
+        } else {
+          break;
+        }
+      }
+      calculator.setupSelfMapCrash(selfMap);
+
       Move needMove = calculator.calculateMove();
       move.IsBrake = needMove.IsBrake;
       move.EnginePower = needMove.EnginePower;
