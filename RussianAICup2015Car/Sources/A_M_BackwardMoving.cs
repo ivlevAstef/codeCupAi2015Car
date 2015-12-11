@@ -81,7 +81,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
 
     public override List<ActionType> GetParallelsActions() {
       return new List<ActionType>() {
-        ActionType.Shooting
+        ActionType.Shooting,
       };
     }
   }

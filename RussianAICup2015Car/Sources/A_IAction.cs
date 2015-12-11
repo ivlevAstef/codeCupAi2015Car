@@ -21,7 +21,7 @@ namespace RussianAICup2015Car.Sources.Actions {
     MoveToBonus,
     Overtake,
     AvoidSideHit,
-    AvoidWindShieldHit,
+    DodgeHit,
 
     Shooting,
     OilSpill,

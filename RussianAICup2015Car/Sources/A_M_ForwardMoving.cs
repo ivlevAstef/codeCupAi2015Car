@@ -32,6 +32,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
         ActionType.PreTurn,
         ActionType.Shooting,
         ActionType.MoveToBonus,
+        ActionType.DodgeHit
       };
 
       Vector dir = new Vector(path[0].DirOut.X, path[0].DirOut.Y);
