@@ -121,7 +121,7 @@ namespace RussianAICup2015Car.Sources.Actions {
       Vector tireSpd = self.Dir * game.TireInitialSpeed;
       double minTireSpeed = game.TireInitialSpeed * game.TireDisappearSpeedFactor;
 
-      int tireRebound = maxTireRebound + 1;
+      int tireRebound = maxTireRebound;
       for (int i = 0; i < tireCalculateTicks ; i++) {
         Vector lastTirePos = tirePos;
         tirePos += tireSpd;

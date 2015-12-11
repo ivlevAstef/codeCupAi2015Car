@@ -80,7 +80,7 @@ namespace RussianAICup2015Car.Sources.Physic {
       result.WheelTurn = WheelTurnForEndZeroWheelTurn(car, game, defaultAngle, speedSign);
 
       turn(result, needDirAngle);
-      avoidSideCrash(result);
+      avoidSideCrash(result, needDirAngle);
       return result;
     }
 
@@ -156,7 +156,7 @@ namespace RussianAICup2015Car.Sources.Physic {
       }
     }
 
-    private void avoidSideCrash(Move moveResult) {
+    private void avoidSideCrash(Move moveResult, Vector needDirAngle = null) {
       HashSet<IPhysicEvent> events = calculateAvoidMapCrashEvents(moveResult);
 
       IPhysicEvent passageLine = events.ComeContaints(PhysicEventType.PassageLine) ? events.GetEvent(PhysicEventType.PassageLine) : null;
@@ -181,7 +181,9 @@ namespace RussianAICup2015Car.Sources.Physic {
           bool isStrongParallel = Math.Abs(Vector.sincos(car.Angle).Dot(sideNormal)) < Math.Sin(Math.PI / 18);//10 degrees
           isStrongParallel &= Math.Abs(physicCar.Dir.Dot(sideNormal)) < Math.Sin(Math.PI / 9);//10 degrees
 
-          if (!isStrongParallel) {
+          bool notCurrentTurnSide = null != needDirAngle && sideNormal.Dot(needDirAngle) < 0;
+
+          if (!isStrongParallel || notCurrentTurnSide) {
             moveResult.WheelTurn = car.WheelTurn - speedSign * Math.Sign(angle) * game.CarWheelTurnChangePerTick;
           } else {
             moveResult.WheelTurn = 0;
