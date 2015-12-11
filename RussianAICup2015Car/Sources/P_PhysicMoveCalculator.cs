@@ -9,6 +9,7 @@ namespace RussianAICup2015Car.Sources.Physic {
     private static readonly int maxCheckRotateIterationCount = 80;
     private static readonly int maxIterationCount = 180;
     private static readonly int maxCheckCrashIterationCount = 28;//800/28 = 28
+    private static readonly int maxCheckMoveCrashIterationCount = 50;
 
     private Car car;
     private Game game;
@@ -250,13 +251,13 @@ namespace RussianAICup2015Car.Sources.Physic {
       };
 
       PCar physicCar = new PCar(iterCar);
-      PhysicEventsCalculator.calculateEvents(physicCar, new MoveWithOutChange(), pEvents, calculateMoveEventCheckEnd);
+      PhysicEventsCalculator.calculateEvents(physicCar, new MoveToAngleFunction(Math.Atan2(dirMove.Y, dirMove.X)), pEvents, calculateMoveEventCheckEnd);
 
       return pEvents;
     }
 
     private bool calculateMoveEventCheckEnd(PCar physicCar, HashSet<IPhysicEvent> pEvents, int tick) {
-      if (tick > maxCheckCrashIterationCount) {
+      if (tick > maxCheckMoveCrashIterationCount) {
         return true;
       }
 

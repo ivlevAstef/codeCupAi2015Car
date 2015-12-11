@@ -2,10 +2,12 @@
 using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
 using System.Collections.Generic;
 using System;
+using RussianAICup2015Car.Sources.Physic;
 
 namespace RussianAICup2015Car.Sources.Actions.Moving {
   class BonusMoving : MovingBase {
     private Bonus findedBonus = null;
+    private static double MaxAngle = Math.PI / 6;//30 degrees
 
     public override bool valid() {
       Logger.instance.Assert(3 <= path.Count, "incorrect way cells count.");
@@ -20,7 +22,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
 
       TileDir dirMove = path[0].DirOut;
 
-      Physic.MovingCalculator calculator = new Physic.MovingCalculator();
+      MovingCalculator calculator = new MovingCalculator();
       calculator.setupEnvironment(car, game, world);
       calculator.setupMapInfo(dirMove, path[0].Pos, null);
 
@@ -28,10 +30,8 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       calculator.setupDefaultAction(bonusEndPos(findedBonus, dirMove));
 
       Move needMove = calculator.calculateMove();
-      if (!needMove.IsBrake) {
-        move.EnginePower = needMove.EnginePower;
-        move.WheelTurn = needMove.WheelTurn;
-      }
+      move.EnginePower = needMove.EnginePower;
+      move.WheelTurn = needMove.WheelTurn;
     }
 
     public override List<ActionType> GetParallelsActions() {
@@ -56,12 +56,13 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
     private Bonus findBonus() {
       Vector dir = new Vector(path[0].DirOut.X, path[0].DirOut.Y);
 
-      if (car.Speed() < 1) {
+      PCar pcar = new PCar(car, game);
+
+      if (pcar.Speed.Length < 1) {
         return null;
       }
 
-      double speed = car.Speed();
-      Vector carPos = new Vector(car.X, car.Y);
+      PCar zeroWheelTurnCar = pcar.GetZeroWheelTurnCar();
 
       Bonus priorityBonus = null;
       foreach (Bonus bonus in world.Bonuses) {
@@ -72,7 +73,12 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
 
         Vector bonusPos = new Vector(bonus.X, bonus.Y);
 
-        if ((bonusPos - carPos).Dot(dir) < 0) {//back
+        if ((bonusPos - pcar.Pos).Dot(dir) < 0) {//back
+          continue;
+        }
+
+        double angleToBonus = (bonusPos - pcar.Pos).Angle;
+        if (Math.Abs(zeroWheelTurnCar.Angle.AngleDeviation(angleToBonus)) > MaxAngle) {
           continue;
         }
 
@@ -80,26 +86,14 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
           continue;
         }
 
-        if (null == priorityBonus || bonusPriorityFor(priorityBonus) < bonusPriorityFor(bonus)) {
+        double newBonusPriority = Constant.BonusPriority(bonus, car, true);
+
+        if (null == priorityBonus || Constant.BonusPriority(priorityBonus, car, true) < newBonusPriority) {
           priorityBonus = bonus;
         }
       }
 
       return priorityBonus;
-    }
-
-    private double bonusPriorityFor(Bonus bonus) {
-      Dictionary<BonusType, int> priority = new Dictionary<BonusType, int> {
-        { BonusType.AmmoCrate , Math.Min(10, 70 - 10 * car.ProjectileCount) },
-        { BonusType.NitroBoost , Math.Min(10, 80 - 10 * car.NitroChargeCount) },
-        { BonusType.OilCanister , Math.Min(10, 50 - 10 * car.OilCanisterCount) },
-        { BonusType.PureScore , 100 },
-        { BonusType.RepairKit , (int)(150 * (1.0 - car.Durability)) }
-      };
-
-      double distance = car.GetDistanceTo(bonus);
-
-      return priority[bonus.Type] - (distance * 0.05);
     }
 
     private bool isNextTile(TilePos checkTile) {

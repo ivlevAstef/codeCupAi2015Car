@@ -181,7 +181,7 @@ namespace RussianAICup2015Car.Sources.Map {
         foreach (Bonus bonus in world.Bonuses) {
           TilePos pos = new TilePos(bonus.X, bonus.Y);
           if (pos.Equals(cell.Pos)) {
-            priority += 0.2;
+            priority += Constant.BonusPriority(bonus, car, false) / 300.0;
           }
         }
 
