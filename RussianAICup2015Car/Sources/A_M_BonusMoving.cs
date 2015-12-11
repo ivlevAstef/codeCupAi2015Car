@@ -7,7 +7,7 @@ using RussianAICup2015Car.Sources.Physic;
 namespace RussianAICup2015Car.Sources.Actions.Moving {
   class BonusMoving : MovingBase {
     private Bonus findedBonus = null;
-    private static double MaxAngle = Math.PI / 6;//30 degrees
+    private static double MaxAngle = Math.PI / 9;//20 degrees
 
     public override bool valid() {
       Logger.instance.Assert(3 <= path.Count, "incorrect way cells count.");
