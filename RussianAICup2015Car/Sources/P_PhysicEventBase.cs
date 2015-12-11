@@ -12,6 +12,7 @@ namespace RussianAICup2015Car.Sources.Physic {
     AngleReach,
     SpeedReach,
     MapCrash,
+    ObjectsCrash,
     IntersectOilStick,
   };
 

@@ -20,14 +20,14 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
 
       TileDir dirMove = path[0].DirOut;
 
-      Vector endPos = bonusEndPos(findedBonus, dirMove);
-
       Physic.MovingCalculator calculator = new Physic.MovingCalculator();
       calculator.setupEnvironment(car, game, world);
+      calculator.setupMapInfo(dirMove, path[0].Pos, null);
 
-      Vector dir = new Vector(dirMove.X, dirMove.Y);
+      calculator.setupAngleReach(new Vector(dirMove.X, dirMove.Y));
+      calculator.setupDefaultAction(bonusEndPos(findedBonus, dirMove));
 
-      Move needMove = calculator.calculateMove(endPos, dirMove, dir);
+      Move needMove = calculator.calculateMove();
       if (!needMove.IsBrake) {
         move.EnginePower = needMove.EnginePower;
         move.WheelTurn = needMove.WheelTurn;

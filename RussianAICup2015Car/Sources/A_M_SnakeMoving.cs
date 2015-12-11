@@ -2,6 +2,7 @@
 using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
 using System.Collections.Generic;
 using System;
+using RussianAICup2015Car.Sources.Physic;
 
 namespace RussianAICup2015Car.Sources.Actions.Moving {
   class SnakeMoving : MovingBase {
@@ -21,13 +22,28 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       TileDir dirMove = path[offset].DirOut;
       TileDir dirEnd = path[1 + offset].DirOut;
 
-      Vector endPos = GetWayEnd(path[1 + offset].Pos, dirEnd);
-      Vector dir = new Vector(dirMove.X + dirEnd.X, dirMove.Y + dirEnd.Y).Normalize();
-
-      Physic.MovingCalculator calculator = new Physic.MovingCalculator();
+      MovingCalculator calculator = new MovingCalculator();
       calculator.setupEnvironment(car, game, world);
+      calculator.setupMapInfo(dirMove, path[0].Pos, path[1 + offset].Pos);
+      calculator.setupDefaultAction(GetWayEnd(path[1 + offset].Pos, TileDir.Zero));
 
-      Move needMove = calculator.calculateTurn(endPos, dirMove, dir);
+      Vector endDir = new Vector(dirEnd.X + dirMove.X, dirEnd.Y + dirMove.Y).Normalize();
+
+      calculator.setupAngleReach(endDir);
+      calculator.setupPassageLine(GetWayEnd(path[1 + offset].Pos, dirEnd), endDir);
+
+      Dictionary<TilePos, TileDir[]> selfMap = new Dictionary<TilePos, TileDir[]>();
+      for (int i = 0; i <= offset + 1; i++) {
+        if (path[i].DirIn == path[i].DirOut) {
+          selfMap.Add(path[i].Pos, new TileDir[2] { path[i].DirIn.PerpendicularLeft(), path[i].DirIn.PerpendicularRight() });
+        } else {
+          selfMap.Add(path[i].Pos, new TileDir[3] { path[i].DirIn, path[i].DirOut.Negative(), path[i].DirIn.Negative() + path[i].DirOut });
+        }
+      }
+
+      calculator.setupSelfMapCrash(selfMap);
+
+      Move needMove = calculator.calculateTurn(endDir);
       move.IsBrake = needMove.IsBrake;
       move.EnginePower = needMove.EnginePower;
       move.WheelTurn = needMove.WheelTurn;

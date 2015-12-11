@@ -15,12 +15,23 @@ namespace RussianAICup2015Car.Sources.Physic {
   }
 
   public class CollisionCircle : ICollisionObject {
+    private static double tileMargin = 0;
+
+    public static void SetupEnvironment(Game game) {
+      tileMargin = game.TrackTileMargin;
+    }
+
     public readonly Vector Center;
     public readonly double Radius;
 
     public CollisionCircle(Vector center, double radius) {
       this.Center = center;
       this.Radius = radius;
+    }
+
+    public CollisionCircle(TilePos tile, TileDir dir) {
+      this.Center = tile.ToVector(0.5 * (1 + dir.X), 0.5 * (1 + dir.Y));
+      this.Radius = tileMargin;
     }
 
     public CollisionObjectType Type { get { return CollisionObjectType.Circle; } }

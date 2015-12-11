@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System;
 
 using RussianAICup2015Car.Sources.Common;
+using RussianAICup2015Car.Sources.Physic;
 
 namespace RussianAICup2015Car.Sources.Actions.Moving {
   class AroundMoving : MovingBase {
@@ -21,14 +22,29 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
     public override void execute(Move move) {
       TileDir dirMove = path[offset].DirOut;
       TileDir dirEnd = path[1 + offset].DirOut;
+      TilePos endTile = path[1 + offset].Pos;
 
       Vector endPos = GetWayEnd(path[1 + offset].Pos, dirMove.Negative(), 1.0);
 
-      Physic.MovingCalculator calculator = new Physic.MovingCalculator();
+      MovingCalculator calculator = new MovingCalculator();
       calculator.setupEnvironment(car, game, world);
+      calculator.setupMapInfo(dirMove, path[0].Pos, path[1 + offset].Pos);
+      calculator.setupDefaultAction(GetWayEnd(endTile, dirEnd.Negative() + dirMove.Negative(), 1.3));
 
-      Vector dir = new Vector(dirEnd.X - dirMove.X, dirEnd.Y - dirMove.Y).Normalize();
-      Move needMove = calculator.calculateTurn(endPos, dirMove, dir);
+      Vector endDir = new Vector(dirEnd.X - dirMove.X, dirEnd.Y - dirMove.Y).Normalize();
+
+      calculator.setupAngleReach(endDir);
+      calculator.setupPassageLine(GetWayEnd(endTile, dirEnd + dirMove.Negative()),endDir);
+
+      Dictionary<TilePos, TileDir[]> selfMap = new Dictionary<TilePos, TileDir[]>();
+      for (int i = 0; i <= offset; i++) {
+        selfMap.Add(path[i].Pos, new TileDir[2] { dirMove.PerpendicularLeft(), dirMove.PerpendicularRight() });
+      }
+      selfMap.Add(endTile, new TileDir[2] { dirEnd.Negative() , dirEnd + dirMove.Negative() });
+
+      calculator.setupSelfMapCrash(selfMap);
+      
+      Move needMove = calculator.calculateTurn(endDir);
 
       move.IsBrake = needMove.IsBrake;
       move.EnginePower = needMove.EnginePower;

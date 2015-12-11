@@ -2,6 +2,7 @@
 using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
 using System.Collections.Generic;
 using System;
+using RussianAICup2015Car.Sources.Physic;
 
 namespace RussianAICup2015Car.Sources.Actions.Moving {
   class PreTurnMoving : MovingBase {
@@ -19,12 +20,25 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       TileDir dirMove = path[0].DirOut;
       TileDir dirEnd = path[2].DirOut;
 
-      Vector endPos = GetWayEnd(path[2].Pos, TileDir.Zero);
-
-      Physic.MovingCalculator calculator = new Physic.MovingCalculator();
+      MovingCalculator calculator = new MovingCalculator();
       calculator.setupEnvironment(car, game, world);
+      calculator.setupMapInfo(dirMove, path[0].Pos, path[2].Pos);
+      calculator.setupDefaultAction(GetWayEnd(path[2].Pos, dirEnd.Negative()));
 
-      Move needMove = calculator.calculateTurn(endPos, dirMove, new Vector(dirEnd.X + dirMove.X, dirEnd.Y + dirMove.Y));
+      Vector endDir = new Vector(dirEnd.X + dirMove.X, dirEnd.Y + dirMove.Y).Normalize();
+
+      calculator.setupAngleReach(endDir);
+      calculator.setupPassageLine(GetWayEnd(path[2].Pos, TileDir.Zero), new Vector(dirEnd.X, dirEnd.Y));
+
+      Dictionary<TilePos, TileDir[]> selfMap = new Dictionary<TilePos, TileDir[]>();
+      for (int i = 0; i < 2; i++) {
+        selfMap.Add(path[i].Pos, new TileDir[2] { dirMove.PerpendicularLeft(), dirMove.PerpendicularRight() });
+      }
+      selfMap.Add(path[2].Pos, new TileDir[2] { dirEnd + dirMove.Negative(), dirEnd });
+      
+      calculator.setupSelfMapCrash(selfMap);
+
+      Move needMove = calculator.calculateTurn(endDir);
       move.IsBrake = needMove.IsBrake;
       move.EnginePower = needMove.EnginePower;
       move.WheelTurn = needMove.WheelTurn;

@@ -9,8 +9,8 @@ namespace RussianAICup2015Car.Sources.Physic {
     private Vector dir;
     private Vector pos;
 
-    public PassageLineEvent(TileDir dirMove/* Vector idealDir*/, Vector pos) {
-      this.dir = new Vector(dirMove.Y, -dirMove.X);// idealDir;
+    public PassageLineEvent(Vector idealDir, Vector pos) {
+      this.dir = idealDir;
       this.pos = pos;
     }
 
@@ -61,11 +61,7 @@ namespace RussianAICup2015Car.Sources.Physic {
   }
 
   public class MapCrashEvent : PhysicEventBase {
-    private readonly List<ICollisionObject> collisionObjects;
-
-    //TODO: need set collision object
-    public MapCrashEvent(List<ICollisionObject> additionalCollisionObjects) {
-      this.collisionObjects = additionalCollisionObjects;
+    public MapCrashEvent() {
     }
 
     public override PhysicEventType Type { get { return PhysicEventType.MapCrash; } }
@@ -73,12 +69,43 @@ namespace RussianAICup2015Car.Sources.Physic {
     public override bool Check(PCar car) {
       CollisionRect carRect = new CollisionRect(car);
 
-      List<CollisionInfo> collisions = new List<CollisionInfo>();
-      if (null != collisionObjects) {
-        collisions.AddRange(CollisionDetector.CheckCollision(carRect, collisionObjects));
+      List<CollisionInfo> collisions = CollisionDetector.CollisionsWithMap(carRect);
+
+      if (!collisions.HasCollision()) {
+        return false;
       }
 
-      collisions.AddRange(CollisionDetector.CollisionsWithMap(carRect));
+      foreach (CollisionInfo info in collisions) {
+        if (!info.CollisionDeletected) {
+          continue;
+        }
+
+        Vector normal = info.NormalObj1;
+        if (car.Speed.Dot(normal) > 0) {
+          continue;
+        }
+
+        checkInfo = new Tuple<Vector, Vector>(info.Point, normal);
+        return true;
+      }
+
+      return false;
+    }
+  }
+
+  public class ObjectsCrashEvent : PhysicEventBase {
+    private readonly List<ICollisionObject> collisionObjects;
+
+    public ObjectsCrashEvent(List<ICollisionObject> collisionObjects) {
+      this.collisionObjects = collisionObjects;
+    }
+
+    public override PhysicEventType Type { get { return PhysicEventType.ObjectsCrash; } }
+
+    public override bool Check(PCar car) {
+      CollisionRect carRect = new CollisionRect(car);
+
+      List<CollisionInfo> collisions = CollisionDetector.CheckCollision(carRect, collisionObjects);
 
       if (!collisions.HasCollision()) {
         return false;

@@ -98,6 +98,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       PhysicEventsCalculator.setupEnvironment(game, world);
 
       CollisionSide.SetupEnvironment(game);
+      CollisionCircle.SetupEnvironment(game);
       CollisionDetector.SetupEnvironment(game, GlobalMap.Instance);
 
       map.SetupEnvironment(car, GlobalMap.Instance);

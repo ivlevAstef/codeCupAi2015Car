@@ -39,6 +39,8 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
 
       Physic.MovingCalculator calculator = new Physic.MovingCalculator();
       calculator.setupEnvironment(car, game, world);
+      calculator.setupMapInfo(dirMove, path[0].Pos, null);
+      calculator.useBackward();
 
       if (0 == offset) {
         TileDir nextDirOut = path[1 + offset].DirOut;
@@ -57,7 +59,10 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
           needBrake = car.Speed() > 8;
         }
 
-        Move needMove = calculator.calculateBackMove(endPos, dirMove, nextDir);
+        calculator.setupAngleReach(nextDir);
+        calculator.setupDefaultAction(endPos);
+        Move needMove = calculator.calculateMove();
+
         move.IsBrake = needMove.IsBrake || needBrake;
         move.EnginePower = needMove.EnginePower;
         move.WheelTurn = needMove.WheelTurn;
@@ -65,7 +70,9 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
         endPos -= dir * game.TrackTileSize;
         double distance = (carPos - GetWayEnd(path[offset].Pos, dirMove)).Dot(dir);
 
-        Move needMove = calculator.calculateMove(endPos, dirMove, dir);
+        calculator.setupAngleReach(dir);
+        calculator.setupDefaultAction(endPos);
+        Move needMove = calculator.calculateMove();
         move.IsBrake = needMove.IsBrake;
         move.EnginePower = game.CarEnginePowerChangePerTick + distance / game.TrackTileSize;
         move.WheelTurn = needMove.WheelTurn;

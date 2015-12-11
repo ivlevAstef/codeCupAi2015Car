@@ -2,6 +2,7 @@
 using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
 using System.Collections.Generic;
 using System;
+using RussianAICup2015Car.Sources.Physic;
 
 namespace RussianAICup2015Car.Sources.Actions.Moving {
   class SnakePreEndMoving : MovingBase {
@@ -12,17 +13,20 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
     }
 
     public override void execute(Move move) {
-      TileDir dirMove = path[0 + offset].DirOut;
+      TileDir dirMove = path[offset].DirOut;
       TileDir dirEnd = path[1 + offset].DirOut;
 
-      Vector endPos = GetWayEnd(path[1 + offset].Pos, dirEnd);
-      dirMove = path[0].DirOut;
-
-      Physic.MovingCalculator calculator = new Physic.MovingCalculator();
+      MovingCalculator calculator = new MovingCalculator();
       calculator.setupEnvironment(car, game, world);
+      calculator.setupMapInfo(dirMove, path[0].Pos, path[1 + offset].Pos);
+      calculator.setupDefaultAction(GetWayEnd(path[1 + offset].Pos, TileDir.Zero));
 
-      Vector dir = new Vector(dirEnd.X, dirEnd.Y);
-      Move needMove = calculator.calculateTurn(endPos, dirMove, dir);
+      Vector endDir = new Vector(dirEnd.X, dirEnd.Y);
+
+      calculator.setupAngleReach(endDir);
+      calculator.setupPassageLine(GetWayEnd(path[1 + offset].Pos, dirEnd), endDir);
+
+      Move needMove = calculator.calculateTurn(endDir);
       move.IsBrake = needMove.IsBrake;
       //move.EnginePower = needMove.EnginePower;
       //move.WheelTurn = needMove.WheelTurn;
