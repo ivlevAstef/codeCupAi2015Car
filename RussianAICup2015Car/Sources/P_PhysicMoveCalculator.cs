@@ -8,7 +8,7 @@ namespace RussianAICup2015Car.Sources.Physic {
   public class MovingCalculator {
     private static readonly int maxCheckRotateIterationCount = 80;
     private static readonly int maxIterationCount = 180;
-    private static readonly int maxCheckCrashIterationCount = 28;//800/28 = 28
+    private static readonly int maxCheckCrashIterationCount = 36;//800/22 = 36
     private static readonly int maxCheckMoveCrashIterationCount = 50;
 
     private Car car;
@@ -305,15 +305,22 @@ namespace RussianAICup2015Car.Sources.Physic {
 
     ///Other
     private List<ICollisionObject> objectsByTilesAndEdgesInfo(Dictionary<TilePos, TileDir[]> tilesInfo) {
+      CollisionRect carRect = new CollisionRect(car);
+
       List<ICollisionObject> result = new List<ICollisionObject>();
 
       if (null != tilesInfo) {
         foreach (TilePos pos in tilesInfo.Keys) {
           foreach (TileDir dir in tilesInfo[pos]) {
+            ICollisionObject obj = null;
             if (dir.Correct()) {
-              result.Add(new CollisionSide(pos, dir));
+              obj = new CollisionSide(pos, dir);
             } else {
-              result.Add(new CollisionCircle(pos, dir));
+              obj = new CollisionCircle(pos, dir);
+            }
+
+            if (null == CollisionDetector.CheckCollision(carRect, obj)) {
+              result.Add(obj);
             }
           }
         }
