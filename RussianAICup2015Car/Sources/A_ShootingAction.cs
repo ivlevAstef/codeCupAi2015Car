@@ -30,16 +30,24 @@ namespace RussianAICup2015Car.Sources.Actions {
     }    
 
     private bool isShootingWasher() {
+      int minIgnoreTick = 1024;
+      int minValidTick = 2048;
+
       foreach (Car carIter in world.Cars) {
-        if (isEnemyOnWasherLine(carIter)) {
-          return true;
+        int tick = 0;
+        if (carIter.Id != car.Id && isEnemyOnWasherLine(carIter, ref tick)) {
+          if (carIter.IsTeammate || carIter.IsFinishedTrack || carIter.Durability < 1.0e-9) {
+            minIgnoreTick = Math.Min(minIgnoreTick, tick);
+          } else {
+            minValidTick = Math.Min(minValidTick, tick);
+          }
         }
       }
 
-      return false;
+      return minValidTick < minIgnoreTick;
     }
 
-    private bool isEnemyOnWasherLine(Car enemy) {
+    private bool isEnemyOnWasherLine(Car enemy, ref int tick) {
       Vector washerPos = new Vector(car.X, car.Y);
       Vector washerDir = Vector.sincos(car.Angle);
       Vector washerSpd = washerDir * game.WasherInitialSpeed;
@@ -49,7 +57,6 @@ namespace RussianAICup2015Car.Sources.Actions {
       }
 
       PCar physicCar = new PCar(enemy, game);
-      physicCar.setEnginePower(1);
 
       double radius = Math.Min(car.Width, car.Height) * 0.25 + game.WasherRadius;
 
@@ -70,7 +77,8 @@ namespace RussianAICup2015Car.Sources.Actions {
           double distance = Math.Sqrt(Math.Pow(fullDistance, 2) - Math.Pow(distanceByDir,2));
 
           if (distance < radius) {
-            return !(enemy.IsTeammate || enemy.IsFinishedTrack || enemy.Durability < 1.0e-9);
+            tick = i;
+            return true;
           }
 
           return false;
@@ -87,7 +95,6 @@ namespace RussianAICup2015Car.Sources.Actions {
 
       foreach (Car carIter in world.Cars) {
         PCar physicCar = new PCar(carIter, game);
-        physicCar.setEnginePower(1);
         if (carIter.IsTeammate) { 
           their.Add(physicCar);
         } else {
@@ -162,15 +169,23 @@ namespace RussianAICup2015Car.Sources.Actions {
     }
 
     private Vector tireCollisionWithMap(Vector pos, Vector lastPos) {
-      CollisionCircle collisionTire = new CollisionCircle(pos, game.TireRadius);
+      int ticks = 5;
+      Vector spd = (pos - lastPos) / (double)ticks;
 
-      List<CollisionInfo> collisions = CollisionDetector.CollisionsWithMap(collisionTire);
+      for (int i = 0; i < ticks; i++) {
+        pos += spd;
 
-      if (!collisions.HasCollision()) {
-        return null;
+        CollisionCircle collisionTire = new CollisionCircle(pos, game.TireRadius);
+        List<CollisionInfo> collisions = CollisionDetector.CollisionsWithMap(collisionTire);
+
+        if (!collisions.HasCollision()) {
+          continue;
+        }
+
+        return collisions.AverageNormalObj1();
       }
 
-      return collisions.AverageNormalObj1();
+      return null;
     }
 
     private bool tireCollisionWithCar(Vector tirePos, PCar car, out Vector normal, double multR = 1) {
@@ -189,9 +204,6 @@ namespace RussianAICup2015Car.Sources.Actions {
     }
 
     private Vector calcTireSpeedAfterKick(Vector speed, Vector normal) {
-      const double magicFriction = 0.02;
-
-      double friction = Math.Min(magicFriction, -speed.Dot(normal));
       return normal.Negative() * (2 * speed.Dot(normal)) + speed;
 
       /*const double momentumTransferFactor = 1;
