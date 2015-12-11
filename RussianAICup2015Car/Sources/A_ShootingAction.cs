@@ -7,7 +7,7 @@ using RussianAICup2015Car.Sources.Physic;
 namespace RussianAICup2015Car.Sources.Actions {
   class ShootingAction : BaseAction {
     private static readonly int maxTireRebound = 1;
-    private static readonly int tireCalculateTicks = 50;
+    private static readonly int tireCalculateTicks = 40;
 
     public override bool valid() {
       if (0 < car.RemainingProjectileCooldownTicks || car.ProjectileCount <= 0) {
