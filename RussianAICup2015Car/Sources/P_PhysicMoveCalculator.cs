@@ -139,7 +139,17 @@ namespace RussianAICup2015Car.Sources.Physic {
           double speedL = iterCar.Speed.Length;
           double decreminant = 4 * speedL * speedL + 8 * Math.Abs(iterCar.Assel) * distance;
 
-          int ticks = (int)Math.Max(1, (- 2 * speedL + Math.Sqrt(decreminant)) / (2 * Math.Abs(iterCar.Assel)));
+          int ticks = 1;
+          if (Math.Abs(iterCar.Assel) > 1.0e-9) {
+            double value = (- 2 * speedL + Math.Sqrt(decreminant)) / (2 * Math.Abs(iterCar.Assel));
+
+            ticks = (int)Math.Max(1, Math.Min(value, 1024));
+          } else if (speedL > 1.0e-3) {
+            ticks = (int)Math.Min(1024, distance / speedL);
+          } else {
+            ticks = 10;
+          }
+
           ticks = Math.Min(ticksCountSave + mapCrash.TickCome - ticksCount, ticks);
 
           if (ticksCount + ticks > maxIterationCount) {/*save function*/
