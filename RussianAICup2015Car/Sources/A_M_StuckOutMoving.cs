@@ -11,6 +11,8 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
     private int outStuckTicks = 0;
     private int sign = -1;
 
+    private TileDir saveDir = null;
+
     public override bool valid() {
       Logger.instance.Assert(3 <= path.Count, "incorrect way cells count.");
 
@@ -65,14 +67,17 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
         return;
       }
 
+      TileDir dir = path[0].DirOut;
+      if (null != saveDir && saveDir != dir) {
+        outStuckTicks = 1;
+      }
+
       double timePower = Math.Sin((Math.PI * 0.5) * (double)(maxTicks - outStuckTicks) / maxTicks);
       timePower = 1.2 * timePower - 0.2;
       move.EnginePower = sign * timePower;
       if (timePower < 1.0e-3) {
         move.IsBrake = true;
       }
-
-      TileDir dir = path[0].DirOut;
 
       double angle = sign * car.GetAngleTo(car.X + dir.X, car.Y + dir.Y) * timePower;
       move.WheelTurn = (25 * angle / Math.PI);

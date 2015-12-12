@@ -266,6 +266,8 @@ namespace RussianAICup2015Car.Sources.Map {
         }
       }
 
+      int additionalUnknownWeight = backStack.Count > 0 ? 16 : 3;
+
       while (backStack.Count + backUnknownStack.Count > 0) {
         while (backStack.Count > 0) {
           TilePos pos = backStack.Dequeue();
@@ -288,7 +290,7 @@ namespace RussianAICup2015Car.Sources.Map {
             TilePos nextPos = pos + dir;
 
             if (gmap.Type(nextPos) == TileType.Unknown) {
-              result[nextPos.X, nextPos.Y] = 3 + (Math.Abs(nextPos.X - end.X) + Math.Abs(nextPos.Y - end.Y));
+              result[nextPos.X, nextPos.Y] = additionalUnknownWeight + (Math.Abs(nextPos.X - end.X) + Math.Abs(nextPos.Y - end.Y));
             }
 
             result[pos.X, pos.Y] = Math.Min(result[nextPos.X, nextPos.Y] + 1, result[pos.X, pos.Y]);

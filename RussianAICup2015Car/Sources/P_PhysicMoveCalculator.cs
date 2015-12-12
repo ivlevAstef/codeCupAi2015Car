@@ -145,7 +145,7 @@ namespace RussianAICup2015Car.Sources.Physic {
 
             ticks = (int)Math.Max(1, Math.Min(value, 1024));
           } else if (speedL > 1.0e-3) {
-            ticks = (int)Math.Min(1024, distance / speedL);
+            ticks = (int)Math.Max(1, Math.Min(distance / speedL, 1024));
           } else {
             ticks = 10;
           }
