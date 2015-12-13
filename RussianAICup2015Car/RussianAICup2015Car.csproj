@@ -43,6 +43,7 @@
   <ItemGroup>
     <Compile Include="Runner.cs" />
     <Compile Include="Sources\A_M_AvoidSideHitMoving.cs" />
+    <Compile Include="Sources\A_M_BlockCarHitMoving.cs" />
     <Compile Include="Sources\A_M_DodgeCarHitMoving.cs" />
     <Compile Include="Sources\A_M_MovingBase.cs" />
     <Compile Include="Sources\A_DeathAction.cs" />

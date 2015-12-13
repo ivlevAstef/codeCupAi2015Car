@@ -9,9 +9,9 @@ namespace RussianAICup2015Car.Sources.Common {
 
     public static double BonusPriority(Bonus bonus, Car car, bool useDistance) {
       Dictionary<BonusType, double> priority = new Dictionary<BonusType, double> {
-        { BonusType.AmmoCrate , Math.Min(10, 70 - 10 * car.ProjectileCount) },
-        { BonusType.NitroBoost , Math.Min(10, 80 - 10 * car.NitroChargeCount) },
-        { BonusType.OilCanister , Math.Min(10, 50 - 10 * car.OilCanisterCount) },
+        { BonusType.AmmoCrate , Math.Max(10, 70 - 10 * car.ProjectileCount) },
+        { BonusType.NitroBoost , Math.Max(10, 80 - 10 * car.NitroChargeCount) },
+        { BonusType.OilCanister , Math.Max(10, 50 - 10 * car.OilCanisterCount) },
         { BonusType.PureScore , 100 },
         { BonusType.RepairKit , 150 * (1.0 - car.Durability) }
       };

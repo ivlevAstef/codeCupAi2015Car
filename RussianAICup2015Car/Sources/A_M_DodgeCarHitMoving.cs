@@ -20,11 +20,16 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       PCar self = hitInfo.Item1;
       PCar enemy = hitInfo.Item2;
 
-      Vector distance = enemy.Pos - self.Pos;
-      double angle = distance.Angle.AngleDeviation(self.Angle);
-      double sign = Math.Abs(angle) < Math.Sin(Math.PI/32) ? 1 : Math.Sign(angle);
+      Vector selfPos = new Vector(self.Car.X, self.Car.Y);
+      Vector enemyPos = new Vector(enemy.Car.X, enemy.Car.Y);
 
-      Vector endPos = self.Pos + distance.Normalize().PerpendicularLeft() * sign * car.Height;
+      Vector distance = enemyPos - selfPos;
+      double angle = self.Car.Angle.AngleDeviation(distance.Angle);
+      double sign = Math.Sign(angle);
+
+      Vector center = selfPos + distance * 0.5;
+      Vector dir = new Vector(path[0].DirOut.X, path[0].DirOut.Y);
+      Vector endPos = center + dir.PerpendicularRight() * sign * car.Height;
 
       TileDir dirMove = path[0].DirOut;
       Physic.MovingCalculator calculator = new Physic.MovingCalculator();
@@ -43,7 +48,8 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       PCar self = new PCar(car, game);
       List<PCar> enemies = new List<PCar>();
       foreach (Car iter in world.Cars) {
-        if (iter.Id != car.Id) {
+        Vector distance = new Vector(iter.X, iter.Y) - self.Pos;
+        if (iter.Id != car.Id && distance.Dot(self.Dir) > 0) {
           enemies.Add(new PCar(iter, game));
         }
       }
@@ -52,22 +58,22 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
     }
 
     private Tuple<PCar,PCar> hitInformation(PCar self, List<PCar> enemies) {
-      double maxAngle = Math.Sin(Math.Atan2(car.Height, car.Width));
+      //double maxAngle = Math.Atan2(car.Height, car.Width);
+      double maxAngle = Math.PI / 3;
 
       self.setEnginePower(1);
+      MoveToAngleFunction mover = new MoveToAngleFunction(new Vector(path[0].DirOut.X, path[0].DirOut.Y).Angle);
 
       for (int i = 0; i < MaxCheckTicks; i++) {
-        self.Iteration(1);
         foreach (PCar enemy in enemies) {
-          enemy.Iteration(1);
-
           Vector distance = enemy.Pos - self.Pos;
-          double angle = Math.Abs(distance.Normalize().Cross(self.Dir));
+          double angle = Math.Abs(Math.Acos(distance.Normalize().Dot(self.Dir)));
           if (distance.Length < game.CarWidth && angle < maxAngle) {
             return new Tuple<PCar,PCar>(self, enemy);
           }
-
+          enemy.Iteration(1);
         }
+        mover.Iteration(self, 1);
       }
 
       return null;
