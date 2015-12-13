@@ -54,6 +54,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
 
       if (0 != offset) {
         result.Add(ActionType.MoveToBonus);
+        result.Add(ActionType.BlockBackEnemy);
         result.Add(ActionType.DodgeHit);
       }
 

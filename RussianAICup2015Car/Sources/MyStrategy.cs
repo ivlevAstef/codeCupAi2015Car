@@ -32,6 +32,8 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       //{ ActionType.Overtake, new A_OvertakeAction()},
       { ActionType.AvoidSideHit, new AvoidSideHitMoving()},
       { ActionType.DodgeHit, new DodgeCarHitMoving()},
+      { ActionType.BlockBackEnemy, new BlockCarHitMoving()},
+      
 
       { ActionType.Shooting, new ShootingAction()},
       { ActionType.OilSpill, new OilSpillAction()},

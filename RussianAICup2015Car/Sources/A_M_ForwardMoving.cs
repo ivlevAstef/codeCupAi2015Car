@@ -44,6 +44,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
         ActionType.PreTurn,
         ActionType.Shooting,
         ActionType.MoveToBonus,
+        ActionType.BlockBackEnemy,
         ActionType.DodgeHit
       };
 
