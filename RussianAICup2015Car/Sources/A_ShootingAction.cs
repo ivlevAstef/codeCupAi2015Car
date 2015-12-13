@@ -149,7 +149,7 @@ namespace RussianAICup2015Car.Sources.Actions {
             }
 
             double angle = tireSpd.Normalize().Cross(collisionNormal);
-            return angle < maxAngle && physicCar.Car.Durability > 1.0e-9 && !physicCar.Car.IsFinishedTrack;
+            return angle < maxAngle && Math.Abs(physicCar.Car.AngularSpeed) > 0.01 && physicCar.Car.Durability > 1.0e-9 && !physicCar.Car.IsFinishedTrack;
           }
         }
 

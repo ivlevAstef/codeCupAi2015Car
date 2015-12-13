@@ -103,10 +103,11 @@ namespace RussianAICup2015Car.Sources.Physic {
       endPoint = endPoint + new Vector(dirMove.X, dirMove.Y) * game.TrackTileMargin;
 
       Vector dir = new Vector(dirMove.X, dirMove.Y);
+
       for (int i = 0, ticksCount = 0; i < 3; i++) {
         IPhysicEvent mapCrash = calculateTurnMapCrashEvents(iterCar, needDirAngle);
 
-        if (null == mapCrash) {
+        if (null == mapCrash || checkStrongParallel(mapCrash)) {
           double speedSign = Math.Sign(Vector.sincos(car.Angle).Dot(new Vector(car.SpeedX, car.SpeedY)));
 
           HashSet<IPhysicEvent> events = calculateTurnEvents(iterCar, needDirAngle);
@@ -188,12 +189,9 @@ namespace RussianAICup2015Car.Sources.Physic {
             angle = car.Angle.AngleDeviation(sideNormal.Angle);
           }
 
-          bool isStrongParallel = Math.Abs(Vector.sincos(car.Angle).Dot(sideNormal)) < Math.Sin(Math.PI / 18);//10 degrees
-          isStrongParallel &= Math.Abs(physicCar.Dir.Dot(sideNormal)) < Math.Sin(Math.PI / 9);//10 degrees
-
           bool notCurrentTurnSide = null != needDirAngle && sideNormal.Dot(needDirAngle) < 0;
 
-          if (!isStrongParallel || notCurrentTurnSide) {
+          if (!checkStrongParallel(mapCrash) || notCurrentTurnSide) {
             moveResult.WheelTurn = car.WheelTurn - speedSign * Math.Sign(angle) * game.CarWheelTurnChangePerTick;
           } else {
             moveResult.WheelTurn = 0;
@@ -208,6 +206,24 @@ namespace RussianAICup2015Car.Sources.Physic {
           }
         }
       }
+    }
+
+    private bool checkStrongParallel(IPhysicEvent mapCrash) {
+      if (null == mapCrash) {
+        return false;
+      }
+
+      Tuple<Vector, Vector> crashInfo = mapCrash.infoCome as Tuple<Vector, Vector>;
+      if (null == crashInfo) {
+        return false;
+      }
+
+      Vector sideNormal = crashInfo.Item2;
+
+      bool isStrongParallel = Math.Abs(Vector.sincos(car.Angle).Dot(sideNormal)) < Math.Sin(Math.PI / 18);//10 degrees
+      isStrongParallel &= Math.Abs(mapCrash.CarCome.Dir.Dot(sideNormal)) < Math.Sin(Math.PI / 9);//10 degrees
+
+      return isStrongParallel;
     }
 
     /// Turn MapCrash
