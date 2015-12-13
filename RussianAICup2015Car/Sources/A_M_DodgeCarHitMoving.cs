@@ -23,11 +23,10 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       Vector selfPos = new Vector(self.Car.X, self.Car.Y);
       Vector enemyPos = new Vector(enemy.Car.X, enemy.Car.Y);
 
-      Vector distance = enemyPos - selfPos;
-      double angle = self.Car.Angle.AngleDeviation(distance.Angle);
+      double angle = self.Car.Angle.AngleDeviation((enemy.Pos - selfPos).Angle);
       double sign = Math.Sign(angle);
 
-      Vector center = selfPos + distance * 0.5;
+      Vector center = selfPos + (enemyPos - selfPos) * 0.5;
       Vector dir = new Vector(path[0].DirOut.X, path[0].DirOut.Y);
       Vector endPos = center + dir.PerpendicularRight() * sign * car.Height;
 
@@ -38,6 +37,18 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
 
       calculator.setupAngleReach(new Vector(dirMove.X, dirMove.Y));
       calculator.setupDefaultAction(endPos);
+
+      Dictionary<TilePos, TileDir[]> selfMap = new Dictionary<TilePos, TileDir[]>();
+      for (int i = 0; i <= 2; i++) {
+        if (path[i].DirIn == path[i].DirOut) {
+          selfMap.Add(path[i].Pos, new TileDir[2] { dirMove.PerpendicularLeft(), dirMove.PerpendicularRight() });
+        } else if (0 == i) {
+          selfMap.Add(path[i].Pos, new TileDir[1] { path[i].DirIn });
+        } else {
+          break;
+        }
+      }
+      calculator.setupSelfMapCrash(selfMap);
 
       Move needMove = calculator.calculateMove();
       move.EnginePower = needMove.EnginePower;
