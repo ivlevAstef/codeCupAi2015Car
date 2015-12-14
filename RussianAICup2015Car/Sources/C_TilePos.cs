@@ -1,13 +1,18 @@
 ﻿using System;
 
 namespace RussianAICup2015Car.Sources.Common {
-  public class TilePos : Point<int> {
+  public class TilePos {
     public static double TileSize;
 
-    public TilePos(int all) : base(all) { }
-    public TilePos(int x, int y) : base(x, y) { }
-    public TilePos(TilePos p) : base(p) { }
-    public TilePos(double x, double y) : base((int)(x / TileSize), (int)(y / TileSize)) {
+    public int X;
+    public int Y;
+
+    public TilePos(int all) { X = all; Y = all; }
+    public TilePos(int x, int y) { this.X = x; this.Y = y; }
+    public TilePos(TilePos p) { X = p.X; Y = p.Y; }
+    public TilePos(double x, double y) {
+      X = (int)(x / TileSize);
+      Y = (int)(y / TileSize);
     }
 
     public Vector ToVector(double anchorX, double anchorY) {

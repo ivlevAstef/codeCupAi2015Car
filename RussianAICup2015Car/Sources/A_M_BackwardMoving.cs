@@ -34,7 +34,8 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
 
       Vector carPos = new Vector(car.X, car.Y);
       Vector endPos = GetWayEnd(path[offset].Pos, TileDir.Zero);
-      endPos.set(car.X * Math.Abs(dir.X) + endPos.X * Math.Abs(dir.Y), car.Y * Math.Abs(dir.Y) + endPos.Y * Math.Abs(dir.X));
+      endPos.X = car.X * Math.Abs(dir.X) + endPos.X * Math.Abs(dir.Y);
+      endPos.Y = car.Y * Math.Abs(dir.Y) + endPos.Y * Math.Abs(dir.X);
       
 
       Physic.MovingCalculator calculator = new Physic.MovingCalculator();

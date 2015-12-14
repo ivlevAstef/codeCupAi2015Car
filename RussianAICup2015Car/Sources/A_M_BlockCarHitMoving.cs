@@ -46,7 +46,7 @@ namespace RussianAICup2015Car.Sources {
       List<PCar> enemies = new List<PCar>();
       foreach (Car iter in world.Cars) {
         Vector distance = new Vector(iter.X, iter.Y) - self.Pos;
-        if (!iter.IsTeammate && 0 == iter.ProjectileCount && distance.Dot(self.Dir) < 0) {
+        if (!iter.IsTeammate && 0 == iter.ProjectileCount && distance.Dot(self.Dir) < 0 && !iter.IsFinishedTrack) {
           enemies.Add(new PCar(iter, game));
         }
       }

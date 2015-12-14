@@ -2,16 +2,19 @@
 using System;
 
 namespace RussianAICup2015Car.Sources.Common {
-  public class TileDir : Point<int> {
+  public class TileDir {
     public static readonly TileDir Zero = new TileDir(0, 0);
     public static readonly TileDir Left = new TileDir(-1, 0);
     public static readonly TileDir Right = new TileDir(1, 0);
     public static readonly TileDir Up = new TileDir(0, -1);
     public static readonly TileDir Down = new TileDir(0, 1);
 
-    public TileDir(int all) : base(all) { }
-    public TileDir(int x, int y) : base(x, y) { }
-    public TileDir(TileDir p) : base(p) { }
+    public int X;
+    public int Y;
+
+    public TileDir(int all) { X = all; Y = all; }
+    public TileDir(int x, int y) { this.X = x; this.Y = y; }
+    public TileDir(TileDir p) { X = p.X; Y = p.Y; }
 
     public static TileDir TileDirByDirection(Direction directionType) {
       switch (directionType) {

@@ -1,12 +1,20 @@
 ﻿using System;
 
 namespace RussianAICup2015Car.Sources.Common {
-  public class Vector : Point<double> {
+  public class Vector {
     private static readonly double epsilon = 1.0e-9;
 
-    public Vector(double all) : base(all) { }
-    public Vector(double x, double y) : base(x, y) { }
-    public Vector(Vector p) : base(p) { }
+    public double X;
+    public double Y;
+
+    public Vector(double all) { X = all; Y = all; }
+    public Vector(double x, double y) { this.X = x; this.Y = y; }
+    public Vector(Vector p) { this.X = p.X; this.Y = p.Y; }
+
+    public void set(double x, double y) {
+      this.X = x;
+      this.Y = y;
+    }
 
     public static Vector sincos(double angle) {
       return new Vector(Math.Cos(angle), Math.Sin(angle)).Normalize();

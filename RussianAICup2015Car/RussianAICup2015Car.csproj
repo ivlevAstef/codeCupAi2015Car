@@ -78,7 +78,6 @@
     <Compile Include="Sources\P_PhysicEventsCalculator.cs" />
     <Compile Include="Sources\P_PhysicExtensions.cs" />
     <Compile Include="Sources\P_PhysicMoveCalculator.cs" />
-    <Compile Include="Sources\C_Point.cs" />
     <Compile Include="Sources\A_ShootingAction.cs" />
     <Compile Include="Sources\A_M_SnakeMoving.cs" />
     <Compile Include="Sources\A_M_StuckOutMoving.cs" />
