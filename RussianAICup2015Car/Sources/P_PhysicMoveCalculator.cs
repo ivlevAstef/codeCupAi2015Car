@@ -125,7 +125,7 @@ namespace RussianAICup2015Car.Sources.Physic {
           if (null != passageLine) {
             int speedReachTick = null != speedReach ? speedReach.TickCome : maxIterationCount;
 
-            if (speedReachTick > ticksCount + passageLine.TickCome) {
+            if (speedReachTick > 10 + ticksCount + passageLine.TickCome) {
               moveResult.IsBrake = car.Speed() > Constant.MinBrakeSpeed;
             }
           }
@@ -257,11 +257,9 @@ namespace RussianAICup2015Car.Sources.Physic {
         }
 
         pEvents.Remove(passageLineEvent);
-        pEvents.Add(new AngleReachEvent(needAngle));
-        PhysicEventsCalculator.calculateEvents(physicCar, new MoveToAngleFunction(needAngle), pEvents, moveToAddPointEventCheckEnd);
+        PhysicEventsCalculator.calculateEvents(physicCar, new MoveToAngleFunction(needAngle), pEvents, moveToAddPoint2EventCheckEnd);
 
-        if (pEvents.ComeContaints(PhysicEventType.MapCrash) || pEvents.ComeContaints(PhysicEventType.ObjectsCrash) ||
-           !pEvents.ComeContaints(PhysicEventType.AngleReach)) {
+        if (pEvents.ComeContaints(PhysicEventType.MapCrash) || pEvents.ComeContaints(PhysicEventType.ObjectsCrash)) {
           continue;
         }
 
@@ -277,8 +275,15 @@ namespace RussianAICup2015Car.Sources.Physic {
 
       return pEvents.ComeContaints(PhysicEventType.MapCrash) || 
         pEvents.ComeContaints(PhysicEventType.PassageLine) ||
-        pEvents.ComeContaints(PhysicEventType.AngleReach) || 
         pEvents.ComeContaints(PhysicEventType.ObjectsCrash);
+    }
+
+    private bool moveToAddPoint2EventCheckEnd(PCar physicCar, HashSet<IPhysicEvent> pEvents, int tick) {
+      if (tick > maxCheckCrashIterationCount) {
+        return true;
+      }
+
+      return pEvents.ComeContaints(PhysicEventType.MapCrash) || pEvents.ComeContaints(PhysicEventType.ObjectsCrash);
     }
 
     /// Turn MapCrash
