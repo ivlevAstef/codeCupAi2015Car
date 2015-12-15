@@ -4,19 +4,17 @@ using System.Collections.Generic;
 using System;
 using RussianAICup2015Car.Sources.Physic;
 
-namespace RussianAICup2015Car.Sources.Actions.Moving {
-  class DodgeCarHitMoving : MovingBase {
+namespace RussianAICup2015Car.Sources.Actions {
+  class DodgeCarHitMoving : AdditionalPoints {
     private const int MaxCheckTicks = 50;
 
-    private Tuple<PCar, PCar> hitInfo = null;
+    public override List<Vector> GetPoints() {
+      Tuple<PCar, PCar> hitInfo = hitInformation();
 
-    public override bool valid() {
-      hitInfo = hitInformation();
+      if (null == hitInfo) {
+        return null;
+      }
 
-      return null != hitInfo;
-    }
-
-    public override void execute(Move move) {
       PCar self = hitInfo.Item1;
       PCar enemy = hitInfo.Item2;
 
@@ -30,29 +28,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       Vector dir = new Vector(path[0].DirOut.X, path[0].DirOut.Y);
       Vector endPos = center + dir.PerpendicularRight() * sign * car.Height;
 
-      TileDir dirMove = path[0].DirOut;
-      Physic.MovingCalculator calculator = new Physic.MovingCalculator();
-      calculator.setupEnvironment(car, game, world);
-      calculator.setupMapInfo(dirMove, path[0].Pos, null);
-
-      calculator.setupAngleReach(new Vector(dirMove.X, dirMove.Y));
-      calculator.setupDefaultAction(endPos);
-
-      Dictionary<TilePos, TileDir[]> selfMap = new Dictionary<TilePos, TileDir[]>();
-      for (int i = 0; i <= 2; i++) {
-        if (path[i].DirIn == path[i].DirOut) {
-          selfMap.Add(path[i].Pos, new TileDir[2] { dirMove.PerpendicularLeft(), dirMove.PerpendicularRight() });
-        } else if (0 == i) {
-          selfMap.Add(path[i].Pos, new TileDir[1] { path[i].DirIn });
-        } else {
-          break;
-        }
-      }
-      calculator.setupSelfMapCrash(selfMap);
-
-      Move needMove = calculator.calculateMove();
-      move.EnginePower = needMove.EnginePower;
-      move.WheelTurn = needMove.WheelTurn;
+      return new List<Vector> { endPos };
     }
 
     private Tuple<PCar, PCar> hitInformation() {

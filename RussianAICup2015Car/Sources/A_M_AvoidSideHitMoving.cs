@@ -29,10 +29,6 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       double maxAngle = Math.Sin(Math.PI / 6);
 
       self.setEnginePower(1);
-      foreach (Physic.PCar enemy in enemies) {
-        enemy.setEnginePower(1);
-      }
-
       for (int i = 0; i < MaxCheckTicks; i++) {
         self.Iteration(1);
         foreach (Physic.PCar enemy in enemies) {

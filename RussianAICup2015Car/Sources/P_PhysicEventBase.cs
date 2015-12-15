@@ -19,6 +19,8 @@ namespace RussianAICup2015Car.Sources.Physic {
   public interface IPhysicEvent {
     PhysicEventType Type { get; }
 
+    IPhysicEvent Copy();
+
     bool Check(PCar car);
     object InfoForCheck { get; }
 
@@ -40,6 +42,8 @@ namespace RussianAICup2015Car.Sources.Physic {
     private PCar car = null;
     private int tick = 0;
     private object info = null;
+
+    public abstract IPhysicEvent Copy();
 
     public void SetCome(PCar car, int tick, object info = null) {
       this.car = car;

@@ -6,18 +6,22 @@ using RussianAICup2015Car.Sources.Common;
 
 namespace RussianAICup2015Car.Sources.Physic {
   public class PassageLineEvent : PhysicEventBase {
-    private Vector dir;
+    private Vector normal;
     private Vector pos;
 
-    public PassageLineEvent(Vector idealDir, Vector pos) {
-      this.dir = idealDir;
+    public PassageLineEvent(Vector normalOut, Vector pos) {
+      this.normal = normalOut;
       this.pos = pos;
     }
 
     public override PhysicEventType Type { get { return PhysicEventType.PassageLine; } }
 
     public override bool Check(PCar car) {
-      return Math.Sign((car.Pos - pos).Cross(dir)) != Math.Sign((car.LastPos - pos).Cross(dir));
+      return (car.Pos - pos).Dot(normal) > 0;
+    }
+
+    public override IPhysicEvent Copy() {
+      return new PassageLineEvent(normal, pos);
     }
   }
 
@@ -44,12 +48,18 @@ namespace RussianAICup2015Car.Sources.Physic {
       double angleDeviation = angle.AngleDeviation(car.Angle);
       return Math.Abs(angleDeviation) < accuracy && Math.Abs(car.WheelTurn) < wheelTurnChangePerTick && car.AngularSpeed < rotationFrictionFactor;
     }
+
+    public override IPhysicEvent Copy() {
+      return new AngleReachEvent(angle, accuracy);
+    }
   }
 
   public class SpeedReachEvent : PhysicEventBase {
+    private double accuracyRadiance;
     private double accuracy;
 
     public SpeedReachEvent(double accuracyAngleRad = Math.PI/18) {
+      this.accuracyRadiance = accuracyAngleRad;
       this.accuracy = Math.Sin(accuracyAngleRad);
     }
 
@@ -57,6 +67,10 @@ namespace RussianAICup2015Car.Sources.Physic {
 
     public override bool Check(PCar car) {
       return Math.Abs(car.Speed.Normalize().Cross(car.Dir)) < accuracy;
+    }
+
+    public override IPhysicEvent Copy() {
+      return new SpeedReachEvent(accuracyRadiance);
     }
   }
 
@@ -90,6 +104,10 @@ namespace RussianAICup2015Car.Sources.Physic {
       }
 
       return false;
+    }
+
+    public override IPhysicEvent Copy() {
+      return new MapCrashEvent();
     }
   }
 
@@ -127,6 +145,10 @@ namespace RussianAICup2015Car.Sources.Physic {
 
       return false;
     }
+
+    public override IPhysicEvent Copy() {
+      return new ObjectsCrashEvent(collisionObjects);
+    }
   }
 
   public class IntersectOilStickEvent : PhysicEventBase {
@@ -148,6 +170,10 @@ namespace RussianAICup2015Car.Sources.Physic {
       }
       return false;
     }
+
+    public override IPhysicEvent Copy() {
+      return new IntersectOilStickEvent(world);
+    }
   }
 
   public class PassageTileEvent : PhysicEventBase {
@@ -163,6 +189,10 @@ namespace RussianAICup2015Car.Sources.Physic {
       TilePos carPos = new TilePos(car.Pos.X, car.Pos.Y);
       return carPos == tile;
     }
+
+    public override IPhysicEvent Copy() {
+      return new PassageTileEvent(tile);
+    }
   }
 
   public class OutFromTileEvent : PhysicEventBase {
@@ -177,6 +207,10 @@ namespace RussianAICup2015Car.Sources.Physic {
     public override bool Check(PCar car) {
       TilePos carPos = new TilePos(car.Pos.X, car.Pos.Y);
       return carPos != tile;
+    }
+
+    public override IPhysicEvent Copy() {
+      return new OutFromTileEvent(tile);
     }
   }
 }

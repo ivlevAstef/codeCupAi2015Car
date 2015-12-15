@@ -28,16 +28,17 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       { ActionType.Around, new AroundMoving()},
       { ActionType.StuckOut, new StuckOutMoving()},
 
-      { ActionType.MoveToBonus, new BonusMoving()},
-      //{ ActionType.Overtake, new A_OvertakeAction()},
       { ActionType.AvoidSideHit, new AvoidSideHitMoving()},
-      { ActionType.DodgeHit, new DodgeCarHitMoving()},
-      { ActionType.BlockBackEnemy, new BlockCarHitMoving()},
-      
 
       { ActionType.Shooting, new ShootingAction()},
       { ActionType.OilSpill, new OilSpillAction()},
       { ActionType.UseNitro, new UseNitroAction()},
+    };
+
+    private List<AdditionalPoints> additionalPointsActions = new List<AdditionalPoints> {
+      new BlockCarHitMoving(),
+      new BonusMoving(),
+      new DodgeCarHitMoving()
     };
 
     private ActionType[] baseActions = new ActionType[] {
@@ -77,6 +78,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
         return;
       }
 
+      callAction.setupAdditionalPoints(calculateAdditionalPoints());
       callAction.execute(move);
 
       foreach (ActionType actionType in callAction.GetParallelsActions()) {
@@ -86,6 +88,19 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       }
 
       Logger.instance.Debug("Car Speed: {0:F} Car Angle:{1:F3}", car.Speed(), car.Angle);
+    }
+
+    private List<Vector> calculateAdditionalPoints() {
+      List<Vector> result = new List<Vector>();
+
+      foreach (AdditionalPoints action in additionalPointsActions) {
+        List<Vector> points = action.GetPoints();
+        if (null != points) {
+          result.AddRange(points);
+        }
+      }
+
+      return result;
     }
 
     private void setupEnvironments(Car car, World world, Game game, Move move) {
@@ -109,7 +124,11 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       path.SetupEnvironment(car, world, game);
 
       foreach (IAction action in actions.Values) {
-        action.setupEnvironment(car, world, game, map, path);
+        action.setupEnvironment(car, world, game, path);
+      }
+
+      foreach (AdditionalPoints action in additionalPointsActions) {
+        action.setupEnvironment(car, world, game, path);
       }
     }
   }

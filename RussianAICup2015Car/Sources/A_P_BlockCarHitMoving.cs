@@ -3,42 +3,29 @@ using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
 using System.Collections.Generic;
 using System;
 using RussianAICup2015Car.Sources.Physic;
-using RussianAICup2015Car.Sources.Actions.Moving;
+using RussianAICup2015Car.Sources.Actions;
 
-namespace RussianAICup2015Car.Sources {
-  class BlockCarHitMoving : MovingBase {
+namespace RussianAICup2015Car.Sources.Actions {
+  class BlockCarHitMoving : AdditionalPoints {
     private const int MaxCheckTicks = 30;
 
-    private Tuple<PCar, PCar> hitInfo = null;
-
-    public override bool valid() {
+    public override List<Vector> GetPoints() {
       if (car.Durability < 0.25) {
-        return false;
+        return null;
       }
 
-      hitInfo = hitInformation();
+      Tuple<PCar, PCar> hitInfo = hitInformation();
+      if (null == hitInfo) {
+        return null;
+      }
 
-      return null != hitInfo;
-    }
-
-    public override void execute(Move move) {
       PCar self = hitInfo.Item1;
       PCar enemy = hitInfo.Item2;
 
       Vector distance = self.Pos - enemy.Pos;
       Vector endPos = enemy.Pos + enemy.Dir * distance.Length;
 
-      TileDir dirMove = path[0].DirOut;
-      Physic.MovingCalculator calculator = new Physic.MovingCalculator();
-      calculator.setupEnvironment(car, game, world);
-      calculator.setupMapInfo(dirMove, path[0].Pos, null);
-
-      calculator.setupAngleReach(new Vector(dirMove.X, dirMove.Y));
-      calculator.setupDefaultAction(endPos);
-
-      Move needMove = calculator.calculateMove();
-      move.EnginePower = needMove.EnginePower;
-      move.WheelTurn = needMove.WheelTurn;
+      return new List<Vector> { endPos };
     }
 
     private Tuple<PCar, PCar> hitInformation() {

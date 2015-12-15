@@ -27,10 +27,10 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       calculator.setupMapInfo(dirMove, path[0].Pos, path[1 + offset].Pos);
       calculator.setupDefaultAction(GetWayEnd(path[1 + offset].Pos, dirEnd.Negative()));
 
-      Vector endDir = new Vector(dirEnd.X, dirEnd.Y);
+      Vector endDir = new Vector(5 * dirEnd.X + dirMove.X, 5 * dirEnd.Y + dirMove.Y).Normalize();
 
       calculator.setupAngleReach(endDir);
-      calculator.setupPassageLine(GetWayEnd(path[1 + offset].Pos, dirEnd), endDir);
+      calculator.setupPassageLine(GetWayEnd(path[1 + offset].Pos, dirEnd * 2 + dirMove, 0.6), new Vector(dirMove.X, dirMove.Y));
 
       Dictionary<TilePos, TileDir[]> selfMap = new Dictionary<TilePos, TileDir[]>();
       for (int i = 0; i <= offset; i++) {
@@ -39,6 +39,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       selfMap.Add(path[1 + offset].Pos, new TileDir[1] { dirMove.Negative() + dirEnd });
 
       calculator.setupSelfMapCrash(selfMap);
+      calculator.setupAdditionalPoints(this.additionalPoints);
 
       Move needMove = calculator.calculateTurn(endDir);
       move.IsBrake = needMove.IsBrake;
@@ -47,18 +48,10 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
     }
 
     public override List<ActionType> GetParallelsActions() {
-      List<ActionType> result = new List<ActionType>() {
+      return new List<ActionType>() {
         ActionType.Shooting,
         ActionType.OilSpill,
       };
-
-      if (0 != offset) {
-        result.Add(ActionType.MoveToBonus);
-        result.Add(ActionType.BlockBackEnemy);
-        result.Add(ActionType.DodgeHit);
-      }
-
-      return result;
     }
   }
 }

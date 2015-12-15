@@ -32,6 +32,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
         }
       }
       calculator.setupSelfMapCrash(selfMap);
+      calculator.setupAdditionalPoints(this.additionalPoints);
 
       Move needMove = calculator.calculateMove();
       move.IsBrake = needMove.IsBrake;
@@ -43,9 +44,6 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       List<ActionType> result = new List<ActionType>() {
         ActionType.PreTurn,
         ActionType.Shooting,
-        ActionType.MoveToBonus,
-        ActionType.BlockBackEnemy,
-        ActionType.DodgeHit
       };
 
       Vector dir = new Vector(path[0].DirOut.X, path[0].DirOut.Y);
@@ -74,6 +72,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
 
     private Vector EndSidePos() {
       TilePos pos = path[0].Pos;
+      TilePos lastPos = pos;
       TileDir dir = path[0].DirOut;
       TileDir normal = new TileDir(0);
 
@@ -87,11 +86,13 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
           normal = path[i].DirOut;
           break;
         }
+
+        lastPos = pos;
         pos = path[i].Pos;
         dir = path[i].DirIn;
       }
 
-      return EndSidePos(pos, dir, normal.Negative());
+      return EndSidePos(lastPos, dir, normal.Negative());
     }
 
     private Vector EndSidePos(TilePos pos, TileDir dir, TileDir normal) {

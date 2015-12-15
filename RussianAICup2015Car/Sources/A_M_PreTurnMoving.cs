@@ -28,7 +28,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       Vector endDir = new Vector(dirEnd.X + dirMove.X, dirEnd.Y + dirMove.Y).Normalize();
 
       calculator.setupAngleReach(endDir);
-      calculator.setupPassageLine(GetWayEnd(path[2].Pos, TileDir.Zero), new Vector(dirEnd.X, dirEnd.Y));
+      calculator.setupPassageLine(GetWayEnd(path[2].Pos, TileDir.Zero), new Vector(dirMove.X, dirMove.Y));
 
       Dictionary<TilePos, TileDir[]> selfMap = new Dictionary<TilePos, TileDir[]>();
       for (int i = 0; i < 2; i++) {
@@ -37,6 +37,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       selfMap.Add(path[2].Pos, new TileDir[2] { dirEnd + dirMove.Negative(), dirEnd });
       
       calculator.setupSelfMapCrash(selfMap);
+      calculator.setupAdditionalPoints(this.additionalPoints);
 
       Move needMove = calculator.calculateTurn(endDir);
       move.IsBrake = needMove.IsBrake;
