@@ -91,11 +91,11 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       Logger.instance.Debug("Car Speed: {0:F} Car Angle:{1:F3}", car.Speed(), car.Angle);
     }
 
-    private List<Vector> calculateAdditionalPoints() {
-      List<Vector> result = new List<Vector>();
+    private List<Tuple<Vector, double>> calculateAdditionalPoints() {
+      List<Tuple<Vector, double>> result = new List<Tuple<Vector, double>>();
 
       foreach (AdditionalPoints action in additionalPointsActions) {
-        List<Vector> points = action.GetPoints();
+        List<Tuple<Vector, double>> points = action.GetPoints();
         if (null != points) {
           result.AddRange(points);
         }
@@ -112,7 +112,8 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
 
       AngleReachEvent.setupEnvironment(game);
 
-      MoveToAngleFunction.setupEnvironment(world, game);
+      MoveToAngleFunction.setupEnvironment(world);
+      MoveToPoint.setupEnvironment(world);
       
       PhysicExtensions.setupEnvironment(game);
       PhysicEventsCalculator.setupEnvironment(game, world);

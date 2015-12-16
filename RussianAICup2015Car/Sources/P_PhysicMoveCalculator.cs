@@ -20,7 +20,7 @@ namespace RussianAICup2015Car.Sources.Physic {
     private AngleReachEvent angleReachEvent = null;
     private ObjectsCrashEvent moverSelfMapCrashEvent = null;
 
-    private List<Vector> additionalPoints = null;
+    private List<Tuple<Vector, double>> additionalPoints = null;
     private Vector defaultPos = null;
     private Vector needPos = null;
     private TileDir dirMove = null;
@@ -68,7 +68,7 @@ namespace RussianAICup2015Car.Sources.Physic {
       this.enginePowerSign = use ? -1 : 1;
     }
 
-    public void setupAdditionalPoints(List<Vector> additionalPoints) {
+    public void setupAdditionalPoints(List<Tuple<Vector, double>> additionalPoints) {
       this.additionalPoints = additionalPoints;
     }
 
@@ -245,7 +245,9 @@ namespace RussianAICup2015Car.Sources.Physic {
       }
 
       int minTicks = int.MaxValue;
-      foreach (Vector point in additionalPoints) {
+      foreach (Tuple<Vector, double> data in additionalPoints) {
+        Vector point = data.Item1;
+
         IPhysicEvent passageLineEvent = new PassageLineEvent(Vector.sincos(needAngle), point, 0);
         HashSet<IPhysicEvent> pEvents = new HashSet<IPhysicEvent> {
           new MapCrashEvent(),
@@ -264,7 +266,7 @@ namespace RussianAICup2015Car.Sources.Physic {
           continue;
         }
 
-        if (passageLineEvent.CarCome.Pos.GetDistanceTo(point) > game.CarHeight * 0.5) {
+        if (passageLineEvent.CarCome.Pos.GetDistanceTo(point) > data.Item2) {
           continue;
         }
 

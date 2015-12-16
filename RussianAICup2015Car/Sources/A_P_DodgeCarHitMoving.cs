@@ -8,7 +8,7 @@ namespace RussianAICup2015Car.Sources.Actions {
   class DodgeCarHitMoving : AdditionalPoints {
     private const int MaxCheckTicks = 50;
 
-    public override List<Vector> GetPoints() {
+    public override List<Tuple<Vector, double>> GetPoints() {
       Tuple<PCar, PCar> hitInfo = hitInformation();
 
       if (null == hitInfo) {
@@ -28,7 +28,7 @@ namespace RussianAICup2015Car.Sources.Actions {
       Vector dir = new Vector(path[0].DirOut.X, path[0].DirOut.Y);
       Vector endPos = center + dir.PerpendicularRight() * sign * car.Height;
 
-      return new List<Vector> { endPos };
+      return new List<Tuple<Vector, double>> { new Tuple<Vector,double>(endPos, car.Height) };
     }
 
     private Tuple<PCar, PCar> hitInformation() {

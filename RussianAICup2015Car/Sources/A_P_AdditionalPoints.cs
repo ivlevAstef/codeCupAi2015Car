@@ -18,6 +18,6 @@ namespace RussianAICup2015Car.Sources.Actions {
       this.path = path;
     }
     
-    public abstract List<Vector> GetPoints();
+    public abstract List<Tuple<Vector,double>> GetPoints();
   }
 }

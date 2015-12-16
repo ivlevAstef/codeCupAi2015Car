@@ -6,8 +6,8 @@ using RussianAICup2015Car.Sources.Physic;
 
 namespace RussianAICup2015Car.Sources.Actions {
   class ShootingAction : BaseAction {
-    private static readonly int maxTireRebound = 1;
-    private static readonly int tireCalculateTicks = 40;
+    private static readonly int maxTireRebound = 0;
+    private static readonly int tireCalculateTicks = 60;
 
     public override bool valid() {
       if (0 < car.RemainingProjectileCooldownTicks || car.ProjectileCount <= 0) {
@@ -145,8 +145,11 @@ namespace RussianAICup2015Car.Sources.Actions {
               return false;
             }
 
-            double angle = tire.Speed.Normalize().Cross(collisionNormal);
-            return angle < maxAngle && Math.Abs(physicCar.Car.AngularSpeed) > 0.01 && physicCar.Car.Durability > 1.0e-9 && !physicCar.Car.IsFinishedTrack;
+            double angleDot = Math.Abs(tire.Speed.Normalize().Dot(collisionNormal));
+            double angleCross = Math.Abs(tire.Speed.Normalize().Cross(collisionNormal));
+            bool correctFireAngle = (Math.Abs(tire.Speed.Dot(physicCar.Speed)) > 70 && angleDot > 0.5) || 
+                                    (Math.Abs(tire.Speed.Cross(physicCar.Speed)) > 70 && angleCross > 0.5);
+            return correctFireAngle && physicCar.Car.Durability > 1.0e-9 && !physicCar.Car.IsFinishedTrack;
           }
         }
 

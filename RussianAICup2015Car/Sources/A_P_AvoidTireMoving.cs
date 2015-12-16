@@ -9,14 +9,14 @@ namespace RussianAICup2015Car.Sources.Actions {
   class AvoidTireMoving : AdditionalPoints {
     private const int MaxCheckTicks = 50;
 
-    public override List<Vector> GetPoints() {
+    public override List<Tuple<Vector, double>> GetPoints() {
       List<Tuple<PCar, PTire>> hitInforamtions = hitInformation();
 
       if (null == hitInforamtions || 0 == hitInforamtions.Count) {
         return null;
       }
 
-      List<Vector> result = new List<Vector>();
+      List<Tuple<Vector, double>> result = new List<Tuple<Vector, double>>();
       foreach (Tuple<PCar, PTire> hitInfo in hitInforamtions) {
         PCar self = hitInfo.Item1;
         PTire tire = hitInfo.Item2;
@@ -31,7 +31,7 @@ namespace RussianAICup2015Car.Sources.Actions {
         Vector dir = new Vector(path[0].DirOut.X, path[0].DirOut.Y);
         Vector endPos = center + dir.PerpendicularRight() * sign * car.Height;
 
-        result.Add(endPos);
+        result.Add(new Tuple<Vector,double>(endPos, car.Height));
       }
 
       return result;

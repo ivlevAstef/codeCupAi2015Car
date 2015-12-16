@@ -11,11 +11,9 @@ namespace RussianAICup2015Car.Sources.Physic {
 
   public class MoveToAngleFunction : IPhysicMoveFunction {
     private static World world = null;
-    private static double rotationFrictionFactor = 0;
 
-    public static void setupEnvironment(World lWorld, Game game) {
+    public static void setupEnvironment(World lWorld) {
       world = lWorld;
-      rotationFrictionFactor = game.CarRotationFrictionFactor;
     }
 
     private double angle;
@@ -42,20 +40,26 @@ namespace RussianAICup2015Car.Sources.Physic {
   }
 
   public class MoveToPoint : IPhysicMoveFunction {
-    private static double rotationFrictionFactor = 0;
+    private static World world = null;
 
-    public static void setupEnvironment(World lWorld, Game game) {
-      rotationFrictionFactor = game.CarRotationFrictionFactor;
+    public static void setupEnvironment(World lWorld) {
+      world = lWorld;
     }
 
     private Vector point;
+    private IntersectOilStickEvent intersecOildStickEvent;
 
     public MoveToPoint(Vector point) {
       this.point = point;
+      intersecOildStickEvent = new IntersectOilStickEvent(world);
     }
 
     public void Iteration(PCar car, int iterationCount) {
       for (int i = 0; i < iterationCount; i++) {
+        if (intersecOildStickEvent.Check(car)) {
+          car.traveledOnOil(intersecOildStickEvent.InfoForCheck as OilSlick);
+        }
+
         double angle = (point - car.Pos).Angle;
 
         double speedSign = Math.Sign(car.Dir.Dot(car.Speed));

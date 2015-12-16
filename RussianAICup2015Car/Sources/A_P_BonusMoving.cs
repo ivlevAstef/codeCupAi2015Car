@@ -6,7 +6,7 @@ using RussianAICup2015Car.Sources.Physic;
 
 namespace RussianAICup2015Car.Sources.Actions {
   class BonusMoving : AdditionalPoints {
-    public override List<Vector> GetPoints() {
+    public override List<Tuple<Vector, double>> GetPoints() {
       Bonus findedBonus = findBonus();
       if (null == findedBonus) {
         return null;
@@ -14,7 +14,9 @@ namespace RussianAICup2015Car.Sources.Actions {
 
       TileDir dirMove = path[0].DirOut;
 
-      return new List<Vector> { bonusEndPos(findedBonus, dirMove) };
+      return new List<Tuple<Vector, double>> { 
+        new Tuple<Vector,double>(bonusEndPos(findedBonus, dirMove), car.Height * 0.5)
+      };
     }
 
     private Vector bonusEndPos(Bonus bonus, TileDir dirMove) {
@@ -24,7 +26,7 @@ namespace RussianAICup2015Car.Sources.Actions {
       Vector perpendicular = new Vector(dirMove.X, dirMove.Y).Perpendicular();
       double sign = Math.Sign((endPos - center).Dot(perpendicular));
 
-      endPos = endPos - perpendicular * (sign * game.CarHeight * 0.5);
+      endPos = endPos - perpendicular * (sign * game.BonusSize * 0.5);
 
       return endPos;
     }

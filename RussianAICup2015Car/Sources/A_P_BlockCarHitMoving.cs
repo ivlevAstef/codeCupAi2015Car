@@ -9,7 +9,7 @@ namespace RussianAICup2015Car.Sources.Actions {
   class BlockCarHitMoving : AdditionalPoints {
     private const int MaxCheckTicks = 30;
 
-    public override List<Vector> GetPoints() {
+    public override List<Tuple<Vector, double>> GetPoints() {
       if (car.Durability < 0.25) {
         return null;
       }
@@ -25,7 +25,7 @@ namespace RussianAICup2015Car.Sources.Actions {
       Vector distance = self.Pos - enemy.Pos;
       Vector endPos = enemy.Pos + enemy.Dir * distance.Length;
 
-      return new List<Vector> { endPos };
+      return new List<Tuple<Vector, double>> { new Tuple<Vector,double>(endPos, car.Height * 0.5) };
     }
 
     private Tuple<PCar, PCar> hitInformation() {
