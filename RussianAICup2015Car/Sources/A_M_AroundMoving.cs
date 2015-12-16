@@ -31,10 +31,10 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       calculator.setupMapInfo(dirMove, path[0].Pos, path[1 + offset].Pos);
       calculator.setupDefaultAction(GetWayEnd(endTile, dirEnd.Negative() + dirMove.Negative(), 1.0));
 
-      Vector endDir = new Vector(dirEnd.X, dirEnd.Y).Normalize();
+      Vector endDir = new Vector(dirEnd.X - dirMove.X, dirEnd.Y - dirMove.Y).Normalize();
 
       calculator.setupAngleReach(endDir);
-      calculator.setupPassageLine(GetWayEnd(endTile, dirEnd), new Vector(dirMove.X, dirMove.Y).Normalize(), 0.75);
+      calculator.setupPassageLine(GetWayEnd(endTile, dirEnd), new Vector(dirMove.X, dirMove.Y), 0.75);
 
       Dictionary<TilePos, TileDir[]> selfMap = new Dictionary<TilePos, TileDir[]>();
       for (int i = 0; i <= offset; i++) {

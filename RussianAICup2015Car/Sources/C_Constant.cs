@@ -4,8 +4,8 @@ using System.Collections.Generic;
 
 namespace RussianAICup2015Car.Sources.Common {
   public static class Constant {
-    public static readonly int PathMaxDepth = 6;
-    public static readonly double MinBrakeSpeed = 10;
+    public static readonly int PathMaxDepth = 8;
+    public static readonly double MinBrakeSpeed = 12;
 
     public static double BonusPriority(Bonus bonus, Car car, bool useDistance) {
       Dictionary<BonusType, double> priority = new Dictionary<BonusType, double> {

@@ -61,5 +61,21 @@ namespace RussianAICup2015Car.Sources.Physic {
 
       return normal.Normalize();
     }
+
+    public static double WheelTurnForEndZeroWheelTurn(this PCar car, double finalAngle, double sign) {
+      PCar physicCar = new PCar(car);
+      int ticks = (int)Math.Abs(Math.Round(physicCar.WheelTurn / game.CarWheelTurnChangePerTick));
+
+      physicCar.setWheelTurn(0);
+      physicCar.Iteration(ticks);
+
+      double angleDeviation = finalAngle.AngleDeviation(physicCar.Angle);
+
+      if (Math.Abs(angleDeviation) < game.CarRotationFrictionFactor) {
+        return 0;
+      }
+
+      return car.WheelTurn + sign * game.CarWheelTurnChangePerTick * Math.Sign(angleDeviation);
+    }
   }
 }

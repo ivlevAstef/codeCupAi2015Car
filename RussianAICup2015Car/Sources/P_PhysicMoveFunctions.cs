@@ -32,14 +32,9 @@ namespace RussianAICup2015Car.Sources.Physic {
           car.traveledOnOil(intersecOildStickEvent.InfoForCheck as OilSlick);
         }
 
-        PCar zeroWheelTurn = car.GetZeroWheelTurnCar();
-        double angleDeviation = angle.AngleDeviation(zeroWheelTurn.Angle);
-
-        if (Math.Abs(angleDeviation) < rotationFrictionFactor) {
-          car.setWheelTurn(0);
-        } else {
-          car.setWheelTurn(Math.Sign(angleDeviation));
-        }
+        double speedSign = Math.Sign(car.Dir.Dot(car.Speed));
+        double wheelTurn = car.WheelTurnForEndZeroWheelTurn(angle, speedSign);
+        car.setWheelTurn(wheelTurn);
 
         car.Iteration(1);
       }
@@ -63,14 +58,9 @@ namespace RussianAICup2015Car.Sources.Physic {
       for (int i = 0; i < iterationCount; i++) {
         double angle = (point - car.Pos).Angle;
 
-        PCar zeroWheelTurn = car.GetZeroWheelTurnCar();
-        double angleDeviation = angle.AngleDeviation(zeroWheelTurn.Angle);
-
-        if (Math.Abs(angleDeviation) < rotationFrictionFactor) {
-          car.setWheelTurn(0);
-        } else {
-          car.setWheelTurn(Math.Sign(angleDeviation));
-        }
+        double speedSign = Math.Sign(car.Dir.Dot(car.Speed));
+        double wheelTurn = car.WheelTurnForEndZeroWheelTurn(angle, speedSign);
+        car.setWheelTurn(wheelTurn);
 
         car.Iteration(1);
       }
