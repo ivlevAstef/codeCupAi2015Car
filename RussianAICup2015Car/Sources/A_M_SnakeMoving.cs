@@ -32,7 +32,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       Vector endDir = new Vector(dirEnd.X + dirMove.X, dirEnd.Y + dirMove.Y).Normalize();
 
       calculator.setupAngleReach(endDir);
-      calculator.setupPassageLine(endPos, new Vector(dirMove.X - dirEnd.X, dirMove.Y - dirEnd.Y).Normalize(), 0.45);
+      calculator.setupPassageLine(endPos, new Vector(dirMove.X - dirEnd.X, dirMove.Y - dirEnd.Y).Normalize(), 0.55);
 
       Dictionary<TilePos, TileDir[]> selfMap = new Dictionary<TilePos, TileDir[]>();
       for (int i = 0; i <= offset + 1; i++) {

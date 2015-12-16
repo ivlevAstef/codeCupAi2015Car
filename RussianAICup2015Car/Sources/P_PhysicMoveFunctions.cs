@@ -47,10 +47,12 @@ namespace RussianAICup2015Car.Sources.Physic {
     }
 
     private Vector point;
+    private double finalAngle;
     private IntersectOilStickEvent intersecOildStickEvent;
 
-    public MoveToPoint(Vector point) {
+    public MoveToPoint(Vector point, double finalAngle) {
       this.point = point;
+      this.finalAngle = finalAngle;
       intersecOildStickEvent = new IntersectOilStickEvent(world);
     }
 
@@ -60,10 +62,8 @@ namespace RussianAICup2015Car.Sources.Physic {
           car.traveledOnOil(intersecOildStickEvent.InfoForCheck as OilSlick);
         }
 
-        double angle = (point - car.Pos).Angle;
-
         double speedSign = Math.Sign(car.Dir.Dot(car.Speed));
-        double wheelTurn = car.WheelTurnForEndZeroWheelTurn(angle, speedSign);
+        double wheelTurn = car.WheelTurnForEndZeroWheelTurnToPoint(point, finalAngle, speedSign);
         car.setWheelTurn(wheelTurn);
 
         car.Iteration(1);
