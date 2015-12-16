@@ -64,6 +64,7 @@
     </Compile>
     <Compile Include="Runner.cs" />
     <Compile Include="Sources\A_M_AvoidSideHitMoving.cs" />
+    <Compile Include="Sources\A_P_AvoidTireMoving.cs" />
     <Compile Include="Sources\A_P_BlockCarHitMoving.cs" />
     <Compile Include="Sources\A_P_DodgeCarHitMoving.cs" />
     <Compile Include="Sources\A_P_AdditionalPoints.cs" />
@@ -105,6 +106,7 @@
     <Compile Include="Sources\A_M_TurnMoving.cs" />
     <Compile Include="Sources\A_UseNitroAction.cs" />
     <Compile Include="Sources\P_PhysicMoveFunctions.cs" />
+    <Compile Include="Sources\P_PhysicTire.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

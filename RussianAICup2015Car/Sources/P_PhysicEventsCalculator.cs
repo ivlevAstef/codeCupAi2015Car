@@ -20,6 +20,7 @@ namespace RussianAICup2015Car.Sources.Physic {
 
     public static void calculateEvents(PCar physicCar, IPhysicMoveFunction moveFunc, HashSet<IPhysicEvent> pEvents, CheckCalculateEnd checkEnd) {
       for (int tick = 0; tick < maxSaveIterationCount; tick++) {
+        moveFunc.Iteration(physicCar, 1);
 
         foreach (IPhysicEvent pEvent in pEvents) {
           if (!pEvent.IsCome && pEvent.Check(physicCar)) {
@@ -30,8 +31,6 @@ namespace RussianAICup2015Car.Sources.Physic {
         if (checkEnd(physicCar, pEvents, tick)) {
           return;
         }
-
-        moveFunc.Iteration(physicCar, 1);
       }
 
       Logger.instance.Assert(false, "Please check delegate: CheckCalculateEnd.");

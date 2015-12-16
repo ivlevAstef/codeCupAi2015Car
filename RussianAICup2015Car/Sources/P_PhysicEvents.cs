@@ -135,7 +135,7 @@ namespace RussianAICup2015Car.Sources.Physic {
         }
 
         Vector normal = info.NormalObj1;
-        if (car.Speed.Dot(normal) > 0) {
+        if (car.Dir.Dot(normal) > -1.0e-3) {
           continue;
         }
 
@@ -175,7 +175,7 @@ namespace RussianAICup2015Car.Sources.Physic {
         }
 
         Vector normal = info.NormalObj1;
-        if (car.Speed.Dot(normal) > 0) {
+        if (car.Dir.Dot(normal) > -1.0e-3) {
           continue;
         }
 

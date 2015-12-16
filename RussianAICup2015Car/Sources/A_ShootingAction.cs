@@ -117,20 +117,17 @@ namespace RussianAICup2015Car.Sources.Actions {
 
       PCar ignored = self;
 
-      Vector tirePos = self.Pos;
-      Vector tireSpd = self.Dir * game.TireInitialSpeed;
-      double minTireSpeed = game.TireInitialSpeed * game.TireDisappearSpeedFactor;
+      PTire tire = new PTire(self.Pos, self.Dir * game.TireInitialSpeed, game);
 
       int tireRebound = maxTireRebound;
       for (int i = 0; i < tireCalculateTicks ; i++) {
-        Vector lastTirePos = tirePos;
-        tirePos += tireSpd;
+        tire.Iteration(1);
 
         foreach (PCar physicCar in their) {
           physicCar.Iteration(1);
 
           Vector collisionNormal = null;
-          if (tireCollisionWithCar(tirePos, physicCar, out collisionNormal, 2)) {
+          if (tireCollisionWithCar(tire.Pos, physicCar, out collisionNormal, 2)) {
             if (ignored == physicCar) {
               continue;
             }
@@ -143,24 +140,24 @@ namespace RussianAICup2015Car.Sources.Actions {
           physicCar.Iteration(1);
 
           Vector collisionNormal = null;
-          if (tireCollisionWithCar(tirePos, physicCar, out collisionNormal, 0.25)) {
+          if (tireCollisionWithCar(tire.Pos, physicCar, out collisionNormal, 0.25)) {
             if (null == collisionNormal) {
               return false;
             }
 
-            double angle = tireSpd.Normalize().Cross(collisionNormal);
+            double angle = tire.Speed.Normalize().Cross(collisionNormal);
             return angle < maxAngle && Math.Abs(physicCar.Car.AngularSpeed) > 0.01 && physicCar.Car.Durability > 1.0e-9 && !physicCar.Car.IsFinishedTrack;
           }
         }
 
-        Vector collisionNormalWithMap = tireCollisionWithMap(tirePos, lastTirePos);
+        Vector collisionNormalWithMap = tireCollisionWithMap(tire.Pos, tire.LastPos);
         if (null != collisionNormalWithMap) {
           ignored = null;
-          tireSpd = calcTireSpeedAfterKick(tireSpd, collisionNormalWithMap);
+          tire.HitTireWitMap(collisionNormalWithMap);
           tireRebound--;
         }
 
-        if (tireSpd.Length < minTireSpeed || tireRebound < 0) {
+        if (!tire.Valid() || tireRebound < 0) {
           return false;
         }
       }
@@ -201,20 +198,6 @@ namespace RussianAICup2015Car.Sources.Actions {
 
       normal = null;
       return false;
-    }
-
-    private Vector calcTireSpeedAfterKick(Vector speed, Vector normal) {
-      return normal.Negative() * (2 * speed.Dot(normal)) + speed;
-
-      /*const double momentumTransferFactor = 1;
-      double denominatorC = (speed.Negative().Cross(normal) / game.AngularMass!!!);
-      Vector denominatorV = speed.Perpendicular() * denominatorC;
-
-      double denominator = (1/game.TireMass) + normal.Dot(denominatorV);
-      double impulseChange = - (1 + momentumTransferFactor) * speed.Dot(normal) / denominator;
-      Vector vectorChange = normal * (impulseChange / game.TireMass);
-
-      return speed + vectorChange;*/
     }
   }
 }

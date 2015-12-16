@@ -9,7 +9,7 @@ namespace RussianAICup2015Car.Sources.Physic {
     private static readonly int maxCheckRotateIterationCount = 80;
     private static readonly int maxIterationCount = 180;
     private static readonly int maxCheckCrashIterationCount = 36;//800/22 = 36
-    private static readonly int maxCheckMoveCrashIterationCount = 50;
+    private static readonly int maxCheckMoveCrashIterationCount = 60;
 
     private Car car;
     private Game game;
@@ -102,7 +102,7 @@ namespace RussianAICup2015Car.Sources.Physic {
 
       HashSet<IPhysicEvent> events = calculateMoveEvents(physicCar);
 
-      if (events.ComeContaints(PhysicEventType.MapCrash)) {
+      if (events.ComeContaints(PhysicEventType.MapCrash) || events.ComeContaints(PhysicEventType.ObjectsCrash)) {
         moveResult.WheelTurn = physicCar.WheelTurnForEndZeroWheelTurn(Math.Atan2(dirMove.Y, dirMove.X), speedSign);
       }
     }
@@ -244,7 +244,7 @@ namespace RussianAICup2015Car.Sources.Physic {
         return;
       }
 
-      //int minTicks = int.MaxValue;
+      int minTicks = int.MaxValue;
       foreach (Vector point in additionalPoints) {
         IPhysicEvent passageLineEvent = new PassageLineEvent(Vector.sincos(needAngle), point, 0);
         HashSet<IPhysicEvent> pEvents = new HashSet<IPhysicEvent> {
@@ -268,15 +268,9 @@ namespace RussianAICup2015Car.Sources.Physic {
           continue;
         }
 
-        /*pEvents.Remove(passageLineEvent);
-        PhysicEventsCalculator.calculateEvents(physicCar, new MoveToAngleFunction(needAngle), pEvents, moveToAddPoint2EventCheckEnd);
-
-        if (pEvents.ComeContaints(PhysicEventType.MapCrash) || pEvents.ComeContaints(PhysicEventType.ObjectsCrash)) {
-          continue;
-        }*/
-
-        needPos = point;
-        break;
+        if (passageLineEvent.TickCome < minTicks) {
+          needPos = point;
+        }
       }
     }
 
@@ -373,7 +367,7 @@ namespace RussianAICup2015Car.Sources.Physic {
         return true;
       }
 
-      return pEvents.ComeContaints(PhysicEventType.MapCrash);
+      return pEvents.ComeContaints(PhysicEventType.MapCrash) || pEvents.ComeContaints(PhysicEventType.ObjectsCrash);
     }
 
     /// avoid map crash

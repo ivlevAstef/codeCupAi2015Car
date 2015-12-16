@@ -38,7 +38,8 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
     private List<AdditionalPoints> additionalPointsActions = new List<AdditionalPoints> {
       new BlockCarHitMoving(),
       new BonusMoving(),
-      new DodgeCarHitMoving()
+      new DodgeCarHitMoving(),
+      new AvoidTireMoving(),
     };
 
     private ActionType[] baseActions = new ActionType[] {
