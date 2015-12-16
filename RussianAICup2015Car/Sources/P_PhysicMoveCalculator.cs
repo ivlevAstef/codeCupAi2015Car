@@ -16,6 +16,7 @@ namespace RussianAICup2015Car.Sources.Physic {
     private World world;
 
     private PassageLineEvent passageLineEvent = null;
+    private OutLineEvent outLineEvent = null;
     private AngleReachEvent angleReachEvent = null;
     private ObjectsCrashEvent moverSelfMapCrashEvent = null;
 
@@ -49,8 +50,10 @@ namespace RussianAICup2015Car.Sources.Physic {
       this.defaultAngle = car.GetAbsoluteAngleTo(defaultPos.X, defaultPos.Y);
     }
 
-    public void setupPassageLine(Vector pos, Vector dir) {
-      passageLineEvent = new PassageLineEvent(dir, pos);
+    public void setupPassageLine(Vector pos, Vector dir, double accuracity) {
+      double oneLineSize = (game.TrackTileSize - 2 * game.TrackTileMargin)/4;
+      passageLineEvent = new PassageLineEvent(dir, pos, accuracity * oneLineSize);
+      outLineEvent = new OutLineEvent(dir, pos, accuracity * oneLineSize);
     }
 
     public void setupAngleReach(Vector angleDir) {
@@ -120,12 +123,13 @@ namespace RussianAICup2015Car.Sources.Physic {
           HashSet<IPhysicEvent> events = calculateTurnEvents(iterCar, needDirAngle);
 
           IPhysicEvent passageLine = events.ComeContaints(PhysicEventType.PassageLine) ? events.GetEvent(PhysicEventType.PassageLine) : null;
+          IPhysicEvent outLine = events.ComeContaints(PhysicEventType.OutLine) ? events.GetEvent(PhysicEventType.OutLine) : null;
           IPhysicEvent speedReach = events.ComeContaints(PhysicEventType.SpeedReach) ? events.GetEvent(PhysicEventType.SpeedReach) : null;
 
-          if (null != passageLine) {
+          if (null != passageLine && null != outLine) {
             int speedReachTick = null != speedReach ? speedReach.TickCome : maxIterationCount;
 
-            if (speedReachTick > 10 + ticksCount + passageLine.TickCome) {
+            if (speedReachTick > ticksCount + outLine.TickCome) {
               moveResult.IsBrake = car.Speed() > Constant.MinBrakeSpeed;
             }
           }
@@ -135,15 +139,6 @@ namespace RussianAICup2015Car.Sources.Physic {
           }
 
           break;
-        } else {
-          HashSet<IPhysicEvent> events = calculateTurnEvents(iterCar, needDirAngle);
-          IPhysicEvent passageLine = events.ComeContaints(PhysicEventType.PassageLine) ? events.GetEvent(PhysicEventType.PassageLine) : null;
-          double needWheelTurn = WheelTurnForEndZeroWheelTurn(car, game, needDirAngle.Angle, speedSign);
-
-          int ticks = (int)Math.Abs(Math.Round((car.WheelTurn - needWheelTurn) / game.CarWheelTurnChangePerTick));
-          if (null != passageLine && ticksCount + passageLine.TickCome < ticks) {
-            moveResult.WheelTurn = WheelTurnForEndZeroWheelTurn(car, game, needDirAngle.Angle, speedSign);
-          }
         }
 
         Tuple<Vector, Vector> crashInfo = mapCrash.infoCome as Tuple<Vector, Vector>;
@@ -234,7 +229,7 @@ namespace RussianAICup2015Car.Sources.Physic {
 
       //int minTicks = int.MaxValue;
       foreach (Vector point in additionalPoints) {
-        IPhysicEvent passageLineEvent = new PassageLineEvent(new Vector(dirMove.X, dirMove.Y), point);
+        IPhysicEvent passageLineEvent = new PassageLineEvent(Vector.sincos(needAngle), point, 0);
         HashSet<IPhysicEvent> pEvents = new HashSet<IPhysicEvent> {
           new MapCrashEvent(),
           passageLineEvent
@@ -256,12 +251,12 @@ namespace RussianAICup2015Car.Sources.Physic {
           continue;
         }
 
-        pEvents.Remove(passageLineEvent);
+        /*pEvents.Remove(passageLineEvent);
         PhysicEventsCalculator.calculateEvents(physicCar, new MoveToAngleFunction(needAngle), pEvents, moveToAddPoint2EventCheckEnd);
 
         if (pEvents.ComeContaints(PhysicEventType.MapCrash) || pEvents.ComeContaints(PhysicEventType.ObjectsCrash)) {
           continue;
-        }
+        }*/
 
         moveResult.WheelTurn = WheelTurnForEndZeroWheelTurn(car, game, car.GetAbsoluteAngleTo(point.X, point.Y), speedSign);
         break;
@@ -314,6 +309,7 @@ namespace RussianAICup2015Car.Sources.Physic {
     private HashSet<IPhysicEvent> calculateTurnEvents(PCar iterCar, Vector needDirAngle) {
       HashSet<IPhysicEvent> pEvents = new HashSet<IPhysicEvent> {
         passageLineEvent.Copy(),
+        outLineEvent.Copy(),
         angleReachEvent.Copy()
       };
 

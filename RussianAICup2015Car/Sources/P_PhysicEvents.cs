@@ -8,20 +8,60 @@ namespace RussianAICup2015Car.Sources.Physic {
   public class PassageLineEvent : PhysicEventBase {
     private Vector normal;
     private Vector pos;
+    private double accuracity;
 
-    public PassageLineEvent(Vector normalOut, Vector pos) {
+    public PassageLineEvent(Vector normalOut, Vector pos, double accuracity) {
       this.normal = normalOut;
       this.pos = pos;
+      this.accuracity = accuracity;
     }
 
     public override PhysicEventType Type { get { return PhysicEventType.PassageLine; } }
 
     public override bool Check(PCar car) {
-      return (car.Pos - pos).Dot(normal) > 0;
+      if (Math.Abs((car.LastPos - pos).Dot(normal)) > accuracity) {
+        if (Math.Abs((car.Pos - pos).Dot(normal)) < accuracity) {
+          return true;
+        }
+
+        return Math.Sign((car.Pos - pos).Dot(normal)) != Math.Sign((car.LastPos - pos).Dot(normal));
+      }
+
+      return false;
     }
 
     public override IPhysicEvent Copy() {
-      return new PassageLineEvent(normal, pos);
+      return new PassageLineEvent(normal, pos, accuracity);
+    }
+  }
+
+  public class OutLineEvent : PhysicEventBase {
+    private Vector normal;
+    private Vector pos;
+    private double accuracity;
+
+    public OutLineEvent(Vector normalOut, Vector pos, double accuracity = 0) {
+      this.normal = normalOut;
+      this.pos = pos;
+      this.accuracity = accuracity;
+    }
+
+    public override PhysicEventType Type { get { return PhysicEventType.OutLine; } }
+
+    public override bool Check(PCar car) {
+      if (Math.Abs((car.Pos - pos).Dot(normal)) > accuracity) {
+        if (Math.Abs((car.LastPos - pos).Dot(normal)) < accuracity) {
+          return true;
+        }
+
+        return Math.Sign((car.Pos - pos).Dot(normal)) != Math.Sign((car.LastPos - pos).Dot(normal));
+      }
+
+      return false;
+    }
+
+    public override IPhysicEvent Copy() {
+      return new OutLineEvent(normal, pos, accuracity);
     }
   }
 
