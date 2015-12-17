@@ -19,7 +19,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       calculator.setupMapInfo(dirMove, path[0].Pos, null);
 
       calculator.setupAngleReach(new Vector(dirMove.X, dirMove.Y));
-      calculator.setupDefaultAction(smoothPoint(EndSidePos()));
+      calculator.setupDefaultAction(EndSidePos());
 
       Dictionary<TilePos, TileDir[]> selfMap = new Dictionary<TilePos, TileDir[]>();
       for (int i = 0; i <= 2; i++) {
@@ -68,17 +68,6 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       }
 
       return false;
-    }
-
-    private Vector smoothPoint(Vector point) {
-      Vector carPos = new Vector(car.X, car.Y);
-      Vector direction = point - carPos;
-      Vector dirMove = new Vector(path[0].DirOut.X, path[0].DirOut.Y);
-
-      Vector length = dirMove * direction.Dot(dirMove);
-      Vector cross = dirMove.PerpendicularLeft() * direction.Cross(dirMove);
-
-      return carPos + length + cross * 0.25;
     }
 
     private Vector EndSidePos() {
