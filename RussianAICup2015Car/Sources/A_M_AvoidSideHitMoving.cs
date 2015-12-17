@@ -5,7 +5,8 @@ using System;
 
 namespace RussianAICup2015Car.Sources.Actions.Moving {
   class AvoidSideHitMoving : MovingBase {
-    private const int MaxCheckTicks = 40;
+    private const int MinCheckTicks = 10;
+    private const int MaxCheckTicks = 80;
 
     public override bool valid() {
 
@@ -37,7 +38,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
           Vector distance = enemy.Pos - self.Pos;
           double angle = Math.Abs(distance.Normalize().Cross(self.Dir));
           double angleSpeed = Math.Abs(self.Dir.Dot(enemy.Dir));
-          if (i > 5 && distance.Length < checkRadius && angle < maxAngle && angleSpeed < maxAngle) {
+          if (i > MinCheckTicks && distance.Length < checkRadius && angle < maxAngle && angleSpeed < maxAngle) {
             return true;
           }
 

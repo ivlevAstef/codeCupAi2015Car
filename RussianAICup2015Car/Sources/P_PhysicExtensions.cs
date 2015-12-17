@@ -91,9 +91,13 @@ namespace RussianAICup2015Car.Sources.Physic {
         }
       }
 
-      Vector dir = physicCar.Speed.Length < 1 ? physicCar.Dir : physicCar.Speed.Normalize();
+      Vector dir = physicCar.Speed.Length < 1 ? physicCar.Dir : physicCar.Dir * 0.8 + physicCar.Speed.Normalize() * 0.2;
 
       double distance = -(point - physicCar.Pos).Cross(dir);
+
+      if (Math.Abs(distance) < 10) {
+        return 0;
+      }
 
       return car.WheelTurn + sign * game.CarWheelTurnChangePerTick * Math.Sign(distance);
     }
