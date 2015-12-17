@@ -59,6 +59,10 @@ namespace RussianAICup2015Car.Sources.Actions {
           continue;
         }
 
+        if (Constant.BonusPriority(bonus, car, false) < 0) {
+          continue;
+        }
+
         double newBonusPriority = Constant.BonusPriority(bonus, car, true);
 
         if (null == priorityBonus || Constant.BonusPriority(priorityBonus, car, true) < newBonusPriority) {

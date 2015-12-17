@@ -50,7 +50,7 @@ namespace RussianAICup2015Car.Sources.Physic {
     private double finalAngle;
     private IntersectOilStickEvent intersecOildStickEvent;
 
-    public MoveToPoint(Vector point, double finalAngle) {
+    public MoveToPoint(Vector point, double finalAngle = double.NaN) {
       this.point = point;
       this.finalAngle = finalAngle;
       intersecOildStickEvent = new IntersectOilStickEvent(world);
@@ -63,8 +63,11 @@ namespace RussianAICup2015Car.Sources.Physic {
         }
 
         double speedSign = Math.Sign(car.Dir.Dot(car.Speed));
-        double wheelTurn = car.WheelTurnForEndZeroWheelTurnToPoint(point, finalAngle, speedSign);
-        car.setWheelTurn(wheelTurn);
+        if (double.IsNaN(finalAngle)) {
+          car.WheelTurnForEndZeroWheelTurn((point - car.Pos).Angle, speedSign);
+        } else {
+          car.setWheelTurn(car.WheelTurnForEndZeroWheelTurnToPoint(point, finalAngle, speedSign));
+        }
 
         car.Iteration(1);
       }

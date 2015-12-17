@@ -13,7 +13,7 @@ namespace RussianAICup2015Car.Sources.Common {
         { BonusType.NitroBoost , Math.Max(10, 80 - 10 * car.NitroChargeCount) },
         { BonusType.OilCanister , Math.Max(10, 50 - 10 * car.OilCanisterCount) },
         { BonusType.PureScore , 100 },
-        { BonusType.RepairKit , 150 * (1.0 - car.Durability) }
+        { BonusType.RepairKit , 150 * (1.0 - car.Durability) - 2 }
       };
 
       if (useDistance) {

@@ -25,12 +25,12 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       MovingCalculator calculator = new MovingCalculator();
       calculator.setupEnvironment(car, game, world);
       calculator.setupMapInfo(dirMove, path[0].Pos, path[1 + offset].Pos);
-      calculator.setupDefaultAction(GetWayEnd(path[1 + offset].Pos, dirEnd.Negative()));
+      calculator.setupDefaultAction(GetWayEnd(path[1 + offset].Pos, TileDir.Zero));
 
       Vector endDir = new Vector(5 * dirEnd.X + dirMove.X, 5 * dirEnd.Y + dirMove.Y).Normalize();
 
       calculator.setupAngleReach(endDir);
-      calculator.setupPassageLine(GetWayEnd(path[1 + offset].Pos, dirEnd), new Vector(dirMove.X, dirMove.Y), 0.9);
+      calculator.setupPassageLine(GetWayEnd(path[1 + offset].Pos, dirEnd), new Vector(dirMove.X, dirMove.Y), 0.85);
 
       Dictionary<TilePos, TileDir[]> selfMap = new Dictionary<TilePos, TileDir[]>();
       for (int i = 0; i <= offset; i++) {

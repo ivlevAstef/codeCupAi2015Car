@@ -164,7 +164,7 @@ namespace RussianAICup2015Car.Sources.Physic {
       if (null != needPos) {
         mover = new MoveToPoint(needPos, needDirAngle.Angle);
       } else {
-        mover = new MoveToPoint(defaultPos, needDirAngle.Angle);
+        mover = new MoveToPoint(defaultPos);
       }
 
       double speedL = car.Speed.Length;
@@ -185,7 +185,7 @@ namespace RussianAICup2015Car.Sources.Physic {
       if (null != needPos) {
         mover = new MoveToPoint(needPos, needDirAngle.Angle);
       } else {
-        mover = new MoveToPoint(defaultPos, needDirAngle.Angle);
+        mover = new MoveToPoint(defaultPos);
       }
 
       PCar car = new PCar(iterCar);
@@ -239,7 +239,12 @@ namespace RussianAICup2015Car.Sources.Physic {
 
           int ticksToZeroEnginePower = (int)(Math.Abs(car.EnginePower) / game.CarEnginePowerChangePerTick);
           if (!isParallel && speedSign > 0 && crash.TickCome < ticksToZeroEnginePower) {
-            moveResult.IsBrake = car.Speed() > Constant.MinBrakeSpeed;
+            if (moveResult.EnginePower > 0.5) {
+              moveResult.EnginePower -= speedSign * game.CarEnginePowerChangePerTick;
+            }
+            if (crash.TickCome < 5) {
+              moveResult.IsBrake = car.Speed() > Constant.MinBrakeSpeed;
+            }
           }
         }
       }

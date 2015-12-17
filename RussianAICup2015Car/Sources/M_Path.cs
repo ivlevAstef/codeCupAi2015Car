@@ -71,7 +71,7 @@ namespace RussianAICup2015Car.Sources.Map {
       beginDir = new TilePos(car.X, car.Y) - pathLastCell.Pos;
 
       HashSet<LiMap.Cell> visited = new HashSet<LiMap.Cell>();
-      int depth = Math.Min(3, (int)(car.Speed()/10));
+      int depth =  Math.Min(3, (int)(car.Speed()/10));
 
       transition = mergePath(firstCellWithTransition, pathLastCell, transition, depth);
 
@@ -222,7 +222,7 @@ namespace RussianAICup2015Car.Sources.Map {
 
     private double tilePriority(TileDir dirIn, TileDir dirOut, TileDir nextDirIn, TileDir nextDirOut) {
       if (nextDirIn.Negative() == nextDirOut) {
-        return -6.5;
+        return -4.25;
       }
 
       if (dirIn.Negative() == dirOut) {

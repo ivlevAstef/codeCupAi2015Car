@@ -12,7 +12,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
     public override bool valid() {
       for (offset = 0; offset <= 1; offset++) {
         if (PathCheckResult.Yes == checkAround(offset)) {
-          return true;
+          return 1 != offset || PathCheckResult.Yes != checkSnakeWithOffset(0);
         }
       }
 

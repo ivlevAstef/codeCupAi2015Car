@@ -26,7 +26,9 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       calculator.setupEnvironment(car, game, world);
       calculator.setupMapInfo(dirMove, path[0].Pos, path[1 + offset].Pos);
 
-      Vector endPos = GetWayEnd(path[1 + offset].Pos, TileDir.Zero) - new Vector(dirMove.X, dirMove.Y) * game.TrackTileSize * 0.5;
+      Vector center = GetWayEnd(path[1 + offset].Pos, TileDir.Zero);
+      Vector endPos = center + new Vector(dirEnd.X - dirMove.X, dirEnd.Y - dirMove.Y) * game.TrackTileSize * 0.25;
+
       calculator.setupDefaultAction(endPos);
 
       Vector endDir = new Vector(dirEnd.X + dirMove.X, dirEnd.Y + dirMove.Y).Normalize();
