@@ -122,40 +122,27 @@ namespace RussianAICup2015Car.Sources.Physic {
       Vector endPoint = endTile.ToVector(1 - dirMove.X, 1 - dirMove.Y);
       endPoint = endPoint + new Vector(dirMove.X, dirMove.Y) * game.TrackTileMargin;
 
-      for (int ticksCount = 0; ticksCount < maxIterationCount;) {
-        IPhysicEvent mapCrash = calculateTurnMapCrashEvents(iterCar, needDirAngle, false);
+      double speedSign = Math.Sign(Vector.sincos(car.Angle).Dot(new Vector(car.SpeedX, car.SpeedY)));
 
-        if (null == mapCrash) {
-          double speedSign = Math.Sign(Vector.sincos(car.Angle).Dot(new Vector(car.SpeedX, car.SpeedY)));
+      HashSet<IPhysicEvent> events = calculateTurnEvents(iterCar, needDirAngle);
 
-          HashSet<IPhysicEvent> events = calculateTurnEvents(iterCar, needDirAngle);
+      IPhysicEvent passageLine = events.ComeContaints(PhysicEventType.PassageLine) ? events.GetEvent(PhysicEventType.PassageLine) : null;
+      IPhysicEvent outLine = events.ComeContaints(PhysicEventType.OutLine) ? events.GetEvent(PhysicEventType.OutLine) : null;
+      IPhysicEvent speedReach = events.ComeContaints(PhysicEventType.SpeedReach) ? events.GetEvent(PhysicEventType.SpeedReach) : null;
 
-          IPhysicEvent passageLine = events.ComeContaints(PhysicEventType.PassageLine) ? events.GetEvent(PhysicEventType.PassageLine) : null;
-          IPhysicEvent outLine = events.ComeContaints(PhysicEventType.OutLine) ? events.GetEvent(PhysicEventType.OutLine) : null;
-          IPhysicEvent speedReach = events.ComeContaints(PhysicEventType.SpeedReach) ? events.GetEvent(PhysicEventType.SpeedReach) : null;
+      if (null != passageLine && null != outLine) {
+        int speedReachTick = null != speedReach ? speedReach.TickCome : maxIterationCount;
 
-          if (null != passageLine && null != outLine) {
-            int speedReachTick = null != speedReach ? speedReach.TickCome : maxIterationCount;
-
-            if (speedReachTick > ticksCount + outLine.TickCome) {
-              moveResult.IsBrake = car.Speed() > Constant.MinBrakeSpeed;
-            }
-          }
-
-          if (0 == ticksCount && !hasReserveTicks(iterCar, needDirAngle)) {
-            IPhysicEvent mapBrakeCrash = calculateTurnMapCrashEvents(iterCar, needDirAngle, true);
-            if (!moveResult.IsBrake || null == mapBrakeCrash) {
-              moveResult.WheelTurn = new PCar(car, game).WheelTurnForEndZeroWheelTurn(needDirAngle.Angle, speedSign);
-            }
-          }
-
-          break;
+        if (speedReachTick > outLine.TickCome) {
+          moveResult.IsBrake = car.Speed() > Constant.MinBrakeSpeed;
         }
+      }
 
-        Tuple<Vector, Vector> crashInfo = mapCrash.infoCome as Tuple<Vector, Vector>;
-        Logger.instance.Assert(null != crashInfo, "Can't get crash info");
-
-        ticksCount += moveOnDistance(iterCar, needDirAngle, (endPoint - crashInfo.Item1).Length);
+      if (!hasReserveTicks(iterCar, needDirAngle)) {
+        IPhysicEvent mapBrakeCrash = calculateTurnMapCrashEvents(iterCar, needDirAngle, true);
+        if (!moveResult.IsBrake || null == mapBrakeCrash || (checkStrongParallel(mapBrakeCrash) && mapBrakeCrash.TickCome < 30)) {
+          moveResult.WheelTurn = new PCar(car, game).WheelTurnForEndZeroWheelTurn(needDirAngle.Angle, speedSign);
+        }
       }
     }
 
@@ -208,18 +195,15 @@ namespace RussianAICup2015Car.Sources.Physic {
 
       IPhysicEvent passageLine = events.ComeContaints(PhysicEventType.PassageLine) ? events.GetEvent(PhysicEventType.PassageLine) : null;
       IPhysicEvent mapCrash = events.ComeContaints(PhysicEventType.MapCrash) ? events.GetEvent(PhysicEventType.MapCrash) : null;
-      IPhysicEvent objectCrash = events.ComeContaints(PhysicEventType.ObjectsCrash) ? events.GetEvent(PhysicEventType.ObjectsCrash) : null;
 
-      IPhysicEvent crash = (null != objectCrash) ? objectCrash : mapCrash;
-
-      if (null != crash) {
+      if (null != mapCrash) {
         int tickToPassageLine = (null != passageLine) ? passageLine.TickCome : maxIterationCount;
 
-        if (crash.TickCome < tickToPassageLine) {
+        if (mapCrash.TickCome < tickToPassageLine) {
           Vector dir = new Vector(dirMove.X, dirMove.Y);
 
-          PCar physicCar = crash.CarCome;
-          Tuple<Vector, Vector> crashInfo = crash.infoCome as Tuple<Vector, Vector>;
+          PCar physicCar = mapCrash.CarCome;
+          Tuple<Vector, Vector> crashInfo = mapCrash.infoCome as Tuple<Vector, Vector>;
           Logger.instance.Assert(null != crashInfo, "Can't get crash info");
           Vector sideNormal = crashInfo.Item2;
 
@@ -230,7 +214,7 @@ namespace RussianAICup2015Car.Sources.Physic {
 
           bool notCurrentTurnSide = null != needDirAngle && sideNormal.Dot(needDirAngle) < 0;
 
-          if (!checkStrongParallel(crash) || notCurrentTurnSide) {
+          if (!checkStrongParallel(mapCrash) || notCurrentTurnSide) {
             moveResult.WheelTurn = car.WheelTurn - speedSign * Math.Sign(angle) * game.CarWheelTurnChangePerTick;
           }
 
@@ -238,12 +222,12 @@ namespace RussianAICup2015Car.Sources.Physic {
           isParallel |= Math.Abs(physicCar.Dir.Dot(sideNormal)) < Math.Sin(Math.PI / 9);//20 degrees
 
           int ticksToZeroEnginePower = (int)(Math.Abs(car.EnginePower) / game.CarEnginePowerChangePerTick);
-          if (!isParallel && speedSign > 0 && crash.TickCome < ticksToZeroEnginePower) {
+          if (!isParallel && speedSign > 0 && mapCrash.TickCome < ticksToZeroEnginePower) {
             if (moveResult.EnginePower > 0.5) {
               moveResult.EnginePower -= speedSign * game.CarEnginePowerChangePerTick;
             }
-            if (crash.TickCome < 5) {
-              moveResult.IsBrake = car.Speed() > Constant.MinBrakeSpeed;
+            if (!isParallel) {
+              moveResult.IsBrake = moveResult.IsBrake || car.Speed() > Constant.MinBrakeSpeed;
             }
           }
         }
@@ -299,17 +283,6 @@ namespace RussianAICup2015Car.Sources.Physic {
         if (passageLineEvent.CarCome.Pos.GetDistanceTo(point) > data.Item2) {
           continue;
         }
-        /*
-        pEvents.Clear();
-        pEvents.Add(new AngleReachEvent(needAngle));
-        if (null != moverSelfMapCrashEvent) {
-          pEvents.Add(moverSelfMapCrashEvent.Copy());
-        }
-
-        PhysicEventsCalculator.calculateEvents(physicCar, new MoveToAngleFunction(needAngle), pEvents, moveToAddPoint2EventCheckEnd);
-        if (pEvents.ComeContaints(PhysicEventType.ObjectsCrash)) {
-          continue;
-        }*/
 
         if (passageLineEvent.TickCome < minTicks) {
           needPos = point;
@@ -409,11 +382,11 @@ namespace RussianAICup2015Car.Sources.Physic {
       }
 
       PCar physicCar = new PCar(iterCar);
-      if (null != needPos) {
-        PhysicEventsCalculator.calculateEvents(physicCar, new MoveToPoint(needPos, Math.Atan2(dirMove.Y, dirMove.X)), pEvents, calculateMoveEventCheckEnd);
-      } else {
+      /*if (null != needPos) {
+        PhysicEventsCalculator.calculateEvents(physicCar, new MoveToAngleFunction(Math.Atan2(dirMove.Y, dirMove.X)), pEvents, calculateMoveEventCheckEnd);
+      } else {*/
         PhysicEventsCalculator.calculateEvents(physicCar, new MoveToAngleFunction(car.GetAbsoluteAngleTo(defaultPos.X, defaultPos.Y)), pEvents, calculateMoveEventCheckEnd);
-      }
+      //}
 
       return pEvents;
     }
@@ -434,10 +407,6 @@ namespace RussianAICup2015Car.Sources.Physic {
 
       if (null != passageLineEvent) {
         pEvents.Add(passageLineEvent.Copy());
-      }
-
-      if (null != moverSelfMapCrashEvent) {
-        pEvents.Add(moverSelfMapCrashEvent.Copy());
       }
 
       PCar physicCar = new PCar(car, game);
