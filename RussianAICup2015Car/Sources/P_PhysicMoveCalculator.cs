@@ -212,7 +212,7 @@ namespace RussianAICup2015Car.Sources.Physic {
             angle = car.Angle.AngleDeviation(sideNormal.Angle);
           }
 
-          bool notCurrentTurnSide = null != needDirAngle && sideNormal.Dot(needDirAngle) < 0;
+          bool notCurrentTurnSide = null != needDirAngle && sideNormal.Dot(needDirAngle) > 0;
 
           if (!checkStrongParallel(mapCrash) || notCurrentTurnSide) {
             moveResult.WheelTurn = car.WheelTurn - speedSign * Math.Sign(angle) * game.CarWheelTurnChangePerTick;
@@ -226,7 +226,7 @@ namespace RussianAICup2015Car.Sources.Physic {
             if (moveResult.EnginePower > 0.5) {
               moveResult.EnginePower -= speedSign * game.CarEnginePowerChangePerTick;
             }
-            if (!isParallel) {
+            if (!isParallel && mapCrash.TickCome < 10) {
               moveResult.IsBrake = moveResult.IsBrake || car.Speed() > Constant.MinBrakeSpeed;
             }
           }
@@ -334,7 +334,7 @@ namespace RussianAICup2015Car.Sources.Physic {
         return true;
       }
 
-      if (tick > 10) {
+      if (tick > 5) {
         physicCar.setBrake(false);
       }
 
