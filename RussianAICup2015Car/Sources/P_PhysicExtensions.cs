@@ -71,11 +71,21 @@ namespace RussianAICup2015Car.Sources.Physic {
 
       double angleDeviation = finalAngle.AngleDeviation(physicCar.Angle);
 
+      if (sign < 0) {
+        Vector v = Vector.sincos(finalAngle + Math.PI);
+        double inverse90Angle =  Math.Abs(v.X) > Math.Abs(v.Y) ? 
+          ((Math.Sign(v.X) - 1) * Math.PI/2) : 
+          (Math.Sign(v.Y) * Math.PI/2);
+
+        double angleSub = inverse90Angle.AngleDeviation(physicCar.Angle);
+        angleDeviation = finalAngle.AngleDeviation(physicCar.Angle + 2 * angleSub);
+      }
+
       if (Math.Abs(angleDeviation) < game.CarRotationFrictionFactor) {
         return 0;
       }
 
-      return car.WheelTurn + sign * game.CarWheelTurnChangePerTick * Math.Sign(angleDeviation);
+      return car.WheelTurn + game.CarWheelTurnChangePerTick * Math.Sign(angleDeviation);
     }
 
     public static double WheelTurnForEndZeroWheelTurnToPoint(this PCar car, Vector point, double finalAngle, double sign) {

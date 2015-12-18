@@ -51,7 +51,7 @@ namespace RussianAICup2015Car.Sources.Physic {
     }
 
     public void setupPassageLine(Vector pos, Vector dir, double accuracity) {
-      double oneLineSize = (game.TrackTileSize - 2 * game.TrackTileMargin)/4;
+      double oneLineSize = (game.TrackTileSize - 2 * game.TrackTileMargin) / 4;
       passageLineEvent = new PassageLineEvent(dir, pos, accuracity * oneLineSize);
       outLineEvent = new OutLineEvent(dir, pos, accuracity * oneLineSize);
     }
@@ -103,7 +103,7 @@ namespace RussianAICup2015Car.Sources.Physic {
       HashSet<IPhysicEvent> events = calculateMoveEvents(physicCar);
 
       if (events.ComeContaints(PhysicEventType.MapCrash) || events.ComeContaints(PhysicEventType.ObjectsCrash)) {
-        moveResult.WheelTurn = physicCar.WheelTurnForEndZeroWheelTurn(Math.Atan2(dirMove.Y, dirMove.X), speedSign);
+        moveResult.WheelTurn = physicCar.WheelTurnForEndZeroWheelTurn(car.GetAbsoluteAngleTo(defaultPos.X, defaultPos.Y), speedSign);
       }
     }
 
@@ -409,7 +409,11 @@ namespace RussianAICup2015Car.Sources.Physic {
       }
 
       PCar physicCar = new PCar(iterCar);
-      PhysicEventsCalculator.calculateEvents(physicCar, new MoveToAngleFunction(Math.Atan2(dirMove.Y, dirMove.X)), pEvents, calculateMoveEventCheckEnd);
+      if (null != needPos) {
+        PhysicEventsCalculator.calculateEvents(physicCar, new MoveToPoint(needPos, Math.Atan2(dirMove.Y, dirMove.X)), pEvents, calculateMoveEventCheckEnd);
+      } else {
+        PhysicEventsCalculator.calculateEvents(physicCar, new MoveToAngleFunction(car.GetAbsoluteAngleTo(defaultPos.X, defaultPos.Y)), pEvents, calculateMoveEventCheckEnd);
+      }
 
       return pEvents;
     }

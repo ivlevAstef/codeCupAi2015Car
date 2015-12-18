@@ -12,7 +12,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       TileDir dir = path[offset].DirOut;
 
       double angle = car.GetAngleTo(car.X + dir.X, car.Y + dir.Y);
-      if (Math.Abs(angle) > (2 * Math.PI / 3)) {
+      if (Math.Abs(angle) > (11 * Math.PI / 18)) {
         return true;
       }
 
@@ -37,44 +37,52 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       endPos.X = car.X * Math.Abs(dir.X) + endPos.X * Math.Abs(dir.Y);
       endPos.Y = car.Y * Math.Abs(dir.Y) + endPos.Y * Math.Abs(dir.X);
       
-
       Physic.MovingCalculator calculator = new Physic.MovingCalculator();
       calculator.setupEnvironment(car, game, world);
       calculator.setupMapInfo(dirMove, path[0].Pos, null);
       calculator.useBackward();
 
       if (0 == offset) {
-        TileDir nextDirOut = path[1 + offset].DirOut;
+        TileDir nextDirOut = path[1].DirOut;
         Vector nextDir = new Vector(nextDirOut.X, nextDirOut.Y);
 
         bool needBrake = false;
+        bool needChangeEnginePower = false;
         double speedSign = Math.Sign(Vector.sincos(car.Angle).Dot(new Vector(car.SpeedX, car.SpeedY)));
+
         if (speedSign > 0 || nextDirOut == dirMove) {
-          endPos -= dir * game.TrackTileSize;
-          needBrake = (nextDirOut != dirMove && speedSign > 0);
-        } else {
-          Vector tileEnd = path[offset].Pos.ToVector(0.5 * (1 + dir.X), 0.5 * (1 + dir.Y));
-          endPos = GetWayEnd(path[1 + offset].Pos, nextDirOut.Negative() - dirMove);
-          endPos += nextDir * (tileEnd - carPos).Dot(dir);
-          endPos = carPos + (carPos - endPos);
+          endPos -= dir * 2 * game.TrackTileSize;
+          needBrake = speedSign > 0;
+        } else if (nextDirOut.Negative() == dirMove) {
+          endPos -= dir * 2 * game.TrackTileSize;
+          needChangeEnginePower = true;
           needBrake = car.Speed() > 8;
+        } else {
+          endPos -= dir * 2 * game.TrackTileSize;
+          endPos += nextDir * car.Height;
+          needBrake = car.Speed() > 10;
         }
 
         calculator.setupAngleReach(nextDir);
         calculator.setupDefaultAction(endPos);
-        Move needMove = calculator.calculateMove();
 
+        Move needMove = calculator.calculateMove();
         move.IsBrake = needMove.IsBrake || needBrake;
         move.EnginePower = needMove.EnginePower;
         move.WheelTurn = needMove.WheelTurn;
+
+        if (needChangeEnginePower) {
+          double distance = (GetWayEnd(path[1].Pos, dirMove.Negative()) - carPos).Dot(dir);
+          move.EnginePower = -game.CarEnginePowerChangePerTick - distance / game.TrackTileSize;
+        }
       } else {
-        endPos -= dir * game.TrackTileSize;
+        endPos -= dir * 2 * game.TrackTileSize;
         double distance = (carPos - GetWayEnd(path[offset].Pos, dirMove)).Dot(dir);
 
         calculator.setupAngleReach(dir);
         calculator.setupDefaultAction(endPos);
         Move needMove = calculator.calculateMove();
-        move.IsBrake = needMove.IsBrake;
+        move.IsBrake = needMove.IsBrake || car.Speed() > 8;
         move.EnginePower = game.CarEnginePowerChangePerTick + distance / game.TrackTileSize;
         move.WheelTurn = needMove.WheelTurn;
       }

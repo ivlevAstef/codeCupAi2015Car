@@ -42,7 +42,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
     }
 
     private bool speedCheck() {
-      if (car.Speed2() < 0.1) {
+      if (car.Speed2() < 0.1 && car.RemainingNitroTicks <= 0) {
         zeroSpeedTicks++;
       } else {
         zeroSpeedTicks = 0;

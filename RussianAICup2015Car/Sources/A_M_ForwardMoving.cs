@@ -26,7 +26,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
         if (path[i].DirIn == path[i].DirOut) {
           selfMap.Add(path[i].Pos, new TileDir[2] { dirMove.PerpendicularLeft(), dirMove.PerpendicularRight() });
         } else if (0 == i) {
-          selfMap.Add(path[i].Pos, new TileDir[1] { path[i].DirIn });
+          selfMap.Add(path[i].Pos, new TileDir[1] { path[0].DirIn });
         } else {
           break;
         }
@@ -82,7 +82,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
           break;
         }
 
-        if (!path[i].DirIn.Equals(path[i].DirOut)) {
+        if (path[i].DirIn != path[i].DirOut) {
           normal = path[i].DirOut;
           break;
         }
@@ -90,6 +90,10 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
         lastPos = pos;
         pos = path[i].Pos;
         dir = path[i].DirIn;
+      }
+
+      if (normal == dir.Negative()) {
+        normal = dir;
       }
 
       return EndSidePos(lastPos, dir, normal.Negative());
