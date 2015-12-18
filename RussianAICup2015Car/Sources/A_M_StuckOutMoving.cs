@@ -7,7 +7,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
   class StuckOutMoving : MovingBase {
     private const double maxTicks = 110;
 
-    private int zeroSpeedTicks = 0;
+    private double zeroSpeedTicks = 0;
     private int outStuckTicks = 0;
     private int sign = -1;
 
@@ -43,12 +43,12 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
 
     private bool speedCheck() {
       if (car.Speed2() < 0.1 && car.RemainingNitroTicks <= 0) {
-        zeroSpeedTicks++;
+        zeroSpeedTicks += Math.Abs(Math.Min(car.EnginePower, 1.0));
       } else {
         zeroSpeedTicks = 0;
       }
 
-      if (zeroSpeedTicks > 10) {
+      if (zeroSpeedTicks > 5) {
         zeroSpeedTicks = 0;
         outStuckTicks = 1;
         return true;
