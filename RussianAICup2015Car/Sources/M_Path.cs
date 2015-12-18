@@ -41,6 +41,7 @@ namespace RussianAICup2015Car.Sources.Map {
 
     private Car car = null;
     private World world = null;
+    private GlobalMap gmap = null;
     private Game game = null;
 
     private CellTransition transition = null;
@@ -49,8 +50,9 @@ namespace RussianAICup2015Car.Sources.Map {
     private TileDir beginDir = null;
     private bool hasUnknown = false;
 
-    public void SetupEnvironment(Car car, World world, Game game) {
+    public void SetupEnvironment(Car car, GlobalMap gmap, World world, Game game) {
       this.car = car;
+      this.gmap = gmap;
       this.world = world;
       this.game = game;
 
@@ -66,6 +68,11 @@ namespace RussianAICup2015Car.Sources.Map {
       if (null != transition && !transition.Cell.Pos.Equals(firstCellWithTransition.Pos)) {
         pathLastCell = transition.Cell;
         transition = transition.Next;
+      }
+
+      if (car.Durability < 1.0e-9 || car.Speed() < 5) {
+        pathLastCell = currentDirLastCell();
+        transition = null;
       }
 
       beginDir = new TilePos(car.X, car.Y) - pathLastCell.Pos;
@@ -120,6 +127,49 @@ namespace RussianAICup2015Car.Sources.Map {
       resultCell.DirOut = resultCell.DirIn;
       resultCell.DirOuts = new TileDir[] { resultCell.DirOut };
       resultCell.Pos = new TilePos(car.X, car.Y) - resultCell.DirOut;
+
+      return resultCell;
+    }
+
+    private Cell currentDirLastCell() {
+      Vector angleDir = Vector.sincos(car.Angle);
+      TileDir[] dirsByPriority = null;
+
+      if (Math.Abs(angleDir.X) > Math.Abs(angleDir.Y)) {
+        dirsByPriority = new TileDir[4] {
+          new TileDir(Math.Sign(angleDir.X), 0),
+          new TileDir(0, Math.Sign(angleDir.Y)),
+          new TileDir(0, -Math.Sign(angleDir.Y)),
+          new TileDir(-Math.Sign(angleDir.X), 0)  
+        };
+      } else {
+        dirsByPriority = new TileDir[4] {
+          new TileDir(0, Math.Sign(angleDir.Y)),
+          new TileDir(Math.Sign(angleDir.X), 0),
+          new TileDir(-Math.Sign(angleDir.X), 0),
+          new TileDir(0, -Math.Sign(angleDir.Y))  
+        };
+      }
+
+      Cell resultCell = new Cell();
+
+      TilePos currentPos = new TilePos(car.X, car.Y);
+      for (int i = 0; i < 4; i++) {
+        if (gmap.Dirs(currentPos).Contains(dirsByPriority[i].Negative())) {
+          resultCell.DirOut = dirsByPriority[i];
+          break;
+        }
+      }
+
+      resultCell.DirOuts = new TileDir[] { resultCell.DirOut };
+      resultCell.Pos = currentPos - resultCell.DirOut;
+
+      for (int i = 3; i >= 0; i--) {
+        if (gmap.Dirs(resultCell.Pos).Contains(dirsByPriority[i])) {
+          resultCell.DirIn = dirsByPriority[i].Negative();
+          break;
+        }
+      }
 
       return resultCell;
     }

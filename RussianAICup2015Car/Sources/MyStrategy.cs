@@ -123,7 +123,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       CollisionDetector.SetupEnvironment(game, GlobalMap.Instance);
 
       map.SetupEnvironment(car, GlobalMap.Instance);
-      path.SetupEnvironment(car, world, game);
+      path.SetupEnvironment(car, GlobalMap.Instance, world, game);
 
       foreach (IAction action in actions.Values) {
         action.setupEnvironment(car, world, game, path);
