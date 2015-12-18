@@ -140,7 +140,7 @@ namespace RussianAICup2015Car.Sources.Physic {
 
       if (!hasReserveTicks(iterCar, needDirAngle)) {
         IPhysicEvent mapBrakeCrash = calculateTurnMapCrashEvents(iterCar, needDirAngle, true);
-        if (!moveResult.IsBrake || null == mapBrakeCrash || (checkStrongParallel(mapBrakeCrash) && mapBrakeCrash.TickCome < 30)) {
+        if (!moveResult.IsBrake || null == mapBrakeCrash || (checkStrongParallel(mapBrakeCrash) && mapBrakeCrash.TickCome < 10)) {
           moveResult.WheelTurn = new PCar(car, game).WheelTurnForEndZeroWheelTurn(needDirAngle.Angle, speedSign);
         }
       }
