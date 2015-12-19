@@ -155,6 +155,11 @@ namespace RussianAICup2015Car.Sources.Physic {
       }
     }
 
+    public double CalculateBrakeFactor() {
+      double speedModule = spd.Length;
+      return (speedModule * frictionMove - frictionCross) / ((speedModule + carAccel) * frictionMove - frictionLenght);
+    }
+
     private void init() {
       wheelTurn = car.WheelTurn;
       setWheelTurn(wheelTurn);

@@ -64,7 +64,7 @@ namespace RussianAICup2015Car.Sources.Physic {
 
         double speedSign = Math.Sign(car.Dir.Dot(car.Speed));
         if (double.IsNaN(finalAngle)) {
-          car.WheelTurnForEndZeroWheelTurn((point - car.Pos).Angle, speedSign);
+          car.WheelTurnForEndZeroWheelTurn(point, speedSign);
         } else {
           car.setWheelTurn(car.WheelTurnForEndZeroWheelTurnToPoint(point, finalAngle, speedSign));
         }

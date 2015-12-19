@@ -11,6 +11,10 @@ namespace RussianAICup2015Car.Sources.Common {
       return new Vector(x + 0.5, y + 0.5) * game.TrackTileSize;
     }
 
+    public static bool LessDotWithAngle(this double dotValue, double angle) {
+      return Math.Acos(Math.Abs(dotValue)) > (Math.PI / 2) - angle;
+    }
+
     public static double AngleNormalize(this double angle) {
       while (angle > Math.PI) {
         angle -= 2.0D * Math.PI;

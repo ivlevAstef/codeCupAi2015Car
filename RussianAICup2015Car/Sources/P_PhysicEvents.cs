@@ -48,8 +48,12 @@ namespace RussianAICup2015Car.Sources.Physic {
 
     public override PhysicEventType Type { get { return PhysicEventType.OutLine; } }
 
+    public bool OutLine(PCar car) {
+      return Math.Abs((car.Pos - pos).Dot(normal)) > accuracity;
+    }
+
     public override bool Check(PCar car) {
-      if (Math.Abs((car.Pos - pos).Dot(normal)) > accuracity) {
+      if (OutLine(car)) {
         if (Math.Abs((car.LastPos - pos).Dot(normal)) < accuracity) {
           return true;
         }
@@ -77,7 +81,7 @@ namespace RussianAICup2015Car.Sources.Physic {
     private double angle;
     private double accuracy;
 
-    public AngleReachEvent(double angle, double accuracyAngleRad = Math.PI/32) {
+    public AngleReachEvent(double angle, double accuracyAngleRad = Math.PI/64) {
       this.angle = angle;
       this.accuracy = accuracyAngleRad;
     }
@@ -96,17 +100,15 @@ namespace RussianAICup2015Car.Sources.Physic {
 
   public class SpeedReachEvent : PhysicEventBase {
     private double accuracyRadiance;
-    private double accuracy;
 
-    public SpeedReachEvent(double accuracyAngleRad = Math.PI/18) {
+    public SpeedReachEvent(double accuracyAngleRad = Math.PI/64) {
       this.accuracyRadiance = accuracyAngleRad;
-      this.accuracy = Math.Sin(accuracyAngleRad);
     }
 
     public override PhysicEventType Type { get { return PhysicEventType.SpeedReach; } }
 
     public override bool Check(PCar car) {
-      return Math.Abs(car.Speed.Normalize().Cross(car.Dir)) < accuracy;
+      return car.Speed.Normalize().Cross(car.Dir).LessDotWithAngle(accuracyRadiance);
     }
 
     public override IPhysicEvent Copy() {

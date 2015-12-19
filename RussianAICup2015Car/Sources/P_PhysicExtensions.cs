@@ -62,6 +62,17 @@ namespace RussianAICup2015Car.Sources.Physic {
       return normal.Normalize();
     }
 
+    public static double WheelTurnForEndZeroWheelTurn(this PCar car, Vector finalPos, double sign) {
+      PCar physicCar = new PCar(car);
+      int ticks = (int)Math.Abs(Math.Round(physicCar.WheelTurn / game.CarWheelTurnChangePerTick));
+
+      physicCar.setWheelTurn(0);
+      physicCar.Iteration(ticks);
+
+      double finalAngle = (finalPos - car.Pos).Angle;
+      return car.WheelTurnForEndZeroWheelTurn(finalAngle, sign);
+    }
+
     public static double WheelTurnForEndZeroWheelTurn(this PCar car, double finalAngle, double sign) {
       PCar physicCar = new PCar(car);
       int ticks = (int)Math.Abs(Math.Round(physicCar.WheelTurn / game.CarWheelTurnChangePerTick));
@@ -76,6 +87,10 @@ namespace RussianAICup2015Car.Sources.Physic {
         double inverse90Angle =  Math.Abs(v.X) > Math.Abs(v.Y) ? 
           ((Math.Sign(v.X) - 1) * Math.PI/2) : 
           (Math.Sign(v.Y) * Math.PI/2);
+
+        if (Math.Abs(Math.Abs(v.X) - Math.Abs(v.Y)) < 1.0e-3) {//45
+          inverse90Angle = v.Angle;
+        }
 
         double angleSub = inverse90Angle.AngleDeviation(physicCar.Angle);
         angleDeviation = finalAngle.AngleDeviation(physicCar.Angle + 2 * angleSub);

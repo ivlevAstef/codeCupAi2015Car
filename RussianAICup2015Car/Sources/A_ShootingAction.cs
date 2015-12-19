@@ -113,8 +113,6 @@ namespace RussianAICup2015Car.Sources.Actions {
     private bool isRunTire(PCar self, PCar[] their, PCar[] enemies) {
       Logger.instance.Assert(null != self, "Self car is null.");
 
-      double maxAngle = Math.Sin(Math.PI / 6);
-
       PCar ignored = self;
 
       PTire tire = new PTire(self.Pos, self.Dir * game.TireInitialSpeed, game);

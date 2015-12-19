@@ -47,9 +47,9 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       };
 
       Vector dir = new Vector(path[0].DirOut.X, path[0].DirOut.Y);
-      double maxAngle = Math.Sin(Math.PI / 9);
+      double maxAngle = Math.PI / 9;
 
-      if (isStraight() && Math.Abs(dir.Cross(Vector.sincos(car.Angle))) < maxAngle) {
+      if (isStraight() && dir.Cross(Vector.sincos(car.Angle)).LessDotWithAngle(maxAngle)) {
         result.Add(ActionType.UseNitro);
       }
 

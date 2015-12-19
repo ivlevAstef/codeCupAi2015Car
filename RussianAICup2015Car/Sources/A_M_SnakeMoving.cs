@@ -34,7 +34,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       Vector endDir = new Vector(dirEnd.X + dirMove.X, dirEnd.Y + dirMove.Y).Normalize();
 
       calculator.setupAngleReach(endDir);
-      calculator.setupPassageLine(endPos, new Vector(dirMove.X - dirEnd.X, dirMove.Y - dirEnd.Y).Normalize(), 0.55);
+      calculator.setupPassageLine(endPos, new Vector(dirMove.X - dirEnd.X, dirMove.Y - dirEnd.Y).Normalize(), 0.6);
 
       Dictionary<TilePos, TileDir[]> selfMap = new Dictionary<TilePos, TileDir[]>();
       for (int i = 0; i <= offset + 1; i++) {
@@ -62,10 +62,10 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       };
 
       Vector dir = new Vector(path[0].DirOut.X + path[1].DirOut.X, path[0].DirOut.Y + path[1].DirOut.Y);
-      double maxAngle = Math.Sin(Math.PI / 18);
-      double angleDiff = Math.Abs(dir.Cross(Vector.sincos(car.Angle)));
+      double maxAngle = Math.PI / 18;
+      double angleDiff = dir.Cross(Vector.sincos(car.Angle));
 
-      if (PathCheckResult.Yes == checkSnakeWithOffset(1) && PathCheckResult.Yes == checkSnakeWithOffset(2) && angleDiff < maxAngle) {
+      if (PathCheckResult.Yes == checkSnakeWithOffset(1) && PathCheckResult.Yes == checkSnakeWithOffset(2) && angleDiff.LessDotWithAngle(maxAngle)) {
         result.Add(ActionType.UseNitro);
       }
 
