@@ -72,7 +72,6 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
 
     private Vector EndSidePos() {
       TilePos pos = path[0].Pos;
-      TilePos lastPos = pos;
       TileDir dir = path[0].DirOut;
       TileDir normal = new TileDir(0);
 
@@ -87,7 +86,6 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
           break;
         }
 
-        lastPos = pos;
         pos = path[i].Pos;
         dir = path[i].DirIn;
       }
@@ -96,7 +94,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
         normal = dir;
       }
 
-      return EndSidePos(lastPos, dir, normal.Negative());
+      return EndSidePos(pos, dir, normal.Negative());
     }
 
     private Vector EndSidePos(TilePos pos, TileDir dir, TileDir normal) {
