@@ -11,8 +11,10 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       offset = 0;
       TileDir dir = path[offset].DirOut;
 
+      double minAngle = (path[offset].DirOut == path[offset].DirIn) ? (11 * Math.PI / 18) : (16 * Math.PI / 18);
+
       double angle = car.GetAngleTo(car.X + dir.X, car.Y + dir.Y);
-      if (Math.Abs(angle) > (11 * Math.PI / 18)) {
+      if (Math.Abs(angle) > minAngle) {
         return true;
       }
 

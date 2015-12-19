@@ -33,7 +33,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       Vector endDir = new Vector(dirEnd.X - dirMove.X, dirEnd.Y - dirMove.Y).Normalize();
 
       calculator.setupAngleReach(endDir);
-      calculator.setupPassageLine(GetWayEnd(endTile, dirEnd), new Vector(dirMove.X, dirMove.Y), 0.75);
+      calculator.setupPassageLine(GetWayEnd(endTile, dirEnd, 1.0), new Vector(dirEnd.X + dirMove.X, dirEnd.Y + dirMove.Y).Normalize(), 0.75);
 
       if (0 != offset) {
         calculator.setupAdditionalPoints(additionalPoints);

@@ -8,8 +8,8 @@ namespace RussianAICup2015Car.Sources.Physic {
   public class MovingCalculator {
     private static readonly int maxCheckRotateIterationCount = 80;
     private static readonly int maxIterationCount = 180;
-    private static readonly int maxCheckCrashIterationCount = 36;//800/22 = 36
-    private static readonly int maxCheckMoveCrashIterationCount = 60;
+    private static readonly int maxCheckCrashIterationCount = 25;
+    private static readonly int maxCheckMoveCrashIterationCount = 80;
 
     private Car car;
     private Game game;
@@ -140,7 +140,9 @@ namespace RussianAICup2015Car.Sources.Physic {
 
       if (!hasReserveTicks(iterCar, needDirAngle)) {
         IPhysicEvent mapBrakeCrash = calculateTurnMapCrashEvents(iterCar, needDirAngle, true);
-        if (!moveResult.IsBrake || null == mapBrakeCrash || (checkStrongParallel(mapBrakeCrash) && mapBrakeCrash.TickCome < 10)) {
+        //bool endMove = checkStrongParallel(mapBrakeCrash);
+        bool nearEndAndCrash = (null != mapBrakeCrash && mapBrakeCrash.TickCome < 1 && null != passageLine && passageLine.TickCome < 20);
+        if (null == mapBrakeCrash || nearEndAndCrash) {
           moveResult.WheelTurn = new PCar(car, game).WheelTurnForEndZeroWheelTurn(needDirAngle.Angle, speedSign);
         }
       }
@@ -247,7 +249,7 @@ namespace RussianAICup2015Car.Sources.Physic {
       Vector sideNormal = crashInfo.Item2;
 
       bool isStrongParallel = Math.Abs(Vector.sincos(car.Angle).Dot(sideNormal)) < Math.Sin(Math.PI / 18);//10 degrees
-      isStrongParallel &= Math.Abs(mapCrash.CarCome.Dir.Dot(sideNormal)) < Math.Sin(Math.PI / 9);//10 degrees
+      isStrongParallel &= Math.Abs(mapCrash.CarCome.Dir.Dot(sideNormal)) < Math.Sin(Math.PI / 18);//10 degrees
 
       return isStrongParallel;
     }
@@ -334,7 +336,7 @@ namespace RussianAICup2015Car.Sources.Physic {
         return true;
       }
 
-      if (tick > 5) {
+      if (tick > 10) {
         physicCar.setBrake(false);
       }
 
