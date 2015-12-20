@@ -133,7 +133,7 @@ namespace RussianAICup2015Car.Sources.Physic {
       if (null != passageLine && null != outLine) {
         int speedReachTick = null != speedReach ? speedReach.TickCome : maxIterationCount;
 
-        if (speedReachTick > outLine.TickCome) {
+        if (speedReachTick * iterCar.CalculateBrakeFactor() > outLine.TickCome) {
           moveResult.IsBrake = car.Speed() > Constant.MinBrakeSpeed;
         }
       }
