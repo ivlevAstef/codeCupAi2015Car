@@ -233,15 +233,17 @@ namespace RussianAICup2015Car.Sources.Physic {
 
       IPhysicEvent passageLine = events.ComeContaints(PhysicEventType.PassageLine) ? events.GetEvent(PhysicEventType.PassageLine) : null;
       IPhysicEvent mapCrash = events.ComeContaints(PhysicEventType.MapCrash) ? events.GetEvent(PhysicEventType.MapCrash) : null;
+      IPhysicEvent objectsCrash = events.ComeContaints(PhysicEventType.ObjectsCrash) ? events.GetEvent(PhysicEventType.ObjectsCrash) : null;
+      IPhysicEvent crash = (null != objectsCrash && objectsCrash.TickCome > 1) ? objectsCrash : mapCrash;
 
-      if (null != mapCrash) {
+      if (null != crash) {
         int tickToPassageLine = (null != passageLine) ? passageLine.TickCome : maxIterationCount;
 
-        if (mapCrash.TickCome < tickToPassageLine) {
+        if (crash.TickCome < tickToPassageLine) {
           Vector dir = new Vector(dirMove.X, dirMove.Y);
 
-          PCar physicCar = mapCrash.CarCome;
-          Tuple<Vector, Vector> crashInfo = mapCrash.infoCome as Tuple<Vector, Vector>;
+          PCar physicCar = crash.CarCome;
+          Tuple<Vector, Vector> crashInfo = crash.infoCome as Tuple<Vector, Vector>;
           Logger.instance.Assert(null != crashInfo, "Can't get crash info");
           Vector sideNormal = crashInfo.Item2;
 
@@ -252,7 +254,7 @@ namespace RussianAICup2015Car.Sources.Physic {
 
           bool notCurrentTurnSide = null != needDirAngle && sideNormal.Dot(needDirAngle) > 0;
 
-          if (!checkStrongParallel(mapCrash) || notCurrentTurnSide) {
+          if (!checkStrongParallel(crash) || notCurrentTurnSide) {
             moveResult.WheelTurn = car.WheelTurn - speedSign * Math.Sign(angle) * game.CarWheelTurnChangePerTick;
           }
 
@@ -260,7 +262,7 @@ namespace RussianAICup2015Car.Sources.Physic {
           isParallel |= physicCar.Dir.Dot(sideNormal).LessDotWithAngle(Math.PI / 9);//20 degrees
 
           int ticksToZeroEnginePower = (int)(Math.Abs(car.EnginePower) / game.CarEnginePowerChangePerTick);
-          if (!isParallel && speedSign > 0 && mapCrash.TickCome < ticksToZeroEnginePower) {
+          if (!isParallel && speedSign > 0 && crash.TickCome < ticksToZeroEnginePower) {
             if (moveResult.EnginePower > 0.5) {
               moveResult.EnginePower -= game.CarEnginePowerChangePerTick;
             }
@@ -433,6 +435,10 @@ namespace RussianAICup2015Car.Sources.Physic {
         new MapCrashEvent()
       };
 
+      if (null != moverSelfMapCrashEvent) {
+        pEvents.Add(moverSelfMapCrashEvent.Copy());
+      }
+
       if (null != passageLineEvent) {
         pEvents.Add(passageLineEvent.Copy());
       }
@@ -454,7 +460,7 @@ namespace RussianAICup2015Car.Sources.Physic {
 
       //physicCar.setBrake(false);
 
-      return pEvents.ComeContaints(PhysicEventType.PassageLine) || pEvents.ComeContaints(PhysicEventType.MapCrash) || pEvents.ComeContaints(PhysicEventType.ObjectsCrash);
+      return pEvents.ComeContaints(PhysicEventType.PassageLine) || pEvents.ComeContaints(PhysicEventType.MapCrash);
     }
 
     ///Other
