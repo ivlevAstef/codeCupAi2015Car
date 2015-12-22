@@ -107,6 +107,8 @@
     <Compile Include="Sources\A_UseNitroAction.cs" />
     <Compile Include="Sources\P_PhysicMoveFunctions.cs" />
     <Compile Include="Sources\P_PhysicTire.cs" />
+    <Compile Include="Sources\Visualization\Debug.cs" />
+    <Compile Include="Sources\Visualization\VisualClient.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
