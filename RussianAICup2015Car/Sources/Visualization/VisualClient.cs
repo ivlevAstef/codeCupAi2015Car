@@ -1,142 +1,89 @@
-using System.IO;
+using System;
 using System.Net.Sockets;
+using System.IO;
 using System.Text;
+using System.Globalization;
 
-namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk
-{
-    public sealed class VisualClient
-    {
-        private const int BUFFER_SIZE_BYTES = 1 << 20;
+namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
 
-        private readonly TcpClient _client;
-        private readonly BinaryWriter _writer;
+  // цвет нужно задавать hex-числом, например 0xABCDEF, AB - red, CD - green, EF - blue, каждый цвет - число из двух hex-цифр в диапазоне от 00 до FF
+  public class VisualClient {
+    
+    private TcpClient client;
+    private StreamWriter writer;
 
-        public VisualClient(string host, int port)
-        {
-            _client = new TcpClient(host, port)
-            {
-                SendBufferSize = BUFFER_SIZE_BYTES,
-                ReceiveBufferSize = BUFFER_SIZE_BYTES,
-                NoDelay = true
-            };
-
-            _writer = new BinaryWriter(_client.GetStream());
-        }
-
-        //---------------------------------------------------------------------
-        // Public
-        //---------------------------------------------------------------------
-
-        /// <summary>
-        /// Start queueing commands to be displayed either before main drawing
-        /// </summary>
-        public void BeginPre()
-        {
-            SendCommand("begin pre");
-        }
-
-        /// <summary>
-        /// Start queueing commands to be displayed either after main drawing
-        /// </summary>
-        public void BeginPost()
-        {
-            SendCommand("begin post");
-        }
-
-        /// <summary>
-        /// Mark either "pre" queue of commands as ready to be displayed
-        /// </summary>
-        public void EndPre()
-        {
-            SendCommand("end pre");
-        }
-
-        /// <summary>
-        /// Mark either "post" queue of commands as ready to be displayed
-        /// </summary>
-        public void EndPost()
-        {
-            SendCommand("end post");
-        }
-
-        /// <summary>
-        /// Draw a circle at (x, y) with radius r and color color
-        /// </summary>
-        public void Circle(double x, double y, float radius, float r = 0f, float g = 0f, float b = 0f)
-        {
-            SendCommand("circle {x} {y} {radius} {r} {g} {b}");
-        }
-
-        /// <summary>
-        /// Draw a filled circle at (x, y) with radius r and color color
-        /// </summary>
-        public void FillCircle(double x, double y, float radius, float r = 0f, float g = 0f, float b = 0f)
-        {
-            SendCommand("fill_circle {x} {y} {radius} {r} {g} {b}");
-        }
-
-        /// <summary>
-        /// Draw a rect with corners at (x, y) to (x, y) with color color
-        /// </summary>
-        public void Rect(double x1, double y1, double x2, double y2, float r = 0f, float g = 0f, float b = 0f)
-        {
-            SendCommand("rect {x1} {y1} {x2} {y2} {r} {g} {b}");
-        }
-
-        /// <summary>
-        /// Draw a filled rect with corners at (x1, y1) to (x2, y2) with color color
-        /// </summary>
-        public void FillRect(double x1, double y1, double x2, double y2, float r = 0f, float g = 0f, float b = 0f)
-        {
-            SendCommand("fill_rect {x1} {y1} {x2} {y2} {r} {g} {b}");
-        }
-
-        /// <summary>
-        /// Draw a line from (x1, y1) to (x2, y2) with color color
-        /// </summary>
-        public void Line(double x1, double y1, double x2, double y2, float r = 0f, float g = 0f, float b = 0f)
-        {
-            SendCommand("line {x1} {y1} {x2} {y2} {r} {g} {b}");
-        }
-
-        /// <summary>
-        /// Show msg at coordinates (x, y) with color color
-        /// </summary>
-        public void Text(double x, double y, string msg, float r = 0f, float g = 0f, float b = 0f)
-        {
-            SendCommand("text {x} {y} {msg} {r} {g} {b}");
-        }
-
-        //---------------------------------------------------------------------
-        // Helpers
-        //---------------------------------------------------------------------
-
-        private void SendCommand(string command)
-        {
-            WriteString(command + "\n");
-            _writer.Flush();
-        }
-
-        private void WriteString(string value)
-        {
-            if (value == null)
-            {
-                WriteInt(-1);
-                return;
-            }
-
-            var bytes = Encoding.UTF8.GetBytes(value);
-            _writer.Write(bytes, 0, bytes.Length);
-        }
-
-        private void WriteInt(int value)
-        {
-            _writer.Write(value);
-        }
-
-        public void Close()
-        {
-            _client.Close();
-        }
+    public VisualClient(string host, int port) {
+      Connect(host, port);
     }
+
+    public void Connect(string host, int port) {
+      client = new TcpClient(host, port);
+    }
+
+    public void Disconnect() {
+      client.Close();
+    }
+
+    private void sendCommand(string command) {
+      command = command.Replace(',', '.');
+
+      if (client != null) {
+        if (writer == null) {
+          writer = new StreamWriter(client.GetStream (), Encoding.ASCII);
+        }
+        writer.WriteLine(command);
+      }
+      System.Console.WriteLine(command);
+    }
+
+    public void BeginPre() {
+      sendCommand("begin pre");
+    }
+
+    public void BeginPost() {
+      sendCommand("begin post");
+    }
+  
+    public void EndPre() {
+      sendCommand("end pre");
+    }
+
+    public void EndPost() {
+      sendCommand("end post");
+    }
+
+    private string encodeColor(int color) {
+      int red = (color & 0xFF0000) >> 16;
+      int green = (color & 0x00FF00) >> 8;
+      int blue = color & 0x0000FF;
+
+      return String.Format("{0} {1} {2}", (double)red / 256.0, (double)green / 256.0, (double)blue / 256.0);
+    }
+
+    public void Circle(double x, double y, double radius, int color) {
+      sendCommand(String.Format("circle {0} {1} {2} {3}", x, y, radius, encodeColor(color)));
+    }
+
+    public void FillCircle(double x, double y, double radius, int color) {
+      sendCommand(String.Format("fill_circle {0} {1} {2} {3}", x, y, radius, encodeColor(color)));
+    }
+
+    public void Rect(double x1, double y1, double x2, double y2, int color) {
+      sendCommand(String.Format("rect {0} {1} {2} {3} {4}", x1, y1, x2, y2, encodeColor(color)));
+    }
+
+    public void FillRect(double x1, double y1, double x2, double y2, int color) {
+      sendCommand(String.Format("fill_rect {0} {1} {2} {3} {4}", x1, y1, x2, y2, encodeColor(color)));
+    }
+
+    public void Line(double x1, double y1, double x2, double y2, int color) {
+      sendCommand(String.Format("line {0} {1} {2} {3} {4}", x1, y1, x2, y2, encodeColor(color)));
+    }
+
+    public void Print(double x, double y, string msg, int color = 0) {
+      sendCommand(String.Format("text {0} {1} {2} {3}", x, y, msg, encodeColor(color)));
+    }
+  }
+
 }
+

@@ -8,12 +8,15 @@ using RussianAICup2015Car.Sources.Actions;
 using RussianAICup2015Car.Sources.Actions.Moving;
 using RussianAICup2015Car.Sources.Map;
 using RussianAICup2015Car.Sources.Physic;
+using System.Threading;
+using System.Globalization;
 
 
 namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
   public sealed class MyStrategy : IStrategy {
     private LiMap map = new LiMap();
     private Path path = new Path();
+    private VisualClient client = null;
 
     private Dictionary<ActionType, IAction> actions = new Dictionary<ActionType, IAction> {
       { ActionType.InitialFreeze, new InitialFreezeAction()},
@@ -54,13 +57,21 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       ActionType.Forward,
     };
 
+
+
     public void Move(Car car, World world, Game game, Move move) {
+      if (null == client && world.Tick > game.InitialFreezeDurationTicks) {
+        client = new VisualClient("localhost", 13579);
+      }
+
       setupEnvironments(car, world, game, move);
 
       CarMovedPath.Instance.Update(car);
 
       GlobalMap.Instance.Update();
       path.CalculatePath(map.FirstCellWithTransitions(Constant.PathMaxDepth), map.HasUnknown);
+
+      drawPath();
 
       IAction callAction = null;
 
@@ -131,6 +142,20 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
 
       foreach (AdditionalPoints action in additionalPointsActions) {
         action.setupEnvironment(car, world, game, path);
+      }
+    }
+
+    private void drawPath() {
+      if (null != client) {
+        client.BeginPre();
+
+        for (int i = 0; i < path.Count; i++) {
+          Vector p1 = path[i].Pos.ToVector(0, 0);
+          Vector p2 = path[i].Pos.ToVector(1, 1);
+          client.FillRect(p1.X, p1.Y, p2.X, p2.Y, 0xEEFFEE);
+        }
+
+        client.EndPre();
       }
     }
   }
