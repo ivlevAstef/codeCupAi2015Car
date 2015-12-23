@@ -10,6 +10,7 @@ using RussianAICup2015Car.Sources.Map;
 using RussianAICup2015Car.Sources.Physic;
 using System.Threading;
 using System.Globalization;
+using RussianAICup2015Car.Sources.Visualization;
 
 
 namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
@@ -64,6 +65,10 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
         client = new VisualClient("localhost", 13579);
       }
 
+      if (null != client) {
+        client.BeginPre();
+      }
+
       setupEnvironments(car, world, game, move);
 
       CarMovedPath.Instance.Update(car);
@@ -85,11 +90,6 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
 
       Logger.instance.Assert(null != callAction, String.Format("Can't find action for current state on tick:{0}", world.Tick));
 
-      if (null == callAction) { //just in case for release.
-        move.WheelTurn = 1.0;
-        return;
-      }
-
       callAction.setupAdditionalPoints(calculateAdditionalPoints());
       callAction.execute(move);
 
@@ -97,6 +97,10 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
         if (actions[actionType].valid()) {
           actions[actionType].execute(move);
         }
+      }
+
+      if (null != client) {
+        client.EndPre();
       }
 
       Logger.instance.Debug("Car Speed: {0:F} Car Angle:{1:F3}", car.Speed(), car.Angle);
@@ -137,7 +141,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
       path.SetupEnvironment(car, GlobalMap.Instance, world, game);
 
       foreach (IAction action in actions.Values) {
-        action.setupEnvironment(car, world, game, path);
+        action.setupEnvironment(car, world, game, path, client);
       }
 
       foreach (AdditionalPoints action in additionalPointsActions) {
@@ -147,15 +151,11 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
 
     private void drawPath() {
       if (null != client) {
-        client.BeginPre();
-
         for (int i = 0; i < path.Count; i++) {
           Vector p1 = path[i].Pos.ToVector(0, 0);
           Vector p2 = path[i].Pos.ToVector(1, 1);
           client.FillRect(p1.X, p1.Y, p2.X, p2.Y, 0xEEFFEE);
         }
-
-        client.EndPre();
       }
     }
   }

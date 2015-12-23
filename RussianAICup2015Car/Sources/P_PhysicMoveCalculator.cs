@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System;
 
 using RussianAICup2015Car.Sources.Common;
+using RussianAICup2015Car.Sources.Visualization;
 
 namespace RussianAICup2015Car.Sources.Physic {
   public class MovingCalculator {
@@ -14,6 +15,7 @@ namespace RussianAICup2015Car.Sources.Physic {
     private Car car;
     private Game game;
     private World world;
+    private VisualClient vClient;
 
     private PassageLineEvent passageLineEvent = null;
     private OutLineEvent outLineEvent = null;
@@ -31,10 +33,11 @@ namespace RussianAICup2015Car.Sources.Physic {
 
     private double speedSign = 1;
 
-    public void setupEnvironment(Car car, Game game, World world) {
+    public void setupEnvironment(Car car, Game game, World world, VisualClient vClient) {
       this.car = car;
       this.game = game;
       this.world = world;
+      this.vClient = vClient;
 
       this.speedSign = Math.Sign(Vector.sincos(car.Angle).Dot(new Vector(car.SpeedX, car.SpeedY)));
     }
@@ -50,10 +53,25 @@ namespace RussianAICup2015Car.Sources.Physic {
       this.needPos = null;
     }
 
-    public void setupPassageLine(Vector pos, Vector dir, double accuracity) {
+    public void setupPassageLine(Vector pos, Vector normal, double accuracity) {
       double oneLineSize = (game.TrackTileSize - 2 * game.TrackTileMargin) / 4;
-      passageLineEvent = new PassageLineEvent(dir, pos, accuracity * oneLineSize);
-      outLineEvent = new OutLineEvent(dir, pos, accuracity * oneLineSize);
+      passageLineEvent = new PassageLineEvent(normal, pos, accuracity * oneLineSize);
+      outLineEvent = new OutLineEvent(normal, pos, accuracity * oneLineSize);
+
+      if (null != vClient) {
+        Vector dir = normal.PerpendicularLeft();
+        Vector p1 = pos + dir * 2 * game.TrackTileSize;
+        Vector p2 = pos - dir * game.TrackTileSize;
+        vClient.Line(p1.X, p1.Y, p2.X, p2.Y, 0xFF7F7F);
+
+        p1 = pos + dir * 2 * game.TrackTileSize + dir.Perpendicular() * accuracity * oneLineSize;
+        p2 = pos - dir * game.TrackTileSize + dir.Perpendicular() * accuracity * oneLineSize;
+        vClient.Line(p1.X, p1.Y, p2.X, p2.Y, 0xFF7FFF);
+
+        p1 = pos + dir * 2 * game.TrackTileSize - dir.Perpendicular() * accuracity * oneLineSize;
+        p2 = pos - dir * game.TrackTileSize - dir.Perpendicular() * accuracity * oneLineSize;
+        vClient.Line(p1.X, p1.Y, p2.X, p2.Y, 0xFF7FFF);
+      }
     }
 
     public void setupAngleReach(Vector angleDir) {
@@ -98,6 +116,7 @@ namespace RussianAICup2015Car.Sources.Physic {
 
     private void move(Move moveResult) {
       PCar physicCar = new PCar(car, game);
+      physicCar.SetupVisualClient(vClient, 0x0000FF);
       physicCar.setEnginePower(enginePowerSign);
 
       HashSet<IPhysicEvent> events = calculateMoveEvents(physicCar);
@@ -117,6 +136,7 @@ namespace RussianAICup2015Car.Sources.Physic {
 
     private void turn(Move moveResult, Vector needDirAngle) {
       PCar iterCar = new PCar(car, game);
+      iterCar.SetupVisualClient(vClient, 0x0000FF);
       iterCar.setEnginePower(enginePowerSign);
 
       Vector endPoint = endTile.ToVector(1 - dirMove.X, 1 - dirMove.Y);
@@ -188,7 +208,7 @@ namespace RussianAICup2015Car.Sources.Physic {
       PCar car = new PCar(iterCar);
 
       for (int tick = 0; tick < 5; tick++) {
-        HashSet<IPhysicEvent> events = calculateTurnEvents(car, needDirAngle);
+        HashSet<IPhysicEvent> events = calculateTurnOutLineEvents(car, needDirAngle);
 
         if (events.ComeContaints(PhysicEventType.OutLine)) {
           return false;
@@ -313,6 +333,7 @@ namespace RussianAICup2015Car.Sources.Physic {
         }
 
         PCar physicCar = new PCar(car, game);
+        physicCar.SetupVisualClient(vClient, 0xAAAAFF);
         PhysicEventsCalculator.calculateEvents(physicCar, new MoveToPoint(point, needAngle), pEvents, moveToAddPointEventCheckEnd);
 
         if (pEvents.ComeContaints(PhysicEventType.MapCrash) || pEvents.ComeContaints(PhysicEventType.ObjectsCrash) || 
@@ -352,6 +373,7 @@ namespace RussianAICup2015Car.Sources.Physic {
       }
 
       PCar physicCar = new PCar(iterCar);
+      physicCar.SetupVisualClient(vClient, 0x7F7F44);
       useBrakeForTurn = isBrake;
       physicCar.setBrake(isBrake);
       PhysicEventsCalculator.calculateEvents(physicCar, new MoveToAngleFunction(needDirAngle.Angle), pEvents, calculateTurnMapCrashEventCheckEnd);
@@ -380,6 +402,7 @@ namespace RussianAICup2015Car.Sources.Physic {
       };
 
       PCar physicCar = new PCar(iterCar);
+      physicCar.SetupVisualClient(vClient, 0x7FFF7F);
       PhysicEventsCalculator.calculateEvents(physicCar, new MoveToAngleFunction(needDirAngle.Angle), pEvents, calculateTurnEventCheckEnd);
 
       if (!pEvents.Containts(PhysicEventType.SpeedReach)) {
@@ -389,16 +412,22 @@ namespace RussianAICup2015Car.Sources.Physic {
       return pEvents;
     }
 
+    private HashSet<IPhysicEvent> calculateTurnOutLineEvents(PCar iterCar, Vector needDirAngle) {
+      HashSet<IPhysicEvent> pEvents = new HashSet<IPhysicEvent> {
+        outLineEvent.Copy()
+      };
+
+      PCar physicCar = new PCar(iterCar);
+      PhysicEventsCalculator.calculateEvents(physicCar, new MoveToAngleFunction(needDirAngle.Angle), pEvents, calculateTurnEventCheckEnd);
+
+      return pEvents;
+    }
+
     private bool calculateTurnEventCheckEnd(PCar physicCar, HashSet<IPhysicEvent> pEvents, int tick) {
       if (tick > maxIterationCount) {
         return true;
       }
-
-      if (pEvents.ComeContaints(PhysicEventType.AngleReach) && !pEvents.Containts(PhysicEventType.SpeedReach)) {
-        pEvents.Add(new SpeedReachEvent());
-      }
-
-      return pEvents.ComeContaints(PhysicEventType.SpeedReach);
+      return pEvents.ComeContaints(PhysicEventType.OutLine);
     }
 
     ///Move
@@ -412,6 +441,7 @@ namespace RussianAICup2015Car.Sources.Physic {
       }
 
       PCar physicCar = new PCar(iterCar);
+      physicCar.SetupVisualClient(vClient, 0x7FFF7F);
       /*if (null != needPos) {
         PhysicEventsCalculator.calculateEvents(physicCar, new MoveToAngleFunction(Math.Atan2(dirMove.Y, dirMove.X)), pEvents, calculateMoveEventCheckEnd);
       } else {*/
@@ -444,6 +474,7 @@ namespace RussianAICup2015Car.Sources.Physic {
       }
 
       PCar physicCar = new PCar(car, game);
+      physicCar.SetupVisualClient(vClient, 0xFF0000);
       physicCar.setEnginePower(currentMove.EnginePower);
       physicCar.setWheelTurn(0);//currentMove.WheelTurn
       physicCar.setBrake(currentMove.IsBrake);

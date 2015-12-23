@@ -40,7 +40,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       endPos.Y = car.Y * Math.Abs(dir.Y) + endPos.Y * Math.Abs(dir.X);
       
       Physic.MovingCalculator calculator = new Physic.MovingCalculator();
-      calculator.setupEnvironment(car, game, world);
+      calculator.setupEnvironment(car, game, world, vClient);
       calculator.setupMapInfo(dirMove, path[0].Pos, null);
       calculator.useBackward();
 

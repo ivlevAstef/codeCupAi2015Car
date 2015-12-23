@@ -4,6 +4,8 @@ using Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk.Model;
 using RussianAICup2015Car.Sources.Map;
 using RussianAICup2015Car.Sources.Common;
 using System;
+using RussianAICup2015Car.Sources.Visualization;
+
 
 namespace RussianAICup2015Car.Sources.Actions {
 
@@ -28,7 +30,7 @@ namespace RussianAICup2015Car.Sources.Actions {
   };
 
   public interface IAction {
-    void setupEnvironment(Car car, World world, Game game, Path path);
+    void setupEnvironment(Car car, World world, Game game, Path path, VisualClient vClient = null);
 
     void setupAdditionalPoints(List<Tuple<Vector, double>> additionalPoints);
 

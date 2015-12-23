@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using RussianAICup2015Car.Sources.Map;
 using RussianAICup2015Car.Sources.Common;
 using System;
+using RussianAICup2015Car.Sources.Visualization;
 
 namespace RussianAICup2015Car.Sources.Actions {
 
@@ -13,12 +14,14 @@ namespace RussianAICup2015Car.Sources.Actions {
     protected Game game = null;
     protected Path path = null;
     protected List<Tuple<Vector, double>> additionalPoints = null;
+    protected VisualClient vClient = null;
 
-    public void setupEnvironment(Car car, World world, Game game, Path path) {
+    public void setupEnvironment(Car car, World world, Game game, Path path, VisualClient vClient = null) {
       this.car = car;
       this.world = world;
       this.game = game;
       this.path = path;
+      this.vClient = vClient;
     }
 
     public void setupAdditionalPoints(List<Tuple<Vector, double>> additionalPoints) {

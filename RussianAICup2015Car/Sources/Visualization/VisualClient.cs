@@ -4,9 +4,8 @@ using System.IO;
 using System.Text;
 using System.Globalization;
 
-namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
+namespace RussianAICup2015Car.Sources.Visualization {
 
-  // цвет нужно задавать hex-числом, например 0xABCDEF, AB - red, CD - green, EF - blue, каждый цвет - число из двух hex-цифр в диапазоне от 00 до FF
   public class VisualClient {
     
     private TcpClient client;
@@ -33,7 +32,7 @@ namespace Com.CodeGame.CodeRacing2015.DevKit.CSharpCgdk {
         }
         writer.WriteLine(command);
       }
-      System.Console.WriteLine(command);
+      //System.Console.WriteLine(command);
     }
 
     public void BeginPre() {

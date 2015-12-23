@@ -51,6 +51,10 @@ namespace RussianAICup2015Car.Sources.Physic {
     private readonly double frictionAngle;
     private readonly double frictionMaxAngleSpeed;
 
+    private Visualization.VisualClient vClient = null;
+    private int vColor = 0xAAAAAA;
+    private int vTick = 0;
+
     public PCar(Car car, Game game) {
       this.car = car;
       this.game = game;
@@ -65,6 +69,11 @@ namespace RussianAICup2015Car.Sources.Physic {
       frictionMaxAngleSpeed = game.CarRotationFrictionFactor * dt;
 
       init();
+    }
+
+    public void SetupVisualClient(Visualization.VisualClient vClient, int color) {
+      this.vClient = vClient;
+      this.vColor = color;
     }
 
     public PCar(PCar physicCar) : this(physicCar.car, physicCar.game) {
@@ -152,6 +161,25 @@ namespace RussianAICup2015Car.Sources.Physic {
         angleSpeed -= limit(angleSpeed - baseAngleSpeed, frictionMaxAngleSpeed);
 
         dir = Vector.sincos(angle);
+      }
+
+      if (null != vClient) {
+        if (0 == vTick % 5) {
+          double w = car.Width * 0.5;
+          double h = car.Height * 0.5;
+          Vector p1 = pos + dir * w + dir.PerpendicularLeft() * h;
+          Vector p2 = pos + dir * w + dir.PerpendicularRight() * h;
+          Vector p3 = pos - dir * w + dir.PerpendicularRight() * h;
+          Vector p4 = pos - dir * w + dir.PerpendicularLeft() * h;
+
+          vClient.Line(p1.X, p1.Y, p2.X, p2.Y, vColor);
+          vClient.Line(p2.X, p2.Y, p3.X, p3.Y, vColor);
+          vClient.Line(p3.X, p3.Y, p4.X, p4.Y, vColor);
+          vClient.Line(p4.X, p4.Y, p1.X, p1.Y, vColor);
+
+          //vClient.Line(lastPos.X, lastPos.Y, pos.X, pos.Y, vColor);
+        }
+        vTick++;
       }
     }
 

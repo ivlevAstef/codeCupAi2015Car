@@ -15,7 +15,7 @@ namespace RussianAICup2015Car.Sources.Actions.Moving {
       TileDir dirMove = path[0].DirOut;
 
       Physic.MovingCalculator calculator = new Physic.MovingCalculator();
-      calculator.setupEnvironment(car, game, world);
+      calculator.setupEnvironment(car, game, world, vClient);
       calculator.setupMapInfo(dirMove, path[0].Pos, null);
 
       calculator.setupAngleReach(new Vector(dirMove.X, dirMove.Y));
