@@ -82,9 +82,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Sources\Common\SIALogger.cpp" />
     <ClCompile Include="Sources\MyStrategy.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Sources\Common\SIALogger.h" />
+    <ClInclude Include="Sources\Common\SIAPoint2D.h" />
+    <ClInclude Include="Sources\Common\SIASingleton.h" />
     <ClInclude Include="Sources\MyStrategy.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
