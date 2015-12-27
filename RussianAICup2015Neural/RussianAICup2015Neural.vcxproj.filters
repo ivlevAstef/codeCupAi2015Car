@@ -8,6 +8,9 @@
     <Filter Include="Sources\Common">
       <UniqueIdentifier>{5e2da49f-a8f0-41ce-a374-3254f68f0a81}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sources\Visualizator">
+      <UniqueIdentifier>{91539602-5e62-471e-b462-935f0df00f29}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Sources\MyStrategy.cpp">
@@ -15,6 +18,9 @@
     </ClCompile>
     <ClCompile Include="Sources\Common\SIALogger.cpp">
       <Filter>Sources\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Visualizator\Visualizator.cpp">
+      <Filter>Sources\Visualizator</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -29,6 +35,9 @@
     </ClInclude>
     <ClInclude Include="Sources\Common\SIAPoint2D.h">
       <Filter>Sources\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Visualizator\Visualizator.h">
+      <Filter>Sources\Visualizator</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

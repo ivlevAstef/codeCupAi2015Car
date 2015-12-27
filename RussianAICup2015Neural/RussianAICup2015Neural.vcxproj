@@ -84,12 +84,14 @@
   <ItemGroup>
     <ClCompile Include="Sources\Common\SIALogger.cpp" />
     <ClCompile Include="Sources\MyStrategy.cpp" />
+    <ClCompile Include="Sources\Visualizator\Visualizator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Sources\Common\SIALogger.h" />
     <ClInclude Include="Sources\Common\SIAPoint2D.h" />
     <ClInclude Include="Sources\Common\SIASingleton.h" />
     <ClInclude Include="Sources\MyStrategy.h" />
+    <ClInclude Include="Sources\Visualizator\Visualizator.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
