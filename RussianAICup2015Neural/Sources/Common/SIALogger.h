@@ -30,7 +30,7 @@
 //#define ENABLE_TRACE
 
 namespace SIA {       
-  class Logger : Singleton<Logger> {
+  class Logger {
   public:
    static void logToStream(const char* logLevel, const char* file, int line, const char* module, const char* message, ...);
   };

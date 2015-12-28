@@ -11,6 +11,9 @@
     <Filter Include="Sources\Visualizator">
       <UniqueIdentifier>{91539602-5e62-471e-b462-935f0df00f29}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sources\Map">
+      <UniqueIdentifier>{7677904b-1457-417c-8dc0-760c58dbe522}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Sources\MyStrategy.cpp">
@@ -21,6 +24,12 @@
     </ClCompile>
     <ClCompile Include="Sources\Visualizator\Visualizator.cpp">
       <Filter>Sources\Visualizator</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Map\ConnectionMap.cpp">
+      <Filter>Sources\Map</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Common\Extensions.cpp">
+      <Filter>Sources\Common</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -39,5 +48,17 @@
     <ClInclude Include="Sources\Visualizator\Visualizator.h">
       <Filter>Sources\Visualizator</Filter>
     </ClInclude>
+    <ClInclude Include="Sources\Map\ConnectionMap.h">
+      <Filter>Sources\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Common\Extensions.h">
+      <Filter>Sources\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Common\Constants.h">
+      <Filter>Sources\Common</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="RussianAICup2015Neural.licenseheader" />
   </ItemGroup>
 </Project>

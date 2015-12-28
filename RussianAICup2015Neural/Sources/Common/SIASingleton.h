@@ -24,6 +24,10 @@ namespace SIA
       ref(static_cast<Parent*>(this), true);
     }
 
+    Singleton(bool) {
+      ref(static_cast<Parent*>(this), true);
+    }
+
     static Parent& instance() {
       assert(nullptr != ref());
       return *ref();

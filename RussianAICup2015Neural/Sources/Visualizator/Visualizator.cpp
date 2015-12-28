@@ -75,7 +75,7 @@ Visualizator::Visualizator() : openSocket(-1) {
   
 }
 
-void Visualizator::sendCommand(const char* str) {
+void Visualizator::sendCommand(const char* str) const {
   if (-1 == openSocket) {
     return;
   }
@@ -92,23 +92,23 @@ void Visualizator::sendCommand(const char* str) {
   }
 }
 
-void Visualizator::beginPre() {
+void Visualizator::beginPre() const {
   sendCommand("begin pre\n");
 }
 
-void Visualizator::endPre() {
+void Visualizator::endPre() const {
   sendCommand("end pre\n");
 }
 
-void Visualizator::beginPost() {
+void Visualizator::beginPost() const {
   sendCommand("begin post\n");
 }
 
-void Visualizator::endPost() {
+void Visualizator::endPost() const {
   sendCommand("end post\n");
 }
 
-void Visualizator::writeWithColor(char* buf, int32_t color) {
+void Visualizator::writeWithColor(char* buf, int32_t color) const {
   size_t len = strlen(buf);
   float r = ((color & 0xFF0000) >> 16) / 256.0;
   float g = ((color & 0x00FF00) >> 8) / 256.0;
@@ -117,37 +117,37 @@ void Visualizator::writeWithColor(char* buf, int32_t color) {
   sendCommand(buf);
 }
 
-void Visualizator::circle(double x, double y, double r, int32_t color) {
+void Visualizator::circle(double x, double y, double r, int32_t color) const {
   char buf[BUF_SIZE] = {0};
   sprintf(buf, "circle %.3lf %.3lf %.3lf", x, y, r);
   writeWithColor(buf, color);
 }
 
-void Visualizator::fillCircle(double x, double y, double r, int32_t color) {
+void Visualizator::fillCircle(double x, double y, double r, int32_t color) const {
   char buf[BUF_SIZE] = {0};
   sprintf(buf, "fill_circle %.3lf %.3lf %.3lf", x, y, r);
   writeWithColor(buf, color);
 }
 
-void Visualizator::rect(double x1, double y1, double x2, double y2, int32_t color) {
+void Visualizator::rect(double x1, double y1, double x2, double y2, int32_t color) const {
   char buf[BUF_SIZE] = {0};
   sprintf(buf, "rect %.3lf %.3lf %.3lf %.3lf", x1, y1, x2, y2);
   writeWithColor(buf, color);
 }
 
-void Visualizator::fillRect(double x1, double y1, double x2, double y2, int32_t color) {
+void Visualizator::fillRect(double x1, double y1, double x2, double y2, int32_t color) const {
   char buf[BUF_SIZE] = {0};
   sprintf(buf, "fill_rect %.3lf %.3lf %.3lf %.3lf", x1, y1, x2, y2);
   writeWithColor(buf, color);
 }
 
-void Visualizator::line(double x1, double y1, double x2, double y2, int32_t color) {
+void Visualizator::line(double x1, double y1, double x2, double y2, int32_t color) const {
   char buf[BUF_SIZE] = {0};
   sprintf(buf, "line %.3lf %.3lf %.3lf %.3lf", x1, y1, x2, y2);
   writeWithColor(buf, color);
 }
 
-void Visualizator::text(double x, double y, const char* text, int32_t color) {
+void Visualizator::text(double x, double y, const char* text, int32_t color) const {
   char buf[BUF_SIZE] = {0};
   sprintf(buf, "text %.3lf %.3lf %s", x, y, text);
   writeWithColor(buf, color);
