@@ -9,21 +9,25 @@
 
 #include "ConnectionMap.h"
 #include "Common/Extensions.h"
+#include "Common/Constants.h"
+#include "Common/SIALogger.h"
 
-const int ConnectionMap::sMaxConnectionPointsInTile = 4;
+const SIA::Position ConnectionMap::sDirUp = SIA::Position(0, -1);
+const SIA::Position ConnectionMap::sDirDown = SIA::Position(0, 1);
+const SIA::Position ConnectionMap::sDirLeft = SIA::Position(-1, 0);
+const SIA::Position ConnectionMap::sDirRight = SIA::Position(1, 0);
 
 void ConnectionMap::update(const model::World& world) {
   createConnectionPoints(world);
 }
 
 int ConnectionMap::connectionPointsBySize(int width, int heigth) {
-  const int pT = sMaxConnectionPointsInTile;
-  return pT + (pT - 1) * (width + heigth - 2) + (pT - 2) * (width - 1) * (heigth - 1);
+  return connectionPointIndex(width - 1, heigth - 1, 1, 0);//last inadmissible index
 }
 
 void ConnectionMap::createConnectionPoints(const model::World& world) {
   points.clear();
-  points.reserve(connectionPointsBySize(world.getWidth(), world.getHeight()));
+  points.resize(connectionPointsBySize(world.getWidth(), world.getHeight()));
 
   for (int x = 0; x < world.getWidth(); x++) {
     for (int y = 0; y < world.getHeight(); y++) {
@@ -36,89 +40,74 @@ void ConnectionMap::fillConnectionPointsByTile(const model::World& world, int x,
   const auto tiles = world.getTilesXY();
   const model::TileType tileType = tiles[x][y];
 
-  SIA::Vector anchorPoints[sMaxConnectionPointsInTile];
-  const size_t anchorPointsCount = anchorsByTileTyle(tileType, anchorPoints);
+  auto directions = directionsByTileType(tileType);
 
-  for (size_t i = 0; i < anchorPointsCount; i++) {
-    ConnectionPoint point = vectorByAnchor(x, y, anchorPoints[i].x, anchorPoints[i].y);
-    points.push_back(point);
+  for (const SIA::Position& dir : directions) {
+    size_t index = connectionPointIndex(x, y, dir.x, dir.y);
+    SIAAssert(0 <= index && index < points.size());
+
+    points[index] = toConnectionPoint(x, y, dir.x, dir.y);
   }
 }
 
-#define UP 0.5, 0
-#define DOWN 0.5, 1
-#define LEFT 0, 0.5
-#define RIGHT 1, 0.5
+const std::vector<SIA::Position>& ConnectionMap::directionsByTileType(const model::TileType& type) {
+  static const std::vector<SIA::Position> empty;
+  static const std::vector<SIA::Position> vertical {sDirUp, sDirDown};
+  static const std::vector<SIA::Position> horizontal {sDirLeft, sDirRight};
+  static const std::vector<SIA::Position> leftTop {sDirRight, sDirDown};
+  static const std::vector<SIA::Position> rightTop {sDirLeft, sDirDown};
+  static const std::vector<SIA::Position> leftBottom {sDirRight, sDirUp};
+  static const std::vector<SIA::Position> rightBottom {sDirLeft, sDirUp};
+  static const std::vector<SIA::Position> leftT {sDirLeft, sDirUp, sDirDown};
+  static const std::vector<SIA::Position> rightT {sDirRight, sDirUp, sDirDown};
+  static const std::vector<SIA::Position> topT {sDirUp, sDirLeft, sDirRight};
+  static const std::vector<SIA::Position> bottomT {sDirDown, sDirLeft, sDirRight};
+  static const std::vector<SIA::Position> cross {sDirUp, sDirDown, sDirLeft, sDirRight};
 
-size_t ConnectionMap::anchorsByTileTyle(const model::TileType& type, SIA::Vector* data) {
   switch (type) {
     case model::EMPTY:
-      return 0;
+      return empty;
     case model::VERTICAL:
-      data[0].set(UP);
-      data[1].set(DOWN);
-      return 2;
+      return vertical;
     case model::HORIZONTAL:
-      data[0].set(LEFT);
-      data[1].set(RIGHT);
-      return 2;
+      return horizontal;
     case model::LEFT_TOP_CORNER:
-      data[0].set(RIGHT);
-      data[1].set(DOWN);
-      return 2;
+      return leftTop;
     case model::RIGHT_TOP_CORNER:
-      data[0].set(LEFT);
-      data[1].set(DOWN);
-      return 2;
+      return rightTop;
     case model::LEFT_BOTTOM_CORNER:
-      data[0].set(RIGHT);
-      data[1].set(UP);
-      return 2;
+      return leftBottom;
     case model::RIGHT_BOTTOM_CORNER:
-      data[0].set(LEFT);
-      data[1].set(UP);
-      return 2;
+      return rightBottom;
     case model::LEFT_HEADED_T:
-      data[0].set(LEFT);
-      data[1].set(UP);
-      data[2].set(DOWN);
-      return 3;
+      return leftT;
     case model::RIGHT_HEADED_T:
-      data[0].set(RIGHT);
-      data[1].set(UP);
-      data[2].set(DOWN);
-      return 3;
+      return rightT;
     case model::TOP_HEADED_T:
-      data[0].set(UP);
-      data[1].set(LEFT);
-      data[2].set(RIGHT);
-      return 3;
+      return topT;
     case model::BOTTOM_HEADED_T:
-      data[0].set(DOWN);
-      data[1].set(LEFT);
-      data[2].set(RIGHT);
-      return 3;
+      return bottomT;
     case model::CROSSROADS:
     case model::UNKNOWN:
-      data[0].set(LEFT);
-      data[1].set(RIGHT);
-      data[2].set(UP);
-      data[3].set(DOWN);
-      return 4;
+      return cross;
   }
 
-  return 0;
+  SIAAssertMsg(false, "Unknown type:%d", type);
+  return empty;
 }
-
-#undef UP
-#undef DOWN
-#undef LEFT
-#undef RIGHT
-
 
 void ConnectionMap::visualizationConnectionPoints(const Visualizator& visualizator, int32_t color) {
   static const double pointR = 10;
   for (ConnectionPoint point : points) {
     visualizator.fillCircle(point.x, point.y, pointR, color);
   }
+}
+
+ConnectionMap::ConnectionPoint ConnectionMap::toConnectionPoint(int x, int y, int dx, int dy) const {
+  return vectorByAnchor(x, y, (double)(dx + 1) * 0.5, (double)(dy + 1) * 0.5);
+}
+
+size_t ConnectionMap::connectionPointIndex(int x, int y, int dx, int dy) const {
+  const int width = Constants::instance().game.getWorldWidth();
+  return 2 * (x + y * width) + dx + 2 * ((-1 == dy) ? -(width - 1) : dy) - 1;
 }

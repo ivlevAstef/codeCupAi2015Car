@@ -14,7 +14,10 @@
 
 class ConnectionMap {
 private:
-  static const int sMaxConnectionPointsInTile;
+  static const SIA::Position sDirUp;
+  static const SIA::Position sDirDown;
+  static const SIA::Position sDirLeft;
+  static const SIA::Position sDirRight;
 
 public:
   void update(const model::World& world);
@@ -25,10 +28,13 @@ private:
   int connectionPointsBySize(int width, int heigth);
   void createConnectionPoints(const model::World& world);
   void fillConnectionPointsByTile(const model::World& world, int x, int y);
-  size_t anchorsByTileTyle(const model::TileType& type, SIA::Vector* data);
+  const std::vector<SIA::Position>& directionsByTileType(const model::TileType& type);
 
 private:
   typedef SIA::Vector ConnectionPoint;
+
+  ConnectionPoint toConnectionPoint(int x, int y, int dx, int dy) const;
+  size_t connectionPointIndex(int x, int y, int dx, int dy) const;
 
   std::vector<ConnectionPoint> points;
 
