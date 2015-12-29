@@ -25,6 +25,7 @@ void MyStrategy::move(const Car& car, const World& world, const Game& game, Move
   map.update(world);
 
   visualizator.beginPost();
+  map.visualizationConnectionJoins(visualizator, 0x000077);
   map.visualizationConnectionPoints(visualizator, 0x000000);
   visualizator.endPost();
 }
