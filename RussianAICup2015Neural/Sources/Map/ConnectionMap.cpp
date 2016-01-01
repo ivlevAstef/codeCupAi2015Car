@@ -72,7 +72,10 @@ void ConnectionMap::fillConnectionDataForTile(const model::World& world, size_t 
       }
       const SIA::Position& dir2 = directions[j];
 
-      ConnectionJoin join = {connectionPointIndex(x, y, dir2.x, dir2.y), 0, 0};
+      ConnectionJoin join = {0};
+      join.pointIndex = connectionPointIndex(x, y, dir2.x, dir2.y);
+      join.length = (dir1 - dir2).length2();
+      join.weight = 0;//TODO: set weight
       pointData.joins.push_back(join);
     }
   }
