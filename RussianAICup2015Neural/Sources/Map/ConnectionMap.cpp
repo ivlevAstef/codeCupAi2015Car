@@ -24,7 +24,7 @@ void ConnectionMap::update(const model::World& world) {
   createConnectionJoins(world);
 }
 
-int ConnectionMap::connectionPointsBySize(int width, int heigth) {
+int ConnectionMap::connectionPointsBySize(size_t width, size_t heigth) {
   return connectionPointIndex(width - 1, heigth - 1, 1, 0);//last inadmissible index
 }
 
@@ -39,15 +39,15 @@ void ConnectionMap::createConnectionPoints(const model::World& world) {
   }
 }
 
-void ConnectionMap::fillConnectionPointsByTile(const model::World& world, int x, int y) {
-  const auto tiles = world.getTilesXY();
-  const model::TileType tileType = tiles[x][y];
+void ConnectionMap::fillConnectionPointsByTile(const model::World& world, size_t x, size_t y) {
+  const auto& tiles = world.getTilesXY();
+  const model::TileType& tileType = tiles[x][y];
 
-  auto directions = directionsByTileType(tileType);
+  auto& directions = directionsByTileType(tileType);
 
   for (const SIA::Position& dir : directions) {
     size_t index = connectionPointIndex(x, y, dir.x, dir.y);
-    SIAAssert(0 <= index && index < points.size());
+    SIAAssert(index < points.size());
 
     points[index] = toConnectionPoint(x, y, dir.x, dir.y);
   }
@@ -66,21 +66,21 @@ void ConnectionMap::createConnectionJoins(const model::World& world) {
   }
 }
 
-void ConnectionMap::fillConnectionJoinsInTile(const model::World& world, int x, int y) {
-  const auto tiles = world.getTilesXY();
-  const model::TileType tileType = tiles[x][y];
+void ConnectionMap::fillConnectionJoinsInTile(const model::World& world, size_t x, size_t y) {
+  const auto& tiles = world.getTilesXY();
+  const model::TileType& tileType = tiles[x][y];
 
-  auto directions = directionsByTileType(tileType);
+  auto& directions = directionsByTileType(tileType);
 
   for (size_t i = 0; i < directions.size(); i++) {
     const SIA::Position& dir1 = directions[i];
     size_t index1 = connectionPointIndex(x, y, dir1.x, dir1.y);
-    SIAAssert(0 <= index1 && index1 < points.size());
+    SIAAssert(index1 < points.size());
 
     for (size_t j = i + 1; j < directions.size(); j++) {
       const SIA::Position& dir2 = directions[j];
       size_t index2 = connectionPointIndex(x, y, dir2.x, dir2.y);
-      SIAAssert(0 <= index2 && index2 < points.size());
+      SIAAssert(index2 < points.size());
 
       ConnectionJoin join(points.at(index1), points.at(index2));
       joinsByTiles[x][y].push_back(join);
@@ -88,15 +88,15 @@ void ConnectionMap::fillConnectionJoinsInTile(const model::World& world, int x, 
   }
 }
 
-const ConnectionJoins& ConnectionMap::getJoinsInTile(int x, int y) {
-  SIAAssert(0 <= x && x < joinsByTiles.size());
-  SIAAssert(0 <= y && y < joinsByTiles[x].size());
+const ConnectionJoins& ConnectionMap::getJoinsInTile(size_t x, size_t y) {
+  SIAAssert(x < joinsByTiles.size());
+  SIAAssert(y < joinsByTiles[x].size());
   return joinsByTiles[x][y];
 }
 
-const ConnectionJoins ConnectionMap::getNextJoinsFromPoint(const ConnectionPoint& point, int fromX, int fromY) {
-  SIAAssert(0 <= fromX && fromX < joinsByTiles.size());
-  SIAAssert(0 <= fromY && fromY < joinsByTiles[fromX].size());
+const ConnectionJoins ConnectionMap::getNextJoinsFromPoint(const ConnectionPoint& point, size_t fromX, size_t fromY) {
+  SIAAssert(fromX < joinsByTiles.size());
+  SIAAssert(fromY < joinsByTiles[fromX].size());
 
   SIA::Position delta = toDeltaByPoint(point, fromX, fromY);
 
@@ -165,7 +165,7 @@ ConnectionPoint ConnectionMap::toConnectionPoint(int x, int y, int dx, int dy) c
   return vectorByAnchor(x, y, (double)(dx + 1) * 0.5, (double)(dy + 1) * 0.5);
 }
 
-SIA::Position ConnectionMap::toDeltaByPoint(const ConnectionPoint& point, int fromX, int fromY) const {
+SIA::Position ConnectionMap::toDeltaByPoint(const ConnectionPoint& point, size_t fromX, size_t fromY) const {
   SIA::Vector center = vectorByAnchor(fromX, fromY, 0.5, 0.5);
   double dx = point.x - center.x;
   double dy = point.y - center.y;
@@ -191,9 +191,11 @@ ConnectionJoin::ConnectionJoin(const ConnectionPoint& p1, const ConnectionPoint&
   weight = 0;
 }
 
+
+#ifdef ENABLE_VISUALIZATOR
 void ConnectionMap::visualizationConnectionPoints(const Visualizator& visualizator, int32_t color) const {
   static const double pointR = 10;
-  for (ConnectionPoint point : points) {
+  for (const ConnectionPoint& point : points) {
     visualizator.fillCircle(point.x, point.y, pointR, color);
   }
 }
@@ -207,3 +209,5 @@ void ConnectionMap::visualizationConnectionJoins(const Visualizator& visualizato
     }
   }
 }
+
+#endif

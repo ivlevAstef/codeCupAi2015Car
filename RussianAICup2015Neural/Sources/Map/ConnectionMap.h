@@ -6,11 +6,18 @@
 //Copyright (c) SIA 2015. All Right Reserved.
 //
 
+#pragma once
+#ifndef _CONNECTION_MAP_H__
+#define _CONNECTION_MAP_H__
+
 #include "model/World.h"
 #include "model/Game.h"
 #include "Common/SIASingleton.h"
 #include "Common/SIAPoint2D.h"
+
+#ifdef ENABLE_VISUALIZATOR
 #include "Visualizator/Visualizator.h"
+#endif
 
 typedef SIA::Vector ConnectionPoint;
 struct ConnectionJoin;
@@ -28,26 +35,28 @@ private:
 public:
   void update(const model::World& world);
 
+  const ConnectionJoins& getJoinsInTile(size_t x, size_t y);
+  const ConnectionJoins getNextJoinsFromPoint(const ConnectionPoint& point, size_t fromX, size_t fromY);
+
+#ifdef ENABLE_VISUALIZATOR
   void visualizationConnectionPoints(const Visualizator& visualizator, int32_t color) const;
   void visualizationConnectionJoins(const Visualizator& visualizator, int32_t color) const;
-
-  const ConnectionJoins& getJoinsInTile(int x, int y);
-  const ConnectionJoins getNextJoinsFromPoint(const ConnectionPoint& point, int fromX, int fromY);
+#endif
 
 private:
-  int connectionPointsBySize(int width, int heigth);
+  int connectionPointsBySize(size_t width, size_t heigth);
 
   void createConnectionPoints(const model::World& world);
-  void fillConnectionPointsByTile(const model::World& world, int x, int y);
+  void fillConnectionPointsByTile(const model::World& world, size_t x, size_t y);
 
   void createConnectionJoins(const model::World& world);
-  void fillConnectionJoinsInTile(const model::World& world, int x, int y);
+  void fillConnectionJoinsInTile(const model::World& world, size_t x, size_t y);
 
   const std::vector<SIA::Position>& directionsByTileType(const model::TileType& type);
 
 private:
   ConnectionPoint toConnectionPoint(int x, int y, int dx, int dy) const;
-  SIA::Position toDeltaByPoint(const ConnectionPoint& point, int fromX, int fromY) const;
+  SIA::Position toDeltaByPoint(const ConnectionPoint& point, size_t fromX, size_t fromY) const;
   size_t connectionPointIndex(int x, int y, int dx, int dy) const;
 
   std::vector<ConnectionPoint> points;
@@ -86,3 +95,5 @@ private:
   const ConnectionPoint* p1;
   const ConnectionPoint* p2;
 };
+
+#endif

@@ -3,7 +3,6 @@
 #include "Common/SIALogger.h"
 #include "Common/Constants.h"
 
-#include "Visualizator/Visualizator.h"
 #include "Map/ConnectionMap.h"
 #include "Map/PathFinder.h"
 
@@ -27,8 +26,8 @@ void MyStrategy::move(const Car& car, const World& world, const Game& game, Move
   PathFinder path;
   bool found = path.findPath(car, world, map);
   SIAAssertMsg(found, "Can't found path.");
-  
 
+#ifdef ENABLE_VISUALIZATOR
   visualizator.beginPost();
 
   map.visualizationConnectionJoins(visualizator, 0x000077);
@@ -36,6 +35,7 @@ void MyStrategy::move(const Car& car, const World& world, const Game& game, Move
   path.visualizationPath(visualizator, 0xFF0000);
 
   visualizator.endPost();
+#endif
 }
 
 MyStrategy::MyStrategy() { }

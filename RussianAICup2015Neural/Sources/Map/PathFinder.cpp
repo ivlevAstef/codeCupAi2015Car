@@ -10,11 +10,13 @@
 #include "Common/SIALogger.h"
 
 bool PathFinder::findPath(const model::Car& car, const model::World& world, const ConnectionMap& map) {
-  return false;
+  return true;
 }
 
+#ifdef ENABLE_VISUALIZATOR
 void PathFinder::visualizationPath(const Visualizator& visualizator, int32_t color) const {
-  for (int i = 1; i < path.size(); i++) {
+  for (size_t i = 1; i < path.size(); i++) {
     visualizator.line(path[i - 1].x, path[i - 1].y, path[i].x, path[i].y, color);
   }
 }
+#endif

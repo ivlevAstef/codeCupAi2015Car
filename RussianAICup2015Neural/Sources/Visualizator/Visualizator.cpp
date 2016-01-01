@@ -6,23 +6,17 @@
 #include <BaseTsd.h>
 typedef SSIZE_T ssize_t;
 
-namespace {
-
-  ssize_t close(SOCKET s)
-  {
-    return closesocket(s);
-  }
-
-  ssize_t write(SOCKET s, const char *buf, int len, int flags = 0)
-  {
-    return send(s, buf, len, flags);
-  }
-
+ssize_t close(SOCKET s) {
+  return closesocket(s);
 }
 
-#pragma warning(disable: 4244 4996)
+ssize_t write(SOCKET s, const char *buf, int len, int flags = 0) {
+  return send(s, buf, len, flags);
+}
+
+#pragma warning(disable: 4996)
 #else
-# include <sys/socket.h>
+#include <sys/socket.h>
 #include <netdb.h>
 #include <unistd.h>
 #endif
@@ -35,7 +29,7 @@ std::string Visualizator::DEFAULT_HOST = "127.0.0.1";
 std::string Visualizator::DEFAULT_PORT = "13579";
 const int Visualizator::BUF_SIZE = 1024;
 
-Visualizator::Visualizator() : openSocket(-1) {
+Visualizator::Visualizator() : openSocket(INVALID_SOCKET) {
   /* Obtain address(es) matching host/port */
   addrinfo hints;
   memset(&hints, 0, sizeof(addrinfo));
@@ -54,7 +48,7 @@ Visualizator::Visualizator() : openSocket(-1) {
 
   for (addrinfo* rp = result; NULL != rp; rp = rp->ai_next) {
     SOCKET sfd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
-    if (-1 == sfd) {
+    if (INVALID_SOCKET == sfd) {
       continue;
     }
 
@@ -69,14 +63,14 @@ Visualizator::Visualizator() : openSocket(-1) {
 
   freeaddrinfo(result);
 
-  if (-1 == openSocket) {/* No address succeeded */
+  if (INVALID_SOCKET == openSocket) {/* No address succeeded */
     fprintf(stderr, "Could not connect\n");
   }
   
 }
 
 void Visualizator::sendCommand(const char* str) const {
-  if (-1 == openSocket) {
+  if (INVALID_SOCKET == openSocket) {
     return;
   }
 
@@ -110,9 +104,9 @@ void Visualizator::endPost() const {
 
 void Visualizator::writeWithColor(char* buf, int32_t color) const {
   size_t len = strlen(buf);
-  float r = ((color & 0xFF0000) >> 16) / 256.0;
-  float g = ((color & 0x00FF00) >> 8) / 256.0;
-  float b = ((color & 0x0000FF)) / 256.0;
+  double r = ((color & 0xFF0000) >> 16) / 256.0;
+  double g = ((color & 0x00FF00) >> 8) / 256.0;
+  double b = ((color & 0x0000FF)) / 256.0;
   sprintf(buf + len, " %.3f %.3f %.3f\n", r, g, b);
   sendCommand(buf);
 }

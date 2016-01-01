@@ -6,6 +6,10 @@
 //Copyright (c) SIA 2015. All Right Reserved.
 //
 
+#pragma once
+#ifndef _PATH_FINDER_H__
+#define _PATH_FINDER_H__
+
 #include "ConnectionMap.h"
 
 class PathFinder {
@@ -16,8 +20,12 @@ public:
 
   inline const std::vector<PathPoint>& getPath() const { return path; }
 
+#ifdef ENABLE_VISUALIZATOR
   void visualizationPath(const Visualizator& visualizator, int32_t color) const;
+#endif
 
 private:
   std::vector<PathPoint> path;
 };
+
+#endif

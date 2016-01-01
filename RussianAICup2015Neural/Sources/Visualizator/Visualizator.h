@@ -1,8 +1,13 @@
-#ifndef VISUAL_DEBUG_CLIENT_
-#define VISUAL_DEBUG_CLIENT_
+#pragma once
+#ifndef _VISUALIZATOR_H__
+#define _VISUALIZATOR_H__
 
-#include <cstdlib>
-#include <cstdio>
+#if (defined _WIN32 || defined _WIN64)
+# include <winsock2.h>
+#else
+#include <sys/socket.h>
+#endif
+
 #include <string>
 #include <cstdint>
 
@@ -26,12 +31,12 @@ public:
   void fillRect(double x1, double y1, double x2, double y2, int32_t color = 0x7F7F7F) const;
   void line(double x1, double y1, double x2, double y2, int32_t color = 0x7F7F7F) const;
   void text(double x, double y, const char* text, int32_t color = 0x7F7F7F) const;
-  
-private:
+
+protected:
   void sendCommand(const char* str) const;
   void writeWithColor(char* buf, int32_t color) const;
 
-  int openSocket;
+  SOCKET openSocket;
 };
 
 #endif

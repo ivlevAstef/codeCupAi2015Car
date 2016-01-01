@@ -6,6 +6,10 @@
 //Copyright (c) SIA 2015. All Right Reserved.
 //
 
+#pragma once
+#ifndef _CONSTANTS_H__
+#define _CONSTANTS_H__
+
 #include "model/Game.h"
 #include "SIASingleton.h"
 
@@ -16,3 +20,5 @@ public:
 
   const model::Game& game;
 };
+
+#endif
