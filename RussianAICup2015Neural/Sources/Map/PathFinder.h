@@ -16,7 +16,7 @@ class PathFinder {
 public:
   typedef SIA::Vector PathPoint;
 public:
-  bool findPath(const model::Car& car, const model::World& world, const ConnectionMap& map);
+  void findPath(const model::Car& car, const model::World& world, const ConnectionMap& map, const size_t maxDepth);
 
   inline const std::vector<PathPoint>& getPath() const { return path; }
 
@@ -25,6 +25,21 @@ public:
 #endif
 
 private:
+  void fillPointsData(PointIndex beginIndex, const ConnectionMap& map);
+
+  PointIndex pointIndexByCar(const model::Car& car, const ConnectionMap& map) const;
+  SIA::Position positionByWayPointIndex(int wayPointIndex, const model::World& world) const;
+
+  PointIndex minPointIndexInPos(SIA::Position pos, const ConnectionMap& map) const;
+
+  std::vector<PathPoint> findPath(PointIndex fromIndex, PointIndex toIndex, const ConnectionMap& map) const;
+
+  double calculatePointWeight(const ConnectionJoin& join) const;
+
+private:
+  std::vector<double> pointWeight;
+  std::vector<bool> pointVisited;
+
   std::vector<PathPoint> path;
 };
 

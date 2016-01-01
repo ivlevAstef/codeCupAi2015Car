@@ -14,5 +14,11 @@
 #include "SIAPoint2D.h"
 
 SIA::Vector vectorByAnchor(int x, int y, double aX, double aY);
+SIA::Position tilePosition(double x, double y);
+SIA::Position tilePosition(SIA::Vector pos);
+
+template <typename T> int sign(T val) {
+  return (T(0) < val) - (val < T(0));
+}
 
 #endif

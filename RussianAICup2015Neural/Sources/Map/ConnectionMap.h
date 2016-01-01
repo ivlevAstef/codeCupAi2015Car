@@ -19,8 +19,10 @@
 #include "Visualizator/Visualizator.h"
 #endif
 
+typedef size_t PointIndex;
+
 struct ConnectionJoin {
-  size_t pointIndex;
+  PointIndex index;
   double weight;
   double length;
 };
@@ -41,9 +43,11 @@ private:
 public:
   void update(const model::World& world);
 
-  const ConnectionPointData& getJoinsByTileAndDir(int x, int y, int dx, int dy);
-  const ConnectionPointData& getJoinsByIndex(size_t pointIndex);
-  const size_t getPointCount();
+  PointIndex getPointIndexByTileAndDir(int x, int y, int dx, int dy) const;
+  bool validPointIndex(PointIndex index) const;
+  PointIndex invalidPointIndex() const;
+  const ConnectionPointData& getConnectionPointByIndex(PointIndex index) const;
+  const size_t getPointCount() const;
 
 #ifdef ENABLE_VISUALIZATOR
   void visualizationConnectionPoints(const Visualizator& visualizator, int32_t color) const;
@@ -53,16 +57,15 @@ public:
 private:
   void createConnectionData(const model::World& world);
   void fillConnectionDataForTile(const model::World& world, size_t x, size_t y);
-  ///methods worked only for Unknown tiles
+
   void removeSingleConnections();
   bool checkConnection(size_t fromIndex, size_t toIndex) const;
-  ///end methods
 
-  const std::vector<SIA::Position>& directionsByTileType(const model::TileType& type);
+  static const std::vector<SIA::Position>& directionsByTileType(const model::TileType& type);
 
 private:
   SIA::Vector toRealPoint(int x, int y, int dx, int dy) const;
-  size_t connectionPointIndex(int x, int y, int dx, int dy) const;
+  PointIndex connectionPointIndex(int x, int y, int dx, int dy) const;
   int countConnectionPointsBySize(size_t width, size_t heigth) const;
 
   std::vector<ConnectionPointData> data;

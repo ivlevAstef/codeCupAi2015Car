@@ -26,16 +26,24 @@ void ConnectionMap::update(const model::World& world) {
   removeSingleConnections();
 }
 
-const ConnectionPointData& ConnectionMap::getJoinsByTileAndDir(int x, int y, int dx, int dy) {
-  return getJoinsByIndex(connectionPointIndex(x, y, dx, dy));
+PointIndex ConnectionMap::getPointIndexByTileAndDir(int x, int y, int dx, int dy) const {
+  return connectionPointIndex(x, y, dx, dy);
 }
 
-const ConnectionPointData& ConnectionMap::getJoinsByIndex(size_t pointIndex) {
-  SIAAssert(pointIndex <= data.size());
-  return data[pointIndex];
+bool ConnectionMap::validPointIndex(PointIndex index) const {
+  return (0 <= index && index < data.size()) && !data[index].joins.empty();
 }
 
-const size_t ConnectionMap::getPointCount() {
+PointIndex ConnectionMap::invalidPointIndex() const {
+  return data.size();
+}
+
+const ConnectionPointData& ConnectionMap::getConnectionPointByIndex(PointIndex index) const {
+  SIAAssert(index <= data.size());
+  return data[index];
+}
+
+const size_t ConnectionMap::getPointCount() const {
   return data.size();
 }
 
@@ -73,8 +81,8 @@ void ConnectionMap::fillConnectionDataForTile(const model::World& world, size_t 
       const SIA::Position& dir2 = directions[j];
 
       ConnectionJoin join = {0};
-      join.pointIndex = connectionPointIndex(x, y, dir2.x, dir2.y);
-      join.length = (dir1 - dir2).length2();
+      join.index = connectionPointIndex(x, y, dir2.x, dir2.y);
+      join.length = (dir1 - dir2).length();
       join.weight = 0;//TODO: set weight
       pointData.joins.push_back(join);
     }
@@ -86,14 +94,14 @@ void ConnectionMap::removeSingleConnections() {
     auto& pointData = data[index];
 
     pointData.joins.erase(std::remove_if(pointData.joins.begin(), pointData.joins.end(), [index, this] (const ConnectionJoin& cell) {
-      return !checkConnection(cell.pointIndex, index);
+      return !checkConnection(cell.index, index);
     }), pointData.joins.end());
   }
 }
 
 bool ConnectionMap::checkConnection(size_t fromIndex, size_t toIndex) const {
   for (const auto& join : data[fromIndex].joins) {
-    if (join.pointIndex == toIndex) {
+    if (join.index == toIndex) {
       return true;
     }
   }
@@ -150,7 +158,7 @@ SIA::Vector ConnectionMap::toRealPoint(int x, int y, int dx, int dy) const {
   return vectorByAnchor(x, y, (double)(dx + 1) * 0.5, (double)(dy + 1) * 0.5);
 }
 
-size_t ConnectionMap::connectionPointIndex(int x, int y, int dx, int dy) const {
+PointIndex ConnectionMap::connectionPointIndex(int x, int y, int dx, int dy) const {
   const int width = Constants::instance().game.getWorldWidth();
   return 2 * (x + y * width) + dx + 2 * ((-1 == dy) ? -(width - 1) : dy) - 1;
 }
@@ -174,8 +182,11 @@ void ConnectionMap::visualizationConnectionJoins(const Visualizator& visualizato
   for (const auto& pointData : data) {
     for (const auto& join : pointData.joins) {
       const auto& p1 = pointData.pos;
-      const auto& p2 = data[join.pointIndex].pos;
+      const auto& p2 = data[join.index].pos;
 
+      const auto& center = p1 + (p2 - p1) * 0.5;
+
+      visualizator.text(center.x, center.y, join.length, color);
       visualizator.line(p1.x, p1.y, p2.x, p2.y, color);
     }
   }

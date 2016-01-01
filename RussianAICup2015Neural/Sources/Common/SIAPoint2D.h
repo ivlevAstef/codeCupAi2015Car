@@ -115,7 +115,7 @@ namespace SIA
       return x * v.Y - y * v.x;
     }
 
-    inline Type length() const {
+    inline double length() const {
       return sqrt(x * x + y * y);
     }
 

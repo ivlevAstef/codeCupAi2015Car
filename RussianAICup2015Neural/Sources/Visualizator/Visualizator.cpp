@@ -146,3 +146,9 @@ void Visualizator::text(double x, double y, const char* text, int32_t color) con
   sprintf(buf, "text %.3lf %.3lf %s", x, y, text);
   writeWithColor(buf, color);
 }
+
+void Visualizator::text(double x, double y, double value, int32_t color) const {
+  char buf[BUF_SIZE] = {0};
+  sprintf(buf, "text %.3lf %.3lf %.2lf", x, y, value);
+  writeWithColor(buf, color);
+}

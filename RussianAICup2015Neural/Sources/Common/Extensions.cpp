@@ -14,3 +14,13 @@ SIA::Vector vectorByAnchor(int x, int y, double ax, double ay) {
   const double tileSize = Constants::instance().game.getTrackTileSize();
   return SIA::Vector((x + ax)* tileSize, (y + ay)* tileSize);
 }
+
+SIA::Position tilePosition(double x, double y) {
+  const double tileSize = Constants::instance().game.getTrackTileSize();
+  return SIA::Position(int(x / tileSize), int(y / tileSize));
+}
+
+SIA::Position tilePosition(SIA::Vector pos) {
+  const double tileSize = Constants::instance().game.getTrackTileSize();
+  return SIA::Position(int(pos.x / tileSize), int(pos.y / tileSize));
+}
