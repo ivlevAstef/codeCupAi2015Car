@@ -19,10 +19,16 @@
 #include "Visualizator/Visualizator.h"
 #endif
 
-typedef SIA::Vector ConnectionPoint;
-struct ConnectionJoin;
-typedef std::vector<ConnectionJoin> ConnectionJoins;
+struct ConnectionJoin {
+  size_t pointIndex;
+  double weight;
+  double length;
+};
 
+struct ConnectionPointData {
+  SIA::Vector pos;
+  std::vector<ConnectionJoin> joins;
+};
 
 class ConnectionMap {
 private:
@@ -35,8 +41,9 @@ private:
 public:
   void update(const model::World& world);
 
-  const ConnectionJoins& getJoinsInTile(size_t x, size_t y);
-  const ConnectionJoins getNextJoinsFromPoint(const ConnectionPoint& point, size_t fromX, size_t fromY);
+  const ConnectionPointData& getJoinsByTileAndDir(int x, int y, int dx, int dy);
+  const ConnectionPointData& getJoinsByIndex(size_t pointIndex);
+  const size_t getPointCount();
 
 #ifdef ENABLE_VISUALIZATOR
   void visualizationConnectionPoints(const Visualizator& visualizator, int32_t color) const;
@@ -44,56 +51,22 @@ public:
 #endif
 
 private:
-  int connectionPointsBySize(size_t width, size_t heigth);
-
-  void createConnectionPoints(const model::World& world);
-  void fillConnectionPointsByTile(const model::World& world, size_t x, size_t y);
-
-  void createConnectionJoins(const model::World& world);
-  void fillConnectionJoinsInTile(const model::World& world, size_t x, size_t y);
+  void createConnectionData(const model::World& world);
+  void fillConnectionDataForTile(const model::World& world, size_t x, size_t y);
+  ///methods worked only for Unknown tiles
+  void removeSingleConnections();
+  bool checkConnection(size_t fromIndex, size_t toIndex) const;
+  ///end methods
 
   const std::vector<SIA::Position>& directionsByTileType(const model::TileType& type);
 
 private:
-  ConnectionPoint toConnectionPoint(int x, int y, int dx, int dy) const;
-  SIA::Position toDeltaByPoint(const ConnectionPoint& point, size_t fromX, size_t fromY) const;
+  SIA::Vector toRealPoint(int x, int y, int dx, int dy) const;
   size_t connectionPointIndex(int x, int y, int dx, int dy) const;
+  int countConnectionPointsBySize(size_t width, size_t heigth) const;
 
-  std::vector<ConnectionPoint> points;
+  std::vector<ConnectionPointData> data;
 
-  std::vector<std::vector<ConnectionJoins>> joinsByTiles;
-
-};
-
-
-struct ConnectionJoin {
-public:
-  ConnectionJoin();
-  ConnectionJoin(const ConnectionPoint& p1, const ConnectionPoint& p2);
-
-  inline const ConnectionPoint& getP1() const {
-    return *p1;
-  }
-  inline const ConnectionPoint& getP2() const {
-    return *p2;
-  }
-
-  inline double getLength() const {
-    return length;
-  }
-
-  inline double getWeight() const {
-    return weight;
-  }
-
-
-private:
-  static const ConnectionPoint sDefaultConnectionPoint;
-  double length;
-  double weight;
-
-  const ConnectionPoint* p1;
-  const ConnectionPoint* p2;
 };
 
 #endif
