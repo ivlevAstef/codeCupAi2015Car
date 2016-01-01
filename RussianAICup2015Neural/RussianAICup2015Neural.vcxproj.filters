@@ -31,6 +31,9 @@
     <ClCompile Include="Sources\Common\Extensions.cpp">
       <Filter>Sources\Common</Filter>
     </ClCompile>
+    <ClCompile Include="Sources\Map\PathFinder.cpp">
+      <Filter>Sources\Map</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Sources\MyStrategy.h">
@@ -56,6 +59,9 @@
     </ClInclude>
     <ClInclude Include="Sources\Common\Constants.h">
       <Filter>Sources\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Map\PathFinder.h">
+      <Filter>Sources\Map</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

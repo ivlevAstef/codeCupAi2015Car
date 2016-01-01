@@ -83,11 +83,37 @@ void ConnectionMap::fillConnectionJoinsInTile(const model::World& world, int x, 
       SIAAssert(0 <= index2 && index2 < points.size());
 
       ConnectionJoin join(points.at(index1), points.at(index2));
-      join.length = (join.getP1() - join.getP2()).length();
       joinsByTiles[x][y].push_back(join);
     }
   }
 }
+
+const ConnectionJoins& ConnectionMap::getJoinsInTile(int x, int y) {
+  SIAAssert(0 <= x && x < joinsByTiles.size());
+  SIAAssert(0 <= y && y < joinsByTiles[x].size());
+  return joinsByTiles[x][y];
+}
+
+const ConnectionJoins ConnectionMap::getNextJoinsFromPoint(const ConnectionPoint& point, int fromX, int fromY) {
+  SIAAssert(0 <= fromX && fromX < joinsByTiles.size());
+  SIAAssert(0 <= fromY && fromY < joinsByTiles[fromX].size());
+
+  SIA::Position delta = toDeltaByPoint(point, fromX, fromY);
+
+  const ConnectionJoins& nextAllJoins = getJoinsInTile(fromX + delta.x, fromY + delta.y);
+
+  ConnectionJoins result;
+  result.reserve(nextAllJoins.size());
+
+  for (const ConnectionJoin& join : nextAllJoins) {
+    if (join.getP1() == point || join.getP2() == point) {
+      result.push_back(join);
+    }
+  }
+
+  return result;
+}
+
 
 const std::vector<SIA::Position>& ConnectionMap::directionsByTileType(const model::TileType& type) {
   static const std::vector<SIA::Position> empty;
@@ -135,8 +161,16 @@ const std::vector<SIA::Position>& ConnectionMap::directionsByTileType(const mode
   return empty;
 }
 
-ConnectionMap::ConnectionPoint ConnectionMap::toConnectionPoint(int x, int y, int dx, int dy) const {
+ConnectionPoint ConnectionMap::toConnectionPoint(int x, int y, int dx, int dy) const {
   return vectorByAnchor(x, y, (double)(dx + 1) * 0.5, (double)(dy + 1) * 0.5);
+}
+
+SIA::Position ConnectionMap::toDeltaByPoint(const ConnectionPoint& point, int fromX, int fromY) const {
+  SIA::Vector center = vectorByAnchor(fromX, fromY, 0.5, 0.5);
+  double dx = point.x - center.x;
+  double dy = point.y - center.y;
+
+  return SIA::Position((int)round(dx * 2), (int)round(dy * 2));
 }
 
 size_t ConnectionMap::connectionPointIndex(int x, int y, int dx, int dy) const {
@@ -144,25 +178,27 @@ size_t ConnectionMap::connectionPointIndex(int x, int y, int dx, int dy) const {
   return 2 * (x + y * width) + dx + 2 * ((-1 == dy) ? -(width - 1) : dy) - 1;
 }
 
-const ConnectionMap::ConnectionPoint ConnectionMap::ConnectionJoin::sDefaultConnectionPoint;
 
-ConnectionMap::ConnectionJoin::ConnectionJoin() : ConnectionJoin(sDefaultConnectionPoint, sDefaultConnectionPoint) {
+///---------- Connection Join
+const ConnectionPoint ConnectionJoin::sDefaultConnectionPoint;
+
+ConnectionJoin::ConnectionJoin() : ConnectionJoin(sDefaultConnectionPoint, sDefaultConnectionPoint) {
 }
 
-ConnectionMap::ConnectionJoin::ConnectionJoin(const ConnectionPoint& p1, const ConnectionPoint& p2)
+ConnectionJoin::ConnectionJoin(const ConnectionPoint& p1, const ConnectionPoint& p2)
   : p1(&p1), p2(&p2) {
-  length = 0;
+  length = (p1 - p2).length();
   weight = 0;
 }
 
-void ConnectionMap::visualizationConnectionPoints(const Visualizator& visualizator, int32_t color) {
+void ConnectionMap::visualizationConnectionPoints(const Visualizator& visualizator, int32_t color) const {
   static const double pointR = 10;
   for (ConnectionPoint point : points) {
     visualizator.fillCircle(point.x, point.y, pointR, color);
   }
 }
 
-void ConnectionMap::visualizationConnectionJoins(const Visualizator& visualizator, int32_t color) {
+void ConnectionMap::visualizationConnectionJoins(const Visualizator& visualizator, int32_t color) const {
   for (size_t x = 0; x < joinsByTiles.size(); x++) {
     for (size_t y = 0; y < joinsByTiles[x].size(); y++) {
       for (const ConnectionJoin& join : joinsByTiles[x][y]) {

@@ -86,6 +86,7 @@
     <ClCompile Include="Sources\Common\Extensions.cpp" />
     <ClCompile Include="Sources\Common\SIALogger.cpp" />
     <ClCompile Include="Sources\Map\ConnectionMap.cpp" />
+    <ClCompile Include="Sources\Map\PathFinder.cpp" />
     <ClCompile Include="Sources\MyStrategy.cpp" />
     <ClCompile Include="Sources\Visualizator\Visualizator.cpp" />
   </ItemGroup>
@@ -96,6 +97,7 @@
     <ClInclude Include="Sources\Common\SIAPoint2D.h" />
     <ClInclude Include="Sources\Common\SIASingleton.h" />
     <ClInclude Include="Sources\Map\ConnectionMap.h" />
+    <ClInclude Include="Sources\Map\PathFinder.h" />
     <ClInclude Include="Sources\MyStrategy.h" />
     <ClInclude Include="Sources\Visualizator\Visualizator.h" />
   </ItemGroup>

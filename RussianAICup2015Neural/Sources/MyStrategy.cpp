@@ -1,11 +1,11 @@
 #include "MyStrategy.h"
 
-#define PI 3.14159265358979323846
-#define _USE_MATH_DEFINES
+#include "Common/SIALogger.h"
+#include "Common/Constants.h"
 
 #include "Visualizator/Visualizator.h"
-#include "Common/Constants.h"
 #include "Map/ConnectionMap.h"
+#include "Map/PathFinder.h"
 
 using namespace model;
 using namespace std;
@@ -24,9 +24,17 @@ void MyStrategy::move(const Car& car, const World& world, const Game& game, Move
   ConnectionMap map;
   map.update(world);
 
+  PathFinder path;
+  bool found = path.findPath(car, world, map);
+  SIAAssertMsg(found, "Can't found path.");
+  
+
   visualizator.beginPost();
+
   map.visualizationConnectionJoins(visualizator, 0x000077);
   map.visualizationConnectionPoints(visualizator, 0x000000);
+  path.visualizationPath(visualizator, 0xFF0000);
+
   visualizator.endPost();
 }
 

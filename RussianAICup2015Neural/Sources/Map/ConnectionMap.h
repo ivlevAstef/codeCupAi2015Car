@@ -12,6 +12,11 @@
 #include "Common/SIAPoint2D.h"
 #include "Visualizator/Visualizator.h"
 
+typedef SIA::Vector ConnectionPoint;
+struct ConnectionJoin;
+typedef std::vector<ConnectionJoin> ConnectionJoins;
+
+
 class ConnectionMap {
 private:
   static const size_t sMaxConnectionJoinsInTile;
@@ -23,8 +28,11 @@ private:
 public:
   void update(const model::World& world);
 
-  void visualizationConnectionPoints(const Visualizator& visualizator, int32_t color);
-  void visualizationConnectionJoins(const Visualizator& visualizator, int32_t color);
+  void visualizationConnectionPoints(const Visualizator& visualizator, int32_t color) const;
+  void visualizationConnectionJoins(const Visualizator& visualizator, int32_t color) const;
+
+  const ConnectionJoins& getJoinsInTile(int x, int y);
+  const ConnectionJoins getNextJoinsFromPoint(const ConnectionPoint& point, int fromX, int fromY);
 
 private:
   int connectionPointsBySize(int width, int heigth);
@@ -38,31 +46,43 @@ private:
   const std::vector<SIA::Position>& directionsByTileType(const model::TileType& type);
 
 private:
-  typedef SIA::Vector ConnectionPoint;
-
   ConnectionPoint toConnectionPoint(int x, int y, int dx, int dy) const;
+  SIA::Position toDeltaByPoint(const ConnectionPoint& point, int fromX, int fromY) const;
   size_t connectionPointIndex(int x, int y, int dx, int dy) const;
 
   std::vector<ConnectionPoint> points;
 
-  struct ConnectionJoin {
-    static const ConnectionPoint sDefaultConnectionPoint;
-    double length;
-    double weight;
-
-    ConnectionJoin();
-    ConnectionJoin(const ConnectionPoint& p1, const ConnectionPoint& p2);
-
-    inline const ConnectionPoint& getP1() const { return *p1; }
-    inline const ConnectionPoint& getP2() const { return *p2; }
-
-  private:
-    const ConnectionPoint* p1;
-    const ConnectionPoint* p2;
-  };
-
-  typedef std::vector<ConnectionJoin> ConnectionJoins;
-
   std::vector<std::vector<ConnectionJoins>> joinsByTiles;
 
+};
+
+
+struct ConnectionJoin {
+public:
+  ConnectionJoin();
+  ConnectionJoin(const ConnectionPoint& p1, const ConnectionPoint& p2);
+
+  inline const ConnectionPoint& getP1() const {
+    return *p1;
+  }
+  inline const ConnectionPoint& getP2() const {
+    return *p2;
+  }
+
+  inline double getLength() const {
+    return length;
+  }
+
+  inline double getWeight() const {
+    return weight;
+  }
+
+
+private:
+  static const ConnectionPoint sDefaultConnectionPoint;
+  double length;
+  double weight;
+
+  const ConnectionPoint* p1;
+  const ConnectionPoint* p2;
 };
