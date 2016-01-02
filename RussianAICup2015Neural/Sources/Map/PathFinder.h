@@ -26,7 +26,7 @@ public:
 #endif
 
 private:
-  void fillPointsData(PointIndex beginIndex, const std::vector<PointIndex>& visited, const ConnectionMap& map);
+  void fillPointsData(PointIndex beginIndex, const ConnectionMap& map);
 
   PointIndex pointIndexByCar(const model::Car& car, const ConnectionMap& map, double moveLength) const;
   SIA::Position nextPositionForCar(PointIndex pointIndex, const model::Car& car, const ConnectionMap& map) const;
@@ -40,7 +40,7 @@ private:
 
   void setBackwardIndexes(PointIndex pointIndex, const SIA::Position pos, const ConnectionMap& map);
 
-  double calculatePointWeight(const ConnectionJoin& join) const;
+  double calculatePointWeight(const ConnectionJoin& join, const PointIndex& from, bool reverse = false) const;
 
 private:
   static const double sBackwardWeight;
@@ -48,6 +48,7 @@ private:
   std::vector<double> pointWeight;
   std::vector<bool> pointVisited;
   std::unordered_set<PointIndex> backwardPointIndexes;
+  PointIndex backwardFromPointIndex;
 
   std::vector<PathPoint> path;
 };
