@@ -33,7 +33,7 @@ void MyStrategy::move(const Car& car, const World& world, const Game& game, Move
   move.setEnginePower(0.75);
 
   double speedModule = SIA::Vector(car.getSpeedX(), car.getSpeedY()).length();
-  if (speedModule * speedModule * abs(angleToWaypoint) > 5 * 3.14) {
+  if (speedModule * speedModule * abs(angleToWaypoint) > 10 * 3.14) {
     move.setBrake(true);
   }
 

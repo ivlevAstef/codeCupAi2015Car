@@ -47,6 +47,7 @@ public:
   bool validPointIndex(PointIndex index) const;
   PointIndex invalidPointIndex() const;
   const ConnectionPointData& getConnectionPointByIndex(PointIndex index) const;
+  const std::vector<SIA::Position> getTiles(PointIndex index) const;
   const size_t getPointCount() const;
 
 #ifdef ENABLE_VISUALIZATOR

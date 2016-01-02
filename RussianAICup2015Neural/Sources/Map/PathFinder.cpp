@@ -9,48 +9,83 @@
 #include "PathFinder.h"
 #include "Common/SIALogger.h"
 #include "Common/Extensions.h"
+#include "Common/Constants.h"
 #include <math.h>
+#include <unordered_set>
+
+const double PathFinder::sBackwardWeight = 4;
 
 void PathFinder::findPath(const model::Car& car, const model::World& world, const ConnectionMap& map, const size_t maxDepth) {
-  const PointIndex beginPointIndex = pointIndexByCar(car, map);
-  SIAAssert(map.invalidPointIndex() != beginPointIndex);
+  const PointIndex beginPointIndex = pointIndexByCar(car, map, Constants::instance().game.getTrackTileSize());
+  setBackwardIndexes(beginPointIndex, nextPositionForCar(beginPointIndex, car, map), map);
+
+  std::vector<PointIndex> pointIndexPath;
 
   int wayPointIndex = car.getNextWaypointIndex();
   PointIndex pointIndex = beginPointIndex;
+  std::vector<PointIndex> visited;
 
-  while (path.size() < maxDepth) {
-    fillPointsData(pointIndex, map);
+  while (pointIndexPath.size() < maxDepth) {
+    fillPointsData(pointIndex, visited, map);
 
-    SIA::Position endPos = positionByWayPointIndex(wayPointIndex, world);
-    PointIndex toIndex = minPointIndexInPos(endPos, map);
+    const SIA::Position endPos = positionByWayPointIndex(wayPointIndex, world);
+    const PointIndex toIndex = minPointIndexInPos(endPos, map);
 
-    const auto& newPath = findPath(pointIndex, toIndex, map);
-    path.insert(path.end(), newPath.begin(), newPath.end());
+    const auto& newPath = findPathPointIndex(pointIndex, toIndex, map);
+    pointIndexPath.insert(pointIndexPath.end(), newPath.begin(), newPath.end());
 
     wayPointIndex++;
     pointIndex = toIndex;
+
+    setBackwardIndexes(pointIndex, endPos, map);
+  }
+
+  fillPathByPointIndex(pointIndexPath, map);
+}
+
+void PathFinder::setBackwardIndexes(PointIndex pointIndex, const SIA::Position pos, const ConnectionMap& map) {
+  backwardPointIndexes.clear();
+
+  for (const ConnectionJoin& join : map.getConnectionPointByIndex(pointIndex).joins) {
+    bool found = false;
+    for (size_t i = 0; i < Constants::dirsCount; i++) {
+      PointIndex index = map.getPointIndexByTileAndDir(pos.x, pos.y, Constants::dirs[i].x, Constants::dirs[i].y);
+      found |= (join.index == index);
+    }
+
+    if (!found) {
+      backwardPointIndexes.insert(join.index);
+    }
   }
 }
 
-PointIndex PathFinder::pointIndexByCar(const model::Car& car, const ConnectionMap& map) const {
-  static const size_t dirsCount = 4;
+SIA::Position PathFinder::nextPositionForCar(PointIndex pointIndex, const model::Car& car, const ConnectionMap& map) const {
+  const auto& tilePoss = map.getTiles(pointIndex);
 
-  const SIA::Vector carPos = SIA::Vector(car.getX(), car.getY());
-  const SIA::Position tilePos = tilePosition(carPos.x, carPos.y);
+  SIA::Position pos = tilePosition(car.getX(), car.getY());
 
-  const SIA::Position dirs[dirsCount] = {
-    SIA::Position(1, 0),
-    SIA::Position(-1, 0),
-    SIA::Position(0, 1),
-    SIA::Position(0, -1)
-  };
+  return (tilePoss[0] != pos) ? tilePoss[0] : tilePoss[1];
+}
+
+void PathFinder::fillPathByPointIndex(const std::vector<PointIndex>& points, const ConnectionMap& map) {
+  path.clear();
+  for (const PointIndex& pointIndex : points) {
+    const auto& pointData = map.getConnectionPointByIndex(pointIndex);
+    path.push_back(pointData.pos);
+  }
+}
+
+PointIndex PathFinder::pointIndexByCar(const model::Car& car, const ConnectionMap& map, double moveLength) const {
+  const SIA::Vector carDir(cos(car.getAngle()), sin(car.getAngle()));
+  const SIA::Vector carPos = SIA::Vector(car.getX() + carDir.x * moveLength, car.getY() + carDir.y * moveLength);
+  const SIA::Position tilePos = tilePosition(car.getX(), car.getY());
 
   PointIndex minIndex = map.invalidPointIndex();
   double minDistance = DBL_MAX;
 
-  for (size_t i = 0; i < dirsCount; i++) {
-    int dx = dirs[i].x;
-    int dy = dirs[i].y;
+  for (size_t i = 0; i < Constants::dirsCount; i++) {
+    int dx = Constants::dirs[i].x;
+    int dy = Constants::dirs[i].y;
 
     PointIndex index = map.getPointIndexByTileAndDir(tilePos.x, tilePos.y, dx, dy);
 
@@ -65,18 +100,10 @@ PointIndex PathFinder::pointIndexByCar(const model::Car& car, const ConnectionMa
 }
 
 PointIndex PathFinder::minPointIndexInPos(SIA::Position pos, const ConnectionMap& map) const {
-  static const size_t dirsCount = 4;
-  const SIA::Position dirs[dirsCount] = {
-    SIA::Position( 1,  0),
-    SIA::Position(-1,  0),
-    SIA::Position( 0,  1),
-    SIA::Position( 0, -1)
-  };
-
   PointIndex minIndex = map.invalidPointIndex();
   double weight = DBL_MAX;
-  for (int i = 0; i < dirsCount; i++) {
-    PointIndex index = map.getPointIndexByTileAndDir(pos.x, pos.y, dirs[i].x, dirs[i].y);
+  for (size_t i = 0; i < Constants::dirsCount; i++) {
+    PointIndex index = map.getPointIndexByTileAndDir(pos.x, pos.y, Constants::dirs[i].x, Constants::dirs[i].y);
     if (map.validPointIndex(index) && pointWeight[index] < weight) {
       minIndex = index;
       weight = pointWeight[index];
@@ -97,8 +124,8 @@ SIA::Position PathFinder::positionByWayPointIndex(int wayPointIndex, const model
   return SIA::Position(wayPoint[0], wayPoint[1]);
 }
 
-std::vector<PathFinder::PathPoint> PathFinder::findPath(PointIndex fromIndex, PointIndex toIndex, const ConnectionMap& map) const {
-  std::vector<SIA::Vector> reversedPath;
+std::vector<PointIndex> PathFinder::findPathPointIndex(PointIndex fromIndex, PointIndex toIndex, const ConnectionMap& map) const {
+  std::vector<PointIndex> reversedPath;
 
   PointIndex pointIndex = toIndex;
 
@@ -110,9 +137,7 @@ std::vector<PathFinder::PathPoint> PathFinder::findPath(PointIndex fromIndex, Po
     for (const auto& join : pointData.joins) {
       if (abs(currentWeight - pointWeight[join.index] - calculatePointWeight(join)) < 1.0e-9) {
         pointIndex = join.index;
-
-        const auto& pointData = map.getConnectionPointByIndex(pointIndex);
-        reversedPath.push_back(pointData.pos);
+        reversedPath.push_back(pointIndex);
         break;
       }
     }
@@ -124,7 +149,7 @@ std::vector<PathFinder::PathPoint> PathFinder::findPath(PointIndex fromIndex, Po
   return reversedPath;
 }
 
-void PathFinder::fillPointsData(PointIndex beginPointIndex, const ConnectionMap& map) {
+void PathFinder::fillPointsData(PointIndex beginPointIndex, const std::vector<PointIndex>& visited, const ConnectionMap& map) {
   const size_t pointCount = map.getPointCount();
   pointWeight.clear();
   pointVisited.clear();
@@ -132,36 +157,42 @@ void PathFinder::fillPointsData(PointIndex beginPointIndex, const ConnectionMap&
   pointVisited.resize(pointCount, false);
 
   pointWeight[beginPointIndex] = 0;
+  for (const PointIndex& i : visited) {
+    pointVisited[i] = true;
+  }
 
-  while (true) {
-    PointIndex minPointIndex = map.invalidPointIndex();
-    double minWeight = DBL_MAX;
-    for (PointIndex i = 0; i < pointCount; i++) {
-      if (pointWeight[i] < minWeight && !pointVisited[i]) {
-        minWeight = pointWeight[i];
-        minPointIndex = i;
-      }
-    }
+  std::unordered_set<PointIndex> validIndex;
+  validIndex.reserve(pointCount);
 
-    if (minPointIndex == map.invalidPointIndex()) {
-      break;
-    }
-
+  PointIndex minPointIndex = beginPointIndex;
+  double minWeight = 0;
+  while (minPointIndex != map.invalidPointIndex()) {
     pointVisited[minPointIndex] = true;
+    validIndex.erase(minPointIndex);
 
     const auto& pointData = map.getConnectionPointByIndex(minPointIndex);
     for (const auto& join : pointData.joins) {
       if (!pointVisited[join.index]) {
         pointWeight[join.index] = min(pointWeight[join.index], minWeight + calculatePointWeight(join));
+        validIndex.insert(join.index);
       }
-    }    
+    }
 
+
+    minPointIndex = map.invalidPointIndex();
+    minWeight = DBL_MAX;
+    for (const PointIndex& i : validIndex) {
+      if (pointWeight[i] < minWeight && !pointVisited[i]) {
+        minWeight = pointWeight[i];
+        minPointIndex = i;
+      }
+    }
   }
-
 }
 
 double PathFinder::calculatePointWeight(const ConnectionJoin& join) const {
-  return join.length;
+  const double backwardWeight = (0 != backwardPointIndexes.count(join.index)) ? sBackwardWeight : 0;
+  return join.length + backwardWeight;
 }
 
 #ifdef ENABLE_VISUALIZATOR

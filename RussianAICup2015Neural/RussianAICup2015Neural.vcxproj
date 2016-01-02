@@ -83,6 +83,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Sources\Common\Constants.cpp" />
     <ClCompile Include="Sources\Common\Extensions.cpp" />
     <ClCompile Include="Sources\Common\SIALogger.cpp" />
     <ClCompile Include="Sources\Map\ConnectionMap.cpp" />

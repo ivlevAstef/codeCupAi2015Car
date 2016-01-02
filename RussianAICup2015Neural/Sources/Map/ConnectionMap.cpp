@@ -43,6 +43,21 @@ const ConnectionPointData& ConnectionMap::getConnectionPointByIndex(PointIndex i
   return data[index];
 }
 
+const std::vector<SIA::Position> ConnectionMap::getTiles(PointIndex index) const {
+  SIAAssert(index <= data.size());
+
+  const SIA::Vector pos = data[index].pos;
+  const double dist = Constants::instance().game.getTrackTileSize() * 0.25;
+
+  std::vector<SIA::Position> result;
+  result.resize(2);
+
+  result[0] = tilePosition(pos.x + dist, pos.y + dist);
+  result[1] = tilePosition(pos.x - dist, pos.y - dist);
+
+  return result;
+}
+
 const size_t ConnectionMap::getPointCount() const {
   return data.size();
 }

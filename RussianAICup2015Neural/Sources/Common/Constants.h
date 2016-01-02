@@ -12,6 +12,7 @@
 
 #include "model/Game.h"
 #include "SIASingleton.h"
+#include "SIAPoint2D.h"
 
 class Constants : public SIA::Singleton <Constants> {
 public:
@@ -19,6 +20,9 @@ public:
   }
 
   const model::Game& game;
+
+  static const size_t dirsCount;
+  static const SIA::Position dirs[];
 };
 
 #endif

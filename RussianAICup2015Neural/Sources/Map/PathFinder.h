@@ -11,6 +11,7 @@
 #define _PATH_FINDER_H__
 
 #include "ConnectionMap.h"
+#include <unordered_set>
 
 class PathFinder {
 public:
@@ -25,20 +26,28 @@ public:
 #endif
 
 private:
-  void fillPointsData(PointIndex beginIndex, const ConnectionMap& map);
+  void fillPointsData(PointIndex beginIndex, const std::vector<PointIndex>& visited, const ConnectionMap& map);
 
-  PointIndex pointIndexByCar(const model::Car& car, const ConnectionMap& map) const;
+  PointIndex pointIndexByCar(const model::Car& car, const ConnectionMap& map, double moveLength) const;
+  SIA::Position nextPositionForCar(PointIndex pointIndex, const model::Car& car, const ConnectionMap& map) const;
+
   SIA::Position positionByWayPointIndex(int wayPointIndex, const model::World& world) const;
 
   PointIndex minPointIndexInPos(SIA::Position pos, const ConnectionMap& map) const;
 
-  std::vector<PathPoint> findPath(PointIndex fromIndex, PointIndex toIndex, const ConnectionMap& map) const;
+  std::vector<PointIndex> findPathPointIndex(PointIndex fromIndex, PointIndex toIndex, const ConnectionMap& map) const;
+  void fillPathByPointIndex(const std::vector<PointIndex>& points, const ConnectionMap& map);
+
+  void setBackwardIndexes(PointIndex pointIndex, const SIA::Position pos, const ConnectionMap& map);
 
   double calculatePointWeight(const ConnectionJoin& join) const;
 
 private:
+  static const double sBackwardWeight;
+
   std::vector<double> pointWeight;
   std::vector<bool> pointVisited;
+  std::unordered_set<PointIndex> backwardPointIndexes;
 
   std::vector<PathPoint> path;
 };
