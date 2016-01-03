@@ -11,7 +11,7 @@
 #define _PATH_FINDER_H__
 
 #include "ConnectionMap.h"
-#include <unordered_set>
+#include <unordered_map>
 
 class PathFinder {
 public:
@@ -40,15 +40,14 @@ private:
 
   void setBackwardIndexes(PointIndex pointIndex, const SIA::Position pos, const ConnectionMap& map);
 
-  double calculatePointWeight(const ConnectionJoin& join, const PointIndex& from, bool reverse = false) const;
+  double calculatePointWeight(const ConnectionJoin& join) const;
 
 private:
   static const double sBackwardWeight;
 
   std::vector<double> pointWeight;
   std::vector<bool> pointVisited;
-  std::unordered_set<PointIndex> backwardPointIndexes;
-  PointIndex backwardFromPointIndex;
+  std::unordered_map<ConnectionJoin*, double> joinsUserInfo;
 
   std::vector<PathPoint> path;
 };

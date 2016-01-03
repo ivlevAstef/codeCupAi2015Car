@@ -44,18 +44,21 @@ void PathFinder::findPath(const model::Car& car, const model::World& world, cons
 }
 
 void PathFinder::setBackwardIndexes(PointIndex pointIndex, const SIA::Position pos, const ConnectionMap& map) {
-  backwardPointIndexes.clear();
-  backwardFromPointIndex = pointIndex;
+  for (const auto& join : joinsUserInfo) {
+    join.first->userInfo = NULL;
+  }
+  joinsUserInfo.clear();
 
-  for (const ConnectionJoin& join : map.getConnectionPointByIndex(pointIndex).joins) {
+  for (const ConnectionJoinData& join : map.getConnectionPointByIndex(pointIndex).joins) {
     bool found = false;
     for (size_t i = 0; i < Constants::dirsCount; i++) {
       PointIndex index = map.getPointIndexByTileAndDir(pos.x, pos.y, Constants::dirs[i].x, Constants::dirs[i].y);
       found |= (join.index == index);
     }
 
-    if (!found) {
-      backwardPointIndexes.insert(join.index);
+    if (!found && 0 == joinsUserInfo.count(join.data)) {
+      joinsUserInfo[join.data] = sBackwardWeight;
+      join.data->userInfo = &joinsUserInfo[join.data];
     }
   }
 }
@@ -136,7 +139,8 @@ std::vector<PointIndex> PathFinder::findPathPointIndex(PointIndex fromIndex, Poi
     PointIndex savePointIndex = pointIndex;
     double currentWeight = pointWeight[pointIndex];
     for (const auto& join : pointData.joins) {
-      if (abs(currentWeight - pointWeight[join.index] - calculatePointWeight(join, pointIndex, true)) < 1.0e-3) {
+      SIAAssert(NULL != join.data);
+      if (abs(currentWeight - pointWeight[join.index] - calculatePointWeight(*join.data)) < 1.0e-3) {
         pointIndex = join.index;
         reversedPath.push_back(pointIndex);
         break;
@@ -171,7 +175,8 @@ void PathFinder::fillPointsData(PointIndex beginPointIndex, const ConnectionMap&
     const auto& pointData = map.getConnectionPointByIndex(minPointIndex);
     for (const auto& join : pointData.joins) {
       if (!pointVisited[join.index]) {
-        pointWeight[join.index] = min(pointWeight[join.index], minWeight + calculatePointWeight(join, minPointIndex));
+        SIAAssert(NULL != join.data);
+        pointWeight[join.index] = min(pointWeight[join.index], minWeight + calculatePointWeight(*join.data));
         validIndex.insert(join.index);
       }
     }
@@ -188,11 +193,8 @@ void PathFinder::fillPointsData(PointIndex beginPointIndex, const ConnectionMap&
   }
 }
 
-double PathFinder::calculatePointWeight(const ConnectionJoin& join, const PointIndex& pointIndex, bool reverse) const {
-  const PointIndex& from = (reverse) ? join.index : pointIndex;
-  const PointIndex& to = (!reverse) ? join.index : pointIndex;
-
-  const double backwardWeight = (from == backwardFromPointIndex && 0 != backwardPointIndexes.count(to)) ? sBackwardWeight : 0;
+double PathFinder::calculatePointWeight(const ConnectionJoin& join) const {
+  const double backwardWeight = (NULL != join.userInfo) ? *join.userInfo : 0;
   return join.length + backwardWeight;
 }
 

@@ -35,7 +35,7 @@ bool ConnectionMap::validPointIndex(PointIndex index) const {
 }
 
 PointIndex ConnectionMap::invalidPointIndex() const {
-  return data.size();
+  return PointIndex(data.size());
 }
 
 const ConnectionPointData& ConnectionMap::getConnectionPointByIndex(PointIndex index) const {
@@ -64,6 +64,8 @@ const size_t ConnectionMap::getPointCount() const {
 
 
 void ConnectionMap::createConnectionData(const model::World& world) {
+  joinsMemory.clear();
+
   data.clear();
   data.resize(countConnectionPointsBySize(world.getWidth(), world.getHeight()));
 
@@ -73,7 +75,32 @@ void ConnectionMap::createConnectionData(const model::World& world) {
 
   for (int x = 0; x < world.getWidth(); x++) {
     for (int y = 0; y < world.getHeight(); y++) {
+      fillJoinsMemoryForTile(world, x, y);
       fillConnectionDataForTile(world, x, y);
+    }
+  }
+}
+
+void ConnectionMap::fillJoinsMemoryForTile(const model::World& world, size_t x, size_t y) {
+  const auto& tiles = world.getTilesXY();
+  const model::TileType& tileType = tiles[x][y];
+
+  auto& directions = directionsByTileType(tileType);
+
+  for (const auto& dir1 : directions) {
+    const PointIndex index1 = connectionPointIndex(x, y, dir1.x, dir1.y);
+
+    for (const auto& dir2 : directions) {
+      const PointIndex index2 = connectionPointIndex(x, y, dir2.x, dir2.y);
+      if (index1 != index2) {
+        ConnectionJoin& join = joinByPointIndexes(index1, index2);
+        join.index1 = min(index1, index2);
+        join.index2 = max(index1, index2);
+
+        join.length = (dir1 - dir2).length();
+        join.weight = 0;//TODO: set weight
+        join.userInfo = NULL;
+      }
     }
   }
 }
@@ -84,22 +111,18 @@ void ConnectionMap::fillConnectionDataForTile(const model::World& world, size_t 
 
   auto& directions = directionsByTileType(tileType);
 
-  for (size_t i = 0; i < directions.size(); i++) {
-    const SIA::Position& dir1 = directions[i];
-    auto& pointData = data[connectionPointIndex(x, y, dir1.x, dir1.y)];
+  for (const auto& dir1 : directions) {
+    const PointIndex index1 = connectionPointIndex(x, y, dir1.x, dir1.y);
+
+    auto& pointData = data[index1];
     pointData.pos = toRealPoint(x, y, dir1.x, dir1.y);
 
-    for (size_t j = 0; j < directions.size(); j++) {
-      if (i == j) {
-        continue;
+    for (const auto& dir2 : directions) {
+      const PointIndex index2 = connectionPointIndex(x, y, dir2.x, dir2.y);
+      if (index1 != index2) {
+        ConnectionJoinData joinData = {index2, &joinByPointIndexes(index1, index2)};
+        pointData.joins.push_back(joinData);
       }
-      const SIA::Position& dir2 = directions[j];
-
-      ConnectionJoin join = {0};
-      join.index = connectionPointIndex(x, y, dir2.x, dir2.y);
-      join.length = (dir1 - dir2).length();
-      join.weight = 0;//TODO: set weight
-      pointData.joins.push_back(join);
     }
   }
 }
@@ -108,7 +131,7 @@ void ConnectionMap::removeSingleConnections() {
   for (size_t index = 0; index < data.size(); index++) {
     auto& pointData = data[index];
 
-    pointData.joins.erase(std::remove_if(pointData.joins.begin(), pointData.joins.end(), [index, this] (const ConnectionJoin& cell) {
+    pointData.joins.erase(std::remove_if(pointData.joins.begin(), pointData.joins.end(), [index, this] (const ConnectionJoinData& cell) {
       return !checkConnection(cell.index, index);
     }), pointData.joins.end());
   }
@@ -175,11 +198,20 @@ SIA::Vector ConnectionMap::toRealPoint(int x, int y, int dx, int dy) const {
 
 PointIndex ConnectionMap::connectionPointIndex(int x, int y, int dx, int dy) const {
   const int width = Constants::instance().game.getWorldWidth();
-  return 2 * (x + y * width) + dx + 2 * ((-1 == dy) ? -(width - 1) : dy) - 1;
+  return PointIndex(2 * (x + y * width) + dx + 2 * ((-1 == dy) ? -(width - 1) : dy) - 1);
 }
 
 int ConnectionMap::countConnectionPointsBySize(size_t width, size_t heigth) const {
   return connectionPointIndex(width - 1, heigth - 1, 1, 0);//last inadmissible index
+}
+
+
+ConnectionJoin& ConnectionMap::joinByPointIndexes(PointIndex index1, PointIndex index2) {
+  PointIndex minIndex = min(index1, index2);
+  PointIndex maxIndex = max(index1, index2);
+
+  auto key = uint32_t(minIndex) + uint32_t(maxIndex) * 16 * 16 * sMaxConnectionJoinsInTile;
+  return joinsMemory[key];
 }
 
 #ifdef ENABLE_VISUALIZATOR
@@ -201,7 +233,8 @@ void ConnectionMap::visualizationConnectionJoins(const Visualizator& visualizato
 
       const auto& center = p1 + (p2 - p1) * 0.5;
 
-      visualizator.text(center.x, center.y, join.length, color);
+      SIAAssert(NULL != join.data);
+      visualizator.text(center.x, center.y, join.data->length, color);
       visualizator.line(p1.x, p1.y, p2.x, p2.y, color);
     }
   }

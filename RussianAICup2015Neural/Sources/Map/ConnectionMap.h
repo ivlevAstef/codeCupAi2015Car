@@ -14,22 +14,31 @@
 #include "model/Game.h"
 #include "Common/SIASingleton.h"
 #include "Common/SIAPoint2D.h"
+#include <unordered_map>
 
 #ifdef ENABLE_VISUALIZATOR
 #include "Visualizator/Visualizator.h"
 #endif
 
-typedef size_t PointIndex;
+typedef uint16_t PointIndex;
 
 struct ConnectionJoin {
-  PointIndex index;
-  double weight;
+  PointIndex index1;
+  PointIndex index2;
+
   double length;
+  double weight;
+  double* userInfo;
+};
+
+struct ConnectionJoinData {
+  PointIndex index;
+  ConnectionJoin* data;
 };
 
 struct ConnectionPointData {
   SIA::Vector pos;
-  std::vector<ConnectionJoin> joins;
+  std::vector<ConnectionJoinData> joins;
 };
 
 class ConnectionMap {
@@ -58,6 +67,7 @@ public:
 private:
   void createConnectionData(const model::World& world);
   void fillConnectionDataForTile(const model::World& world, size_t x, size_t y);
+  void fillJoinsMemoryForTile(const model::World& world, size_t x, size_t y);
 
   void removeSingleConnections();
   bool checkConnection(size_t fromIndex, size_t toIndex) const;
@@ -69,7 +79,10 @@ private:
   PointIndex connectionPointIndex(int x, int y, int dx, int dy) const;
   int countConnectionPointsBySize(size_t width, size_t heigth) const;
 
+  ConnectionJoin& joinByPointIndexes(PointIndex index1, PointIndex index2);
+
   std::vector<ConnectionPointData> data;
+  std::unordered_map<uint32_t, ConnectionJoin> joinsMemory;
 
 };
 
