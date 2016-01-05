@@ -15,6 +15,7 @@
 #include "Common/SIASingleton.h"
 #include "Common/SIAPoint2D.h"
 #include <unordered_map>
+#include <stdint.h>
 
 #ifdef ENABLE_VISUALIZATOR
 #include "Visualizator/Visualizator.h"
@@ -34,6 +35,8 @@ struct ConnectionJoin {
 struct ConnectionJoinData {
   PointIndex index;
   ConnectionJoin* data;
+
+  ConnectionJoinData(PointIndex index, ConnectionJoin* data) : index(index), data(data) { }
 };
 
 struct ConnectionPointData {
@@ -50,6 +53,8 @@ private:
   static const SIA::Position sDirRight;
 
 public:
+  static void reMemory();
+
   void update(const model::World& world);
 
   PointIndex getPointIndexByTileAndDir(int x, int y, int dx, int dy) const;
@@ -78,16 +83,19 @@ private:
   static const std::vector<SIA::Position>& directionsByTileType(const model::TileType& type);
 
 private:
-  SIA::Vector toRealPoint(int x, int y, int dx, int dy) const;
-  PointIndex connectionPointIndex(int x, int y, int dx, int dy) const;
-  int countConnectionPointsBySize(size_t width, size_t heigth) const;
+  static SIA::Vector toRealPoint(int x, int y, int dx, int dy);
+  static PointIndex connectionPointIndex(int x, int y, int dx, int dy);
 
   ConnectionJoin& joinByPointIndexes(PointIndex index1, PointIndex index2);
 
-  std::vector<ConnectionPointData> data;
-  std::unordered_map<uint32_t, ConnectionJoin> joinsMemory;
+private:
+  static size_t sMapWidth;
+  static size_t sMapHeight;
+  static size_t sConnectionPointsCount;
 
-  std::vector<std::vector<std::vector<model::Bonus>>> bonusesByTiles;
+  static std::vector<ConnectionJoin> joinsMemory;
+  static std::vector<ConnectionPointData> data;
+  static std::vector<std::vector<std::vector<model::Bonus>>> bonusesByTiles;
 
 };
 

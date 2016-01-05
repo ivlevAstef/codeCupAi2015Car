@@ -11,6 +11,7 @@ using namespace std;
 
 void MyStrategy::move(const Car& car, const World& world, const Game& game, Move& move) {
   volatile Constants constants = Constants(game);
+  ConnectionMap::reMemory();
 
   //move.setThrowProjectile(true);
   move.setSpillOil(true);

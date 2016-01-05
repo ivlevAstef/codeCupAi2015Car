@@ -28,6 +28,7 @@ ssize_t write(SOCKET s, const char *buf, int len, int flags = 0) {
 std::string Visualizator::DEFAULT_HOST = "127.0.0.1";
 std::string Visualizator::DEFAULT_PORT = "13579";
 const int Visualizator::BUF_SIZE = 1024;
+char Visualizator::buf[BUF_SIZE] = {0};
 
 Visualizator::Visualizator() : openSocket(INVALID_SOCKET) {
   /* Obtain address(es) matching host/port */
@@ -112,49 +113,41 @@ void Visualizator::writeWithColor(char* buf, int32_t color) const {
 }
 
 void Visualizator::circle(double x, double y, double r, int32_t color) const {
-  char buf[BUF_SIZE] = {0};
   sprintf(buf, "circle %.3lf %.3lf %.3lf", x, y, r);
   writeWithColor(buf, color);
 }
 
 void Visualizator::fillCircle(double x, double y, double r, int32_t color) const {
-  char buf[BUF_SIZE] = {0};
   sprintf(buf, "fill_circle %.3lf %.3lf %.3lf", x, y, r);
   writeWithColor(buf, color);
 }
 
 void Visualizator::rect(double x1, double y1, double x2, double y2, int32_t color) const {
-  char buf[BUF_SIZE] = {0};
   sprintf(buf, "rect %.3lf %.3lf %.3lf %.3lf", x1, y1, x2, y2);
   writeWithColor(buf, color);
 }
 
 void Visualizator::fillRect(double x1, double y1, double x2, double y2, int32_t color) const {
-  char buf[BUF_SIZE] = {0};
   sprintf(buf, "fill_rect %.3lf %.3lf %.3lf %.3lf", x1, y1, x2, y2);
   writeWithColor(buf, color);
 }
 
 void Visualizator::line(double x1, double y1, double x2, double y2, int32_t color) const {
-  char buf[BUF_SIZE] = {0};
   sprintf(buf, "line %.3lf %.3lf %.3lf %.3lf", x1, y1, x2, y2);
   writeWithColor(buf, color);
 }
 
 void Visualizator::text(double x, double y, const char* text, int32_t color) const {
-  char buf[BUF_SIZE] = {0};
   sprintf(buf, "text %.3lf %.3lf %s", x, y, text);
   writeWithColor(buf, color);
 }
 
 void Visualizator::text(double x, double y, double value, int32_t color) const {
-  char buf[BUF_SIZE] = {0};
   sprintf(buf, "text %.3lf %.3lf %.2lf", x, y, value);
   writeWithColor(buf, color);
 }
 
 void Visualizator::text(double x, double y, int64_t value, int32_t color) const {
-  char buf[BUF_SIZE] = {0};
   sprintf(buf, "text %.3lf %.3lf %I64d", x, y, value);
   writeWithColor(buf, color);
 }

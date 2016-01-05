@@ -24,7 +24,6 @@ void PathFinder::findPath(const model::Car& car, const model::World& world, cons
 
   int wayPointIndex = car.getNextWaypointIndex();
   PointIndex pointIndex = beginPointIndex;
-  std::vector<PointIndex> visited;
 
   while (pointIndexPath.size() < maxDepth) {
     fillPointsData(pointIndex, map);
@@ -157,38 +156,42 @@ std::vector<PointIndex> PathFinder::findPathPointIndex(PointIndex fromIndex, Poi
 
 void PathFinder::fillPointsData(PointIndex beginPointIndex, const ConnectionMap& map) {
   const size_t pointCount = map.getPointCount();
-  pointWeight.clear();
-  pointVisited.clear();
-  pointWeight.resize(pointCount, DBL_MAX);
+
+  std::vector<char> pointVisited;
   pointVisited.resize(pointCount, false);
+
+  pointWeight.clear();
+  pointWeight.resize(pointCount, DBL_MAX);
 
   pointWeight[beginPointIndex] = 0;
 
-  std::unordered_set<PointIndex> validIndex;
-  validIndex.reserve(60);
+  bool* pPointVisited = (bool*)pointVisited.data();
+  double* pPointWeight = pointWeight.data();
 
   PointIndex minPointIndex = beginPointIndex;
   double minWeight = 0;
   while (minPointIndex != map.invalidPointIndex()) {
-    pointVisited[minPointIndex] = true;
-    validIndex.erase(minPointIndex);
+    pPointVisited[minPointIndex] = true;
 
     const auto& pointData = map.getConnectionPointByIndex(minPointIndex);
-    for (const auto& join : pointData.joins) {
-      if (!pointVisited[join.index]) {
+    const size_t pointDataJoinsSize = pointData.joins.size();
+
+    for (size_t i = 0; i < pointDataJoinsSize; ++i) {
+      const auto& join = pointData.joins[i];
+
+      if (!pPointVisited[join.index]) {
         SIAAssert(NULL != join.data);
-        pointWeight[join.index] = min(pointWeight[join.index], minWeight + calculatePointWeight(*join.data));
-        validIndex.insert(join.index);
+        pPointWeight[join.index] = MIN(pPointWeight[join.index], minWeight + calculatePointWeight(*join.data));
       }
     }
 
-
     minPointIndex = map.invalidPointIndex();
     minWeight = DBL_MAX;
-    for (const PointIndex& i : validIndex) {
-      if (pointWeight[i] < minWeight && !pointVisited[i]) {
-        minWeight = pointWeight[i];
-        minPointIndex = i;
+
+    for (size_t i = 0; i < pointCount; i++) {
+      if (pPointWeight[i] < minWeight && !pPointVisited[i]) {
+        minWeight = pPointWeight[i];
+        minPointIndex = PointIndex(i);
       }
     }
   }
@@ -196,12 +199,14 @@ void PathFinder::fillPointsData(PointIndex beginPointIndex, const ConnectionMap&
 
 double PathFinder::calculatePointWeight(const ConnectionJoin& join) const {
   const double backwardWeight = (NULL != join.userInfo) ? *join.userInfo : 0;
-  return max(0, join.length - join.weight * sWeightMult + backwardWeight);
+  return MAX(0.1, join.length - join.weight * sWeightMult + backwardWeight);
 }
 
 #ifdef ENABLE_VISUALIZATOR
 void PathFinder::visualizationPath(const Visualizator& visualizator, int32_t color) const {
-  for (size_t i = 1; i < path.size(); i++) {
+  const size_t pathSize = path.size();
+
+  for (size_t i = 1; i < pathSize; ++i) {
     visualizator.line(path[i - 1].x, path[i - 1].y, path[i].x, path[i].y, color);
   }
 }

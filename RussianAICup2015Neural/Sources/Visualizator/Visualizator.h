@@ -12,11 +12,13 @@
 #include <cstdint>
 
 class Visualizator {
-public:
+private:
   static std::string DEFAULT_HOST;
   static std::string DEFAULT_PORT;
   static const int BUF_SIZE;
+  static char buf[];
 
+public:
   Visualizator();
 
   void beginPre() const;
