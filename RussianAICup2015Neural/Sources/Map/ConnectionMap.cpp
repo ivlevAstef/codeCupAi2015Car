@@ -22,6 +22,7 @@ const SIA::Position ConnectionMap::sDirLeft = SIA::Position(-1, 0);
 const SIA::Position ConnectionMap::sDirRight = SIA::Position(1, 0);
 
 void ConnectionMap::update(const model::World& world) {
+  createBonusesByTiles(world);
   createConnectionData(world);
   removeSingleConnections();
 }
@@ -98,7 +99,7 @@ void ConnectionMap::fillJoinsMemoryForTile(const model::World& world, size_t x, 
         join.index2 = max(index1, index2);
 
         join.length = (dir1 - dir2).length();
-        join.weight = 0;//TODO: set weight
+        join.weight = weightForTileAndDir(world, x, y, dir1, dir2);//TODO: set weight
         join.userInfo = NULL;
       }
     }
@@ -144,6 +145,32 @@ bool ConnectionMap::checkConnection(size_t fromIndex, size_t toIndex) const {
     }
   }
   return false;
+}
+
+void ConnectionMap::createBonusesByTiles(const model::World& world) {
+  bonusesByTiles.resize(world.getWidth());
+
+  for (auto& bonusesAxis : bonusesByTiles) {
+    bonusesAxis.resize(world.getHeight());
+  }
+
+  for (const auto& bonus : world.getBonuses()) {
+    SIA::Position tilePos = tilePosition(bonus.getX(), bonus.getY());
+    bonusesByTiles[tilePos.x][tilePos.y].push_back(bonus);
+  }
+}
+
+double ConnectionMap::weightForTileAndDir(const model::World& world, size_t x, size_t y, const SIA::Position& dir1, const SIA::Position& dir2) const {
+  SIAAssert(x < bonusesByTiles.size());
+  SIAAssert(y < bonusesByTiles[x].size());
+
+  double result = 0;
+
+  for (const auto& bonus : bonusesByTiles[x][y]) {
+    result += 1.0;//TODO: create normal formule
+  }
+
+  return result;
 }
 
 const std::vector<SIA::Position>& ConnectionMap::directionsByTileType(const model::TileType& type) {

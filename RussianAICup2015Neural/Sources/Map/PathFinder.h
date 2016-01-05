@@ -43,6 +43,7 @@ private:
   double calculatePointWeight(const ConnectionJoin& join) const;
 
 private:
+  static const double sWeightMult;
   static const double sBackwardWeight;
 
   std::vector<double> pointWeight;

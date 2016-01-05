@@ -72,6 +72,9 @@ private:
   void removeSingleConnections();
   bool checkConnection(size_t fromIndex, size_t toIndex) const;
 
+  void createBonusesByTiles(const model::World& world);
+  double weightForTileAndDir(const model::World& world, size_t x, size_t y, const SIA::Position& dir1, const SIA::Position& dir2) const;
+
   static const std::vector<SIA::Position>& directionsByTileType(const model::TileType& type);
 
 private:
@@ -83,6 +86,8 @@ private:
 
   std::vector<ConnectionPointData> data;
   std::unordered_map<uint32_t, ConnectionJoin> joinsMemory;
+
+  std::vector<std::vector<std::vector<model::Bonus>>> bonusesByTiles;
 
 };
 

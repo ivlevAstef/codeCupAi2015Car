@@ -13,6 +13,7 @@
 #include <math.h>
 #include <unordered_set>
 
+const double PathFinder::sWeightMult = 0.75;
 const double PathFinder::sBackwardWeight = 16*16*2;
 
 void PathFinder::findPath(const model::Car& car, const model::World& world, const ConnectionMap& map, const size_t maxDepth) {
@@ -195,7 +196,7 @@ void PathFinder::fillPointsData(PointIndex beginPointIndex, const ConnectionMap&
 
 double PathFinder::calculatePointWeight(const ConnectionJoin& join) const {
   const double backwardWeight = (NULL != join.userInfo) ? *join.userInfo : 0;
-  return join.length + backwardWeight;
+  return max(0, join.length - join.weight * sWeightMult + backwardWeight);
 }
 
 #ifdef ENABLE_VISUALIZATOR
