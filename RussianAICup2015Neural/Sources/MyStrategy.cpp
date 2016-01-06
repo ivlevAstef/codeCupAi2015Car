@@ -38,6 +38,7 @@ void MyStrategy::move(const Car& car, const World& world, const Game& game, Move
   }
 
 #ifdef ENABLE_VISUALIZATOR
+  Visualizator::setWindowCenter(car.getX(), car.getY(), world.getWidth() * game.getTrackTileSize(), world.getHeight() * game.getTrackTileSize());
   visualizator.beginPost();
 
   map.visualizationConnectionJoins(visualizator, 0x000077);

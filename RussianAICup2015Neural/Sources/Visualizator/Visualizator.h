@@ -18,8 +18,15 @@ private:
   static const int BUF_SIZE;
   static char buf[];
 
+  static double windowCenterX;
+  static double windowCenterY;
+  static double windowWidth;
+  static double windowHeight;
+
 public:
   Visualizator();
+
+  static void setWindowCenter(double x, double y, double maxWidth, double maxHeight);
 
   void beginPre() const;
   void endPre() const;
@@ -36,7 +43,9 @@ public:
   void text(double x, double y, double value, int32_t color = 0x7F7F7F) const;
   void text(double x, double y, int64_t value, int32_t color = 0x7F7F7F) const;
 
-protected:
+private:
+  static bool checkPoint(double x, double y);
+
   void sendCommand(const char* str) const;
   void writeWithColor(char* buf, int32_t color) const;
 
