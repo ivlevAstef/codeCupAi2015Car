@@ -94,6 +94,12 @@ namespace SIA
       return Point2D<Type>(x / s, y / s);
     }
 
+    inline const Point2D<Type> operator/=(Type s) {
+      x /= s;
+      y /= s;
+      return *this;
+    }
+
     inline bool operator<(const Point2D<Type>& v) const {
       return x < v.x && y < v.y;
     }

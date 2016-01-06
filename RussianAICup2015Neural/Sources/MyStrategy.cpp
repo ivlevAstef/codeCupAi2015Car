@@ -22,11 +22,10 @@ void MyStrategy::move(const Car& car, const World& world, const Game& game, Move
 
   ConnectionMap map;
   map.update(world);
+  map.updateWeightForCar(car, world);
 
   PathFinder path;
   path.findPath(car, world, map, 6);
-
-
 
   double angleToWaypoint = car.getAngleTo(path.getPath()[1].x, path.getPath()[1].y);
 

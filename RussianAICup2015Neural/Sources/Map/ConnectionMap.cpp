@@ -26,8 +26,10 @@ size_t ConnectionMap::sMapWidth = 0;
 size_t ConnectionMap::sMapHeight = 0;
 
 std::vector<ConnectionJoin> ConnectionMap::joinsMemory;
+ConnectionJoin* ConnectionMap::pJoinsMemory = NULL;
+
 std::vector<ConnectionPointData> ConnectionMap::data;
-std::vector<std::vector<std::vector<model::Bonus>>> ConnectionMap::bonusesByTiles;
+ConnectionPointData* ConnectionMap::pData = NULL;
 
 void ConnectionMap::reMemory() {
   sMapWidth = Constants::instance().game.getWorldWidth();
@@ -37,37 +39,77 @@ void ConnectionMap::reMemory() {
 
   if (joinsMemory.size() != sConnectionPointsCount * sConnectionPointsCount) {
     joinsMemory.resize(sConnectionPointsCount * sConnectionPointsCount);
+    pJoinsMemory = joinsMemory.data();
   }
   
   if (data.size() != sConnectionPointsCount) {
     data.resize(sConnectionPointsCount);
+    pData = data.data();
   }
 
   for (size_t i = 0; i < sConnectionPointsCount; ++i) {
-    auto& pointData = data[i];
+    auto& pointData = pData[i];
     pointData.joins.clear();
     pointData.joins.reserve(sMaxConnectionJoinsInTile);
-  }
-
-  if (bonusesByTiles.size() != sMapWidth) {
-    bonusesByTiles.resize(sMapWidth);
-
-    for (auto& bonusesAxis : bonusesByTiles) {
-      bonusesAxis.resize(sMapHeight);
-    }
-  }
-
-  for (size_t x = 0; x < sMapWidth; ++x) {
-    for (size_t y = 0; y < sMapHeight; ++y) {
-      bonusesByTiles[x][y].clear();
-    }
   }
 }
 
 void ConnectionMap::update(const model::World& world) {
-  createBonusesByTiles(world);
   createConnectionData(world);
   removeSingleConnections();
+}
+
+void ConnectionMap::updateWeightForCar(const model::Car& car, const model::World& world) {
+  const size_t joinsMemorySize = joinsMemory.size();
+  for (size_t i = 0; i < joinsMemorySize; i++) {
+    pJoinsMemory[i].weight = 0;
+  }
+
+  const auto& tiles = world.getTilesXY();
+
+  const auto& bonuses = world.getBonuses();
+  const size_t bonusesSize = bonuses.size();
+
+  for (size_t i = 0; i < bonusesSize; ++i) {
+    const auto& bonus = bonuses[i];
+
+    const SIA::Position tile = tilePosition(bonus.getX(), bonus.getY());
+    const model::TileType& tileType = tiles[tile.x][tile.y];
+
+    auto& directions = directionsByTileType(tileType);
+    const size_t directionsSize = directions.size();
+
+    for (size_t i1 = 0; i1 < directionsSize; ++i1) {
+      const auto& dir1 = directions[i1];
+
+      for (size_t i2 = i1 + 1; i2 < directionsSize; ++i2) {
+        const auto& dir2 = directions[i2];
+
+        if (checkBelongsBonusToJoin(bonus, tile, dir1, dir2)) {
+          const PointIndex index1 = connectionPointIndex(tile.x, tile.y, dir1.x, dir1.y);
+          const PointIndex index2 = connectionPointIndex(tile.x, tile.y, dir2.x, dir2.y);
+
+          ConnectionJoin& join = joinByPointIndexes(index1, index2);
+          join.weight += Constants::bonusPriorityForCar(bonus.getType(), car);
+        }
+      }
+    }
+  }
+}
+
+bool ConnectionMap::checkBelongsBonusToJoin(const model::Bonus& bonus, const SIA::Position& tile, const SIA::Position& dir1, const SIA::Position& dir2) const {
+  static const double sTileSize = Constants::instance().game.getTrackTileSize();
+  static const double sTileMargin = Constants::instance().game.getTrackTileMargin();
+
+  SIA::Vector p1 = toRealPoint(tile.x, tile.y, dir1.x, dir1.y);
+  SIA::Vector normal(dir1.y - dir2.y, - (dir1.x - dir2.x));
+  normal /= normal.length();
+
+  SIA::Vector bonusPos(bonus.getX(), bonus.getY());
+
+  const double maxDistance = (sTileSize * 0.5 - sTileMargin) / (abs(normal.x) + abs(normal.y));
+
+  return abs((bonusPos - p1).dot(normal)) < maxDistance;
 }
 
 PointIndex ConnectionMap::getPointIndexByTileAndDir(int x, int y, int dx, int dy) const {
@@ -75,7 +117,7 @@ PointIndex ConnectionMap::getPointIndexByTileAndDir(int x, int y, int dx, int dy
 }
 
 bool ConnectionMap::validPointIndex(PointIndex index) const {
-  return (0 <= index && index < data.size()) && !data[index].joins.empty();
+  return (0 <= index && index < data.size()) && !pData[index].joins.empty();
 }
 
 PointIndex ConnectionMap::invalidPointIndex() const {
@@ -84,13 +126,13 @@ PointIndex ConnectionMap::invalidPointIndex() const {
 
 const ConnectionPointData& ConnectionMap::getConnectionPointByIndex(PointIndex index) const {
   SIAAssert(index <= data.size());
-  return data[index];
+  return pData[index];
 }
 
 const std::vector<SIA::Position> ConnectionMap::getTiles(PointIndex index) const {
   SIAAssert(index <= data.size());
 
-  const SIA::Vector pos = data[index].pos;
+  const SIA::Vector pos = pData[index].pos;
   const double dist = Constants::instance().game.getTrackTileSize() * 0.25;
 
   std::vector<SIA::Position> result;
@@ -126,7 +168,7 @@ void ConnectionMap::fillJoinsMemoryForTile(const model::World& world, size_t x, 
     const auto& dir1 = directions[i1];
     const PointIndex index1 = connectionPointIndex(x, y, dir1.x, dir1.y);
 
-    for (size_t i2 = 0; i2 < directionsSize; ++i2) {
+    for (size_t i2 = i1 + 1; i2 < directionsSize; ++i2) {
       const auto& dir2 = directions[i2];
       const PointIndex index2 = connectionPointIndex(x, y, dir2.x, dir2.y);
 
@@ -136,7 +178,7 @@ void ConnectionMap::fillJoinsMemoryForTile(const model::World& world, size_t x, 
         join.index2 = MAX(index1, index2);
 
         join.length = (dir1 - dir2).length();
-        join.weight = weightForTileAndDir(world, x, y, dir1, dir2);//TODO: set weight
+        join.weight = 0;
         join.userInfo = NULL;
       }
     }
@@ -154,7 +196,7 @@ void ConnectionMap::fillConnectionDataForTile(const model::World& world, size_t 
     const auto& dir1 = directions[i1];
     const PointIndex index1 = connectionPointIndex(x, y, dir1.x, dir1.y);
 
-    auto& pointData = data[index1];
+    auto& pointData = pData[index1];
     pointData.pos = toRealPoint(x, y, dir1.x, dir1.y);
 
     for (size_t i2 = 0; i2 < directionsSize; ++i2) {
@@ -173,7 +215,7 @@ void ConnectionMap::removeSingleConnections() {
   const size_t dataSize = data.size();
 
   for (size_t index = 0; index < dataSize; ++index) {
-    auto& pointData = data[index];
+    auto& pointData = pData[index];
     const size_t joinsSize = pointData.joins.size();
 
     for (size_t i = 0; i < joinsSize; ++i) {
@@ -186,7 +228,7 @@ void ConnectionMap::removeSingleConnections() {
 }
 
 bool ConnectionMap::checkConnection(size_t fromIndex, size_t toIndex) const {
-  const auto& joins = data[fromIndex].joins;
+  const auto& joins = pData[fromIndex].joins;
   const size_t joinsSize = joins.size();
 
   for (size_t i = 0; i < joinsSize; ++i) {
@@ -195,34 +237,6 @@ bool ConnectionMap::checkConnection(size_t fromIndex, size_t toIndex) const {
     }
   }
   return false;
-}
-
-void ConnectionMap::createBonusesByTiles(const model::World& world) {
-  const auto& bonuses = world.getBonuses();
-  const size_t bonusesSize = bonuses.size();
-
-  for (size_t i = 0; i < bonusesSize; ++i) {
-    const auto& bonus = bonuses[i];
-
-    const SIA::Position tilePos = tilePosition(bonus.getX(), bonus.getY());
-    bonusesByTiles[tilePos.x][tilePos.y].push_back(bonus);
-  }
-}
-
-double ConnectionMap::weightForTileAndDir(const model::World& world, size_t x, size_t y, const SIA::Position& dir1, const SIA::Position& dir2) const {
-  SIAAssert(x < bonusesByTiles.size());
-  SIAAssert(y < bonusesByTiles[x].size());
-
-  double result = 0;
-
-  const auto& bonuses = bonusesByTiles[x][y];
-  const size_t bonusesSize = bonuses.size();
-
-  for (size_t i = 0; i < bonusesSize; ++i) {
-    result += 1.0;//TODO: create normal formula
-  }
-
-  return result;
 }
 
 const std::vector<SIA::Position>& ConnectionMap::directionsByTileType(const model::TileType& type) {
@@ -284,7 +298,7 @@ ConnectionJoin& ConnectionMap::joinByPointIndexes(PointIndex index1, PointIndex 
   PointIndex maxIndex = MAX(index1, index2);
 
   auto key = uint32_t(minIndex) + uint32_t(maxIndex) * sConnectionPointsCount;
-  return joinsMemory[key];
+  return pJoinsMemory[key];
 }
 
 #ifdef ENABLE_VISUALIZATOR
@@ -292,8 +306,10 @@ void ConnectionMap::visualizationConnectionPoints(const Visualizator& visualizat
   static const double pointR = 10;
 
   const size_t dataSize = data.size();
+  const auto* pData = data.data();
+
   for (size_t i = 0; i < dataSize; ++i) {
-    const auto& pointData = data[i];
+    const auto& pointData = pData[i];
 
     if (!pointData.joins.empty()) {
       visualizator.fillCircle(pointData.pos.x, pointData.pos.y, pointR, color);
@@ -303,8 +319,10 @@ void ConnectionMap::visualizationConnectionPoints(const Visualizator& visualizat
 
 void ConnectionMap::visualizationConnectionJoins(const Visualizator& visualizator, int32_t color) const {
   const size_t dataSize = data.size();
+  const auto* pData = data.data();
+
   for (size_t i = 0; i < dataSize; ++i) {
-    const auto& pointData = data[i];
+    const auto& pointData = pData[i];
 
     const auto& joins = pointData.joins;
     const size_t joinsSize = joins.size();
@@ -312,14 +330,18 @@ void ConnectionMap::visualizationConnectionJoins(const Visualizator& visualizato
     for (size_t j = 0; j < joinsSize; ++j) {
       const auto& join = joins[j];
 
-      const auto& p1 = pointData.pos;
-      const auto& p2 = data[join.index].pos;
+      if (join.index > i) /*for don't show twice*/ {
 
-      const auto& center = p1 + (p2 - p1) * 0.5;
+        const auto& p1 = pointData.pos;
+        const auto& p2 = pData[join.index].pos;
 
-      SIAAssert(NULL != join.data);
-      visualizator.text(center.x, center.y, join.data->length, color);
-      visualizator.line(p1.x, p1.y, p2.x, p2.y, color);
+        const auto& center = p1 + (p2 - p1) * 0.5;
+
+        SIAAssert(NULL != join.data);
+        visualizator.text(center.x, center.y, join.data->length, color);
+        visualizator.text(center.x, center.y + 35, join.data->weight, 0x000000);
+        visualizator.line(p1.x, p1.y, p2.x, p2.y, color);
+      }
     }
   }
 }

@@ -56,6 +56,7 @@ public:
   static void reMemory();
 
   void update(const model::World& world);
+  void updateWeightForCar(const model::Car& car, const model::World& world);
 
   PointIndex getPointIndexByTileAndDir(int x, int y, int dx, int dy) const;
   bool validPointIndex(PointIndex index) const;
@@ -77,8 +78,7 @@ private:
   void removeSingleConnections();
   bool checkConnection(size_t fromIndex, size_t toIndex) const;
 
-  void createBonusesByTiles(const model::World& world);
-  double weightForTileAndDir(const model::World& world, size_t x, size_t y, const SIA::Position& dir1, const SIA::Position& dir2) const;
+  bool checkBelongsBonusToJoin(const model::Bonus& bonus, const SIA::Position& tile, const SIA::Position& dir1, const SIA::Position& dir2) const;
 
   static const std::vector<SIA::Position>& directionsByTileType(const model::TileType& type);
 
@@ -94,8 +94,9 @@ private:
   static size_t sConnectionPointsCount;
 
   static std::vector<ConnectionJoin> joinsMemory;
+  static ConnectionJoin* pJoinsMemory;//fast
   static std::vector<ConnectionPointData> data;
-  static std::vector<std::vector<std::vector<model::Bonus>>> bonusesByTiles;
+  static ConnectionPointData* pData;//fast
 
 };
 

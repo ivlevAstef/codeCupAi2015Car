@@ -41,13 +41,12 @@ void PathFinder::findPath(const model::Car& car, const model::World& world, cons
   }
 
   fillPathByPointIndex(pointIndexPath, map);
+
+  clearJoinsUserInfo();
 }
 
 void PathFinder::setBackwardIndexes(PointIndex pointIndex, const SIA::Position pos, const ConnectionMap& map) {
-  for (const auto& join : joinsUserInfo) {
-    join.first->userInfo = NULL;
-  }
-  joinsUserInfo.clear();
+  clearJoinsUserInfo();
 
   for (const ConnectionJoinData& join : map.getConnectionPointByIndex(pointIndex).joins) {
     bool found = false;
@@ -61,6 +60,13 @@ void PathFinder::setBackwardIndexes(PointIndex pointIndex, const SIA::Position p
       join.data->userInfo = &joinsUserInfo[join.data];
     }
   }
+}
+
+void PathFinder::clearJoinsUserInfo() {
+  for (const auto& join : joinsUserInfo) {
+    join.first->userInfo = NULL;
+  }
+  joinsUserInfo.clear();
 }
 
 SIA::Position PathFinder::nextPositionForCar(PointIndex pointIndex, const model::Car& car, const ConnectionMap& map) const {

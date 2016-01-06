@@ -11,6 +11,8 @@
 #define _CONSTANTS_H__
 
 #include "model/Game.h"
+#include "model/Car.h"
+#include "model/BonusType.h"
 #include "SIASingleton.h"
 #include "SIAPoint2D.h"
 
@@ -23,6 +25,8 @@ public:
 
   static const size_t dirsCount;
   static const SIA::Position dirs[];
+
+  static double bonusPriorityForCar(const model::BonusType& bonusType, const model::Car& car);
 };
 
 #endif

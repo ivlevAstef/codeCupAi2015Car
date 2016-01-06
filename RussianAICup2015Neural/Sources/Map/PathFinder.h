@@ -40,6 +40,8 @@ private:
 
   void setBackwardIndexes(PointIndex pointIndex, const SIA::Position pos, const ConnectionMap& map);
 
+  void clearJoinsUserInfo();
+
   double calculatePointWeight(const ConnectionJoin& join) const;
 
 private:
