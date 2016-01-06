@@ -75,12 +75,11 @@ private:
   void fillConnectionDataForTile(const model::World& world, size_t x, size_t y);
   void fillJoinsMemoryForTile(const model::World& world, size_t x, size_t y);
 
-  void removeSingleConnections();
   bool checkConnection(size_t fromIndex, size_t toIndex) const;
 
   bool checkBelongsBonusToJoin(const model::Bonus& bonus, const SIA::Position& tile, const SIA::Position& dir1, const SIA::Position& dir2) const;
 
-  static const std::vector<SIA::Position>& directionsByTileType(const model::TileType& type);
+  static const std::vector<SIA::Position>& directionsByTileType(model::TileType type, const model::World& world, size_t x, size_t y);
 
 private:
   static SIA::Vector toRealPoint(int x, int y, int dx, int dy);

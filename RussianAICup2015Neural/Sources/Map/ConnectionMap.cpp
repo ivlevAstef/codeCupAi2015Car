@@ -35,7 +35,7 @@ void ConnectionMap::reMemory() {
   sMapWidth = Constants::instance().game.getWorldWidth();
   sMapHeight = Constants::instance().game.getWorldHeight();
 
-  sConnectionPointsCount = connectionPointIndex(sMapWidth - 1, sMapHeight - 1, 1, 0);
+  sConnectionPointsCount = connectionPointIndex(sMapWidth - 1, sMapHeight - 1, 0, 0) + 2;
 
   if (joinsMemory.size() != sConnectionPointsCount * sConnectionPointsCount) {
     joinsMemory.resize(sConnectionPointsCount * sConnectionPointsCount);
@@ -56,7 +56,6 @@ void ConnectionMap::reMemory() {
 
 void ConnectionMap::update(const model::World& world) {
   createConnectionData(world);
-  removeSingleConnections();
 }
 
 void ConnectionMap::updateWeightForCar(const model::Car& car, const model::World& world) {
@@ -76,7 +75,7 @@ void ConnectionMap::updateWeightForCar(const model::Car& car, const model::World
     const SIA::Position tile = tilePosition(bonus.getX(), bonus.getY());
     const model::TileType& tileType = tiles[tile.x][tile.y];
 
-    auto& directions = directionsByTileType(tileType);
+    auto& directions = directionsByTileType(tileType, world, tile.x, tile.y);
     const size_t directionsSize = directions.size();
 
     for (size_t i1 = 0; i1 < directionsSize; ++i1) {
@@ -89,8 +88,10 @@ void ConnectionMap::updateWeightForCar(const model::Car& car, const model::World
           const PointIndex index1 = connectionPointIndex(tile.x, tile.y, dir1.x, dir1.y);
           const PointIndex index2 = connectionPointIndex(tile.x, tile.y, dir2.x, dir2.y);
 
-          ConnectionJoin& join = joinByPointIndexes(index1, index2);
-          join.weight += Constants::bonusPriorityForCar(bonus.getType(), car);
+          if (index1 != sConnectionPointsCount && index2 != sConnectionPointsCount) {
+            ConnectionJoin& join = joinByPointIndexes(index1, index2);
+            join.weight += Constants::bonusPriorityForCar(bonus.getType(), car);
+          }
         }
       }
     }
@@ -121,7 +122,7 @@ bool ConnectionMap::validPointIndex(PointIndex index) const {
 }
 
 PointIndex ConnectionMap::invalidPointIndex() const {
-  return PointIndex(data.size());
+  return PointIndex(sConnectionPointsCount);
 }
 
 const ConnectionPointData& ConnectionMap::getConnectionPointByIndex(PointIndex index) const {
@@ -161,7 +162,7 @@ void ConnectionMap::fillJoinsMemoryForTile(const model::World& world, size_t x, 
   const auto& tiles = world.getTilesXY();
   const model::TileType& tileType = tiles[x][y];
 
-  auto& directions = directionsByTileType(tileType);
+  auto& directions = directionsByTileType(tileType, world, x, y);
   const size_t directionsSize = directions.size();
 
   for (size_t i1 = 0; i1 < directionsSize; ++i1) {
@@ -172,7 +173,7 @@ void ConnectionMap::fillJoinsMemoryForTile(const model::World& world, size_t x, 
       const auto& dir2 = directions[i2];
       const PointIndex index2 = connectionPointIndex(x, y, dir2.x, dir2.y);
 
-      if (index1 != index2) {
+      if (index1 != index2 && index1 != sConnectionPointsCount && index2 != sConnectionPointsCount) {
         ConnectionJoin& join = joinByPointIndexes(index1, index2);
         join.index1 = MIN(index1, index2);
         join.index2 = MAX(index1, index2);
@@ -189,7 +190,7 @@ void ConnectionMap::fillConnectionDataForTile(const model::World& world, size_t 
   const auto& tiles = world.getTilesXY();
   const model::TileType& tileType = tiles[x][y];
 
-  const auto& directions = directionsByTileType(tileType);
+  const auto& directions = directionsByTileType(tileType, world, x, y);
   const size_t directionsSize = directions.size();
 
   for (size_t i1 = 0; i1 < directionsSize; ++i1) {
@@ -203,25 +204,9 @@ void ConnectionMap::fillConnectionDataForTile(const model::World& world, size_t 
       const auto& dir2 = directions[i2];
       const PointIndex index2 = connectionPointIndex(x, y, dir2.x, dir2.y);
 
-      if (index1 != index2) {
+      if (index1 != index2 && index1 != sConnectionPointsCount && index2 != sConnectionPointsCount) {
         ConnectionJoinData joinData = {index2, &joinByPointIndexes(index1, index2)};
         pointData.joins.push_back(joinData);
-      }
-    }
-  }
-}
-
-void ConnectionMap::removeSingleConnections() {
-  const size_t dataSize = data.size();
-
-  for (size_t index = 0; index < dataSize; ++index) {
-    auto& pointData = pData[index];
-    const size_t joinsSize = pointData.joins.size();
-
-    for (size_t i = 0; i < joinsSize; ++i) {
-      if (!checkConnection(pointData.joins[i].index, index)) {
-        pointData.joins.erase(pointData.joins.begin() + i);
-        i--;
       }
     }
   }
@@ -239,7 +224,39 @@ bool ConnectionMap::checkConnection(size_t fromIndex, size_t toIndex) const {
   return false;
 }
 
-const std::vector<SIA::Position>& ConnectionMap::directionsByTileType(const model::TileType& type) {
+#define CHECK_TYPE(TYPE) type == model::TileType::TYPE
+
+static bool isContainsLeft(const model::TileType type) {
+  return CHECK_TYPE(HORIZONTAL) ||
+    CHECK_TYPE(RIGHT_TOP_CORNER) || CHECK_TYPE(RIGHT_BOTTOM_CORNER) ||
+    CHECK_TYPE(LEFT_HEADED_T) || CHECK_TYPE(TOP_HEADED_T) || CHECK_TYPE(BOTTOM_HEADED_T) ||
+    CHECK_TYPE(CROSSROADS) || CHECK_TYPE(UNKNOWN);
+}
+
+static bool isContainsRight(const model::TileType type) {
+  return CHECK_TYPE(HORIZONTAL) ||
+    CHECK_TYPE(LEFT_TOP_CORNER) || CHECK_TYPE(LEFT_BOTTOM_CORNER) ||
+    CHECK_TYPE(RIGHT_HEADED_T) || CHECK_TYPE(TOP_HEADED_T) || CHECK_TYPE(BOTTOM_HEADED_T) ||
+    CHECK_TYPE(CROSSROADS) || CHECK_TYPE(UNKNOWN);
+}
+
+static bool isContainsUp(const model::TileType type) {
+  return CHECK_TYPE(VERTICAL) ||
+    CHECK_TYPE(RIGHT_BOTTOM_CORNER) || CHECK_TYPE(LEFT_BOTTOM_CORNER) ||
+    CHECK_TYPE(RIGHT_HEADED_T) || CHECK_TYPE(LEFT_HEADED_T) || CHECK_TYPE(TOP_HEADED_T) ||
+    CHECK_TYPE(CROSSROADS) || CHECK_TYPE(UNKNOWN);
+}
+
+static bool isContainsDown(const model::TileType type) {
+  return CHECK_TYPE(VERTICAL) ||
+    CHECK_TYPE(RIGHT_TOP_CORNER) || CHECK_TYPE(LEFT_TOP_CORNER) ||
+    CHECK_TYPE(RIGHT_HEADED_T) || CHECK_TYPE(LEFT_HEADED_T) || CHECK_TYPE(BOTTOM_HEADED_T) ||
+    CHECK_TYPE(CROSSROADS) || CHECK_TYPE(UNKNOWN);
+}
+
+#undef CHECK_TYPE
+
+const std::vector<SIA::Position>& ConnectionMap::directionsByTileType(model::TileType type, const model::World& world, size_t x, size_t y) {
   static const std::vector<SIA::Position> empty;
   static const std::vector<SIA::Position> vertical {sDirUp, sDirDown};
   static const std::vector<SIA::Position> horizontal {sDirLeft, sDirRight};
@@ -252,6 +269,10 @@ const std::vector<SIA::Position>& ConnectionMap::directionsByTileType(const mode
   static const std::vector<SIA::Position> topT {sDirUp, sDirLeft, sDirRight};
   static const std::vector<SIA::Position> bottomT {sDirDown, sDirLeft, sDirRight};
   static const std::vector<SIA::Position> cross {sDirUp, sDirDown, sDirLeft, sDirRight};
+
+  static std::vector<SIA::Position> unknownBuf;
+  unknownBuf.clear();
+  unknownBuf.reserve(4);
 
   switch (type) {
     case model::EMPTY:
@@ -277,8 +298,24 @@ const std::vector<SIA::Position>& ConnectionMap::directionsByTileType(const mode
     case model::BOTTOM_HEADED_T:
       return bottomT;
     case model::CROSSROADS:
-    case model::UNKNOWN:
       return cross;
+    case model::UNKNOWN:
+      const auto& tiles = world.getTilesXY();
+      if (0 < x && isContainsRight(tiles[x - 1][y])) {
+        unknownBuf.push_back(sDirLeft);
+      }
+      if (0 < y && isContainsDown(tiles[x][y - 1])) {
+        unknownBuf.push_back(sDirUp);
+      }
+
+      if (x < world.getWidth() - 1 && isContainsLeft(tiles[x + 1][y])) {
+        unknownBuf.push_back(sDirRight);
+      }
+      if (y < world.getHeight() - 1 && isContainsUp(tiles[x][y + 1])) {
+        unknownBuf.push_back(sDirDown);
+      }      
+
+      return unknownBuf;
   }
 
   SIAAssertMsg(false, "Unknown type:%d", type);

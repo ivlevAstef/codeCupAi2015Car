@@ -23,6 +23,8 @@ private:
   static double windowWidth;
   static double windowHeight;
 
+  static bool isFirst;
+
 public:
   Visualizator();
 
