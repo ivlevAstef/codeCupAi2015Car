@@ -29,7 +29,7 @@ struct ConnectionJoin {
 
   double length;
   double weight;
-  double* userInfo;
+  double angle;
 };
 
 struct ConnectionJoinData {
@@ -62,6 +62,7 @@ public:
   bool validPointIndex(PointIndex index) const;
   PointIndex invalidPointIndex() const;
   const ConnectionPointData& getConnectionPointByIndex(PointIndex index) const;
+  const ConnectionJoinData& getConnectionJoinByIndexes(PointIndex index1, PointIndex index2) const;
   const std::vector<SIA::Position> getTiles(PointIndex index) const;
   const size_t getPointCount() const;
 

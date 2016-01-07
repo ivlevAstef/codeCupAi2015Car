@@ -23,13 +23,13 @@ public:
 
 #ifdef ENABLE_VISUALIZATOR
   void visualizationPath(const Visualizator& visualizator, int32_t color) const;
+  void visualizationPointWeight(const Visualizator& visualizator, int32_t color, const ConnectionMap& map) const;
 #endif
 
 private:
-  void fillPointsData(PointIndex beginIndex, const ConnectionMap& map);
+  void fillPointsData(PointIndex lastPointIndex, PointIndex beginIndex, const ConnectionMap& map);
 
-  PointIndex pointIndexByCar(const model::Car& car, const ConnectionMap& map, double moveLength) const;
-  SIA::Position nextPositionForCar(PointIndex pointIndex, const model::Car& car, const ConnectionMap& map) const;
+  PointIndex pointIndexByCar(const model::Car& car, const ConnectionMap& map, double moveLength, PointIndex ignoredIndex) const;
 
   SIA::Position positionByWayPointIndex(int wayPointIndex, const model::World& world) const;
 
@@ -38,19 +38,14 @@ private:
   std::vector<PointIndex> findPathPointIndex(PointIndex fromIndex, PointIndex toIndex, const ConnectionMap& map) const;
   void fillPathByPointIndex(const std::vector<PointIndex>& points, const ConnectionMap& map);
 
-  void setBackwardIndexes(PointIndex pointIndex, const SIA::Position pos, const ConnectionMap& map);
-
-  void clearJoinsUserInfo();
-
-  double calculatePointWeight(const ConnectionJoin& join) const;
+  double calculatePointWeight(const ConnectionJoin& join, const ConnectionJoin* lastJoin, const PointIndex& commonPointIndex) const;
 
 private:
   static const double sWeightMult;
-  static const double sBackwardWeight;
+  static const double sAngleWeightMult;
 
   std::vector<double> pointWeight;
   std::vector<PointIndex> minLastPointIndexes;
-  std::unordered_map<ConnectionJoin*, double> joinsUserInfo;
 
   std::vector<PathPoint> path;
 };

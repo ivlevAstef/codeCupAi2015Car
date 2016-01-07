@@ -44,6 +44,7 @@ void MyStrategy::move(const Car& car, const World& world, const Game& game, Move
   map.visualizationConnectionJoins(visualizator, 0x000077);
   map.visualizationConnectionPoints(visualizator, 0x000000);
   path.visualizationPath(visualizator, 0xFF0000);
+  path.visualizationPointWeight(visualizator, 0xFF00FF, map);
 
   visualizator.endPost();
 #endif

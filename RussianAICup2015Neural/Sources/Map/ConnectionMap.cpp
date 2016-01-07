@@ -13,6 +13,7 @@
 #include "Common/SIALogger.h"
 
 #include <algorithm>
+#include <cmath>
 
 const size_t ConnectionMap::sMaxConnectionJoinsInTile = 6;
 
@@ -130,6 +131,23 @@ const ConnectionPointData& ConnectionMap::getConnectionPointByIndex(PointIndex i
   return pData[index];
 }
 
+const ConnectionJoinData& ConnectionMap::getConnectionJoinByIndexes(PointIndex index1, PointIndex index2) const {
+  SIAAssert(index1 <= data.size());
+  SIAAssert(index2 <= data.size());
+
+  const auto& joins = pData[index1].joins;
+  const size_t joinsSize = joins.size();
+
+  for (size_t i = 0; i < joinsSize; ++i) {
+    if (joins[i].index == index2) {
+      return joins[i];
+    }
+  }
+
+  SIAAssertMsg(false, "Can't find join by two index: %d, %d", index1, index2);
+  return joins[0];
+}
+
 const std::vector<SIA::Position> ConnectionMap::getTiles(PointIndex index) const {
   SIAAssert(index <= data.size());
 
@@ -178,9 +196,10 @@ void ConnectionMap::fillJoinsMemoryForTile(const model::World& world, size_t x, 
         join.index1 = MIN(index1, index2);
         join.index2 = MAX(index1, index2);
 
-        join.length = (dir1 - dir2).length();
+        const auto& joinDir = (join.index1 == index1) ? (dir1 - dir2) : (dir2 - dir1);
+        join.length = joinDir.length();
+        join.angle = atan2(joinDir.y, joinDir.x);
         join.weight = 0;
-        join.userInfo = NULL;
       }
     }
   }
@@ -308,10 +327,10 @@ const std::vector<SIA::Position>& ConnectionMap::directionsByTileType(model::Til
         unknownBuf.push_back(sDirUp);
       }
 
-      if (x < world.getWidth() - 1 && isContainsLeft(tiles[x + 1][y])) {
+      if (x + 1 < size_t(world.getWidth()) && isContainsLeft(tiles[x + 1][y])) {
         unknownBuf.push_back(sDirRight);
       }
-      if (y < world.getHeight() - 1 && isContainsUp(tiles[x][y + 1])) {
+      if (y + 1 < size_t(world.getHeight()) && isContainsUp(tiles[x][y + 1])) {
         unknownBuf.push_back(sDirDown);
       }      
 
