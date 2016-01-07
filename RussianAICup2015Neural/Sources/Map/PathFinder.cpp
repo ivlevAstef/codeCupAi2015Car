@@ -136,24 +136,14 @@ SIA::Position PathFinder::positionByWayPointIndex(int wayPointIndex, const model
 
 std::vector<PointIndex> PathFinder::findPathPointIndex(PointIndex fromIndex, PointIndex toIndex, const ConnectionMap& map) const {
   std::vector<PointIndex> reversedPath;
+  reversedPath.reserve(32);
 
   PointIndex pointIndex = toIndex;
 
   while (pointIndex != fromIndex) {
-    const auto& pointData = map.getConnectionPointByIndex(pointIndex);
-
-    PointIndex savePointIndex = pointIndex;
-    double currentWeight = pointWeight[pointIndex];
-    for (const auto& join : pointData.joins) {
-      SIAAssert(NULL != join.data);
-      if (abs(currentWeight - pointWeight[join.index] - calculatePointWeight(*join.data)) < 1.0e-3) {
-        pointIndex = join.index;
-        reversedPath.push_back(pointIndex);
-        break;
-      }
-    }
-
-    SIAAssert(savePointIndex != pointIndex);
+    pointIndex = minLastPointIndexes[pointIndex];
+    SIAAssert(pointIndex != map.invalidPointIndex());
+    reversedPath.push_back(pointIndex);
   }
 
   std::reverse(reversedPath.begin(), reversedPath.end());
@@ -169,10 +159,14 @@ void PathFinder::fillPointsData(PointIndex beginPointIndex, const ConnectionMap&
   pointWeight.clear();
   pointWeight.resize(pointCount, DBL_MAX);
 
+  minLastPointIndexes.clear();
+  minLastPointIndexes.resize(pointCount, map.invalidPointIndex());
+
   pointWeight[beginPointIndex] = 0;
 
   bool* pPointVisited = (bool*)pointVisited.data();
   double* pPointWeight = pointWeight.data();
+  PointIndex* pPointLast = minLastPointIndexes.data();
 
   PointIndex minPointIndex = beginPointIndex;
   double minWeight = 0;
@@ -187,7 +181,12 @@ void PathFinder::fillPointsData(PointIndex beginPointIndex, const ConnectionMap&
 
       if (!pPointVisited[join.index]) {
         SIAAssert(NULL != join.data);
-        pPointWeight[join.index] = MIN(pPointWeight[join.index], minWeight + calculatePointWeight(*join.data));
+
+        double newPointWeight = minWeight + calculatePointWeight(*join.data);
+        if (newPointWeight < pPointWeight[join.index]) {
+          pPointWeight[join.index] = newPointWeight;
+          pPointLast[join.index] = minPointIndex;
+        }
       }
     }
 

@@ -49,6 +49,7 @@ private:
   static const double sBackwardWeight;
 
   std::vector<double> pointWeight;
+  std::vector<PointIndex> minLastPointIndexes;
   std::unordered_map<ConnectionJoin*, double> joinsUserInfo;
 
   std::vector<PathPoint> path;
