@@ -8,6 +8,7 @@
 
 using namespace model;
 using namespace std;
+using namespace Map;
 
 void MyStrategy::move(const Car& car, const World& world, const Game& game, Move& move) {
   volatile Constants constants = Constants(game);

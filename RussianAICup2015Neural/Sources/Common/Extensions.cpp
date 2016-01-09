@@ -10,36 +10,40 @@
 #include "Extensions.h"
 #include "Constants.h"
 
-double calcPI() {
-  static const double PI = std::atan(1) * 4;
-  return PI;
-}
-
-SIA::Vector vectorByAnchor(int x, int y, double ax, double ay) {
-  const double tileSize = Constants::instance().game.getTrackTileSize();
-  return SIA::Vector((x + ax)* tileSize, (y + ay)* tileSize);
-}
-
-SIA::Position tilePosition(double x, double y) {
-  const double tileSize = Constants::instance().game.getTrackTileSize();
-  return SIA::Position(int(x / tileSize), int(y / tileSize));
-}
-
-SIA::Position tilePosition(SIA::Vector pos) {
-  const double tileSize = Constants::instance().game.getTrackTileSize();
-  return SIA::Position(int(pos.x / tileSize), int(pos.y / tileSize));
-}
-
-double angleDiff(double angle1, double angle2) {
-  double angle = angle1 - angle2;
-
-  while (angle > SIA_PI) {
-    angle -= 2.0 * SIA_PI;
+namespace Extensions
+{
+  double constPI() {
+    static const double PI = std::atan(1) * 4;
+    return PI;
   }
 
-  while (angle < -SIA_PI) {
-    angle += 2.0 * SIA_PI;
+  SIA::Vector vectorByAnchor(int x, int y, double ax, double ay) {
+    static const double tileSize = Constants::instance().game.getTrackTileSize();
+    return SIA::Vector((x + ax)* tileSize, (y + ay)* tileSize);
   }
 
-  return angle;
+  SIA::Position tilePosition(double x, double y) {
+    static const double tileSize = Constants::instance().game.getTrackTileSize();
+    return SIA::Position(int(x / tileSize), int(y / tileSize));
+  }
+
+  SIA::Position tilePosition(SIA::Vector pos) {
+    static const double tileSize = Constants::instance().game.getTrackTileSize();
+    return SIA::Position(int(pos.x / tileSize), int(pos.y / tileSize));
+  }
+
+  double angleDiff(double angle1, double angle2) {
+    double angle = angle1 - angle2;
+
+    while (angle > SIA_PI) {
+      angle -= 2.0 * SIA_PI;
+    }
+
+    while (angle < -SIA_PI) {
+      angle += 2.0 * SIA_PI;
+    }
+
+    return angle;
+  }
+
 }

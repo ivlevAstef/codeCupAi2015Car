@@ -15,6 +15,9 @@
 #include <algorithm>
 #include <cmath>
 
+using namespace Map;
+using namespace Extensions;
+
 const size_t ConnectionMap::sMaxConnectionJoinsInTile = 6;
 
 const SIA::Position ConnectionMap::sDirUp = SIA::Position(0, -1);

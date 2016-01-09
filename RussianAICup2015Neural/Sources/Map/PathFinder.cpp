@@ -10,8 +10,11 @@
 #include "Common/SIALogger.h"
 #include "Common/Extensions.h"
 #include "Common/Constants.h"
-#include <math.h>
-#include <unordered_set>
+#include <cmath>
+
+using namespace Map;
+using namespace Extensions;
+
 
 const double PathFinder::sWeightMult = 0.75;
 const double PathFinder::sAngleWeightMult = 0.75;
