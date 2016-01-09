@@ -14,6 +14,24 @@ void MyStrategy::move(const Car& car, const World& world, const Game& game, Move
   volatile Constants constants = Constants(game);
   ConnectionMap::reMemory();
 
+  ///create map
+  ConnectionMap map;
+  map.update(world);
+  map.updateWeightForCar(car, world);
+
+  ///create paths
+  std::vector<PathFinder> paths;
+  paths.push_back(PathFinder());
+  paths[0].findPath(car, world, map, constants.pathSelfDepth);
+
+  for (const Car& otherCar : world.getCars()) {
+    if (otherCar.getId() != car.getId()) {
+      paths.push_back(PathFinder());
+      paths[paths.size() - 1].findPath(otherCar, world, map, constants.pathOtherCarDepth);
+    }
+  }
+
+  ///simple move
   //move.setThrowProjectile(true);
   move.setSpillOil(true);
 
@@ -21,15 +39,7 @@ void MyStrategy::move(const Car& car, const World& world, const Game& game, Move
     move.setUseNitro(true);
   }
 
-  ConnectionMap map;
-  map.update(world);
-  map.updateWeightForCar(car, world);
-
-  PathFinder path;
-  path.findPath(car, world, map, 6);
-
-  double angleToWaypoint = car.getAngleTo(path.getPath()[1].x, path.getPath()[1].y);
-
+  double angleToWaypoint = car.getAngleTo(paths[0].getPath()[1].x, paths[0].getPath()[1].y);
   move.setWheelTurn(angleToWaypoint * 32.0 / 3.14);
   move.setEnginePower(0.75);
 
@@ -38,14 +48,20 @@ void MyStrategy::move(const Car& car, const World& world, const Game& game, Move
     move.setBrake(true);
   }
 
+  ///visualization
 #ifdef ENABLE_VISUALIZATOR
   Visualizator::setWindowCenter(car.getX(), car.getY(), world.getWidth() * game.getTrackTileSize(), world.getHeight() * game.getTrackTileSize());
   visualizator.beginPost();
 
   map.visualizationConnectionJoins(visualizator, 0x000077);
   map.visualizationConnectionPoints(visualizator, 0x000000);
-  path.visualizationPath(visualizator, 0xFF0000);
-  path.visualizationPointWeight(visualizator, 0xFF00FF, map);
+
+  for (size_t i = 1; i < paths.size(); i++) {
+    paths[i].visualizationPath(visualizator, 0x770077);
+  }
+
+  paths[0].visualizationPath(visualizator, 0xFF0000);
+  paths[0].visualizationPointWeight(visualizator, 0xFF00FF, map);
 
   visualizator.endPost();
 #endif

@@ -20,6 +20,7 @@ const double PathFinder::sWeightMult = 0.75;
 const double PathFinder::sAngleWeightMult = 0.75;
 
 void PathFinder::findPath(const model::Car& car, const model::World& world, const ConnectionMap& map, const size_t maxDepth) {
+  pCar = &car;
   const PointIndex beginPointIndex = pointIndexByCar(car, map, Constants::instance().game.getTrackTileSize(), map.invalidPointIndex());
   const PointIndex lastBeginPointIndex = pointIndexByCar(car, map, -Constants::instance().game.getTrackTileSize(), beginPointIndex);
 
@@ -45,13 +46,17 @@ void PathFinder::findPath(const model::Car& car, const model::World& world, cons
     wayPointIndex++;
   }
 
-  fillPathByPointIndex(pointIndexPath, map);
+  fillPathByPointIndex(pointIndexPath, maxDepth, map);
 }
 
-void PathFinder::fillPathByPointIndex(const std::vector<PointIndex>& points, const ConnectionMap& map) {
+void PathFinder::fillPathByPointIndex(const std::vector<PointIndex>& points, size_t maxDepth, const ConnectionMap& map) {
   path.clear();
-  for (const PointIndex& pointIndex : points) {
-    const auto& pointData = map.getConnectionPointByIndex(pointIndex);
+
+  const size_t count = MIN(points.size(), maxDepth);
+  path.reserve(count);
+
+  for (size_t i = 0; i < count; ++i) {
+    const auto& pointData = map.getConnectionPointByIndex(points[i]);
     path.push_back(pointData.pos);
   }
 }

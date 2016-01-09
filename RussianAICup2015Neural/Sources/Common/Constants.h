@@ -23,6 +23,9 @@ public:
 
   const model::Game& game;
 
+  static const size_t pathSelfDepth;
+  static const size_t pathOtherCarDepth;
+
   static const size_t dirsCount;
   static const SIA::Position dirs[];
 

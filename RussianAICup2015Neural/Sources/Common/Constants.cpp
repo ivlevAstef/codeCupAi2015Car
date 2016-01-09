@@ -17,6 +17,9 @@ const SIA::Position Constants::dirs[dirsCount] = {
   SIA::Position(0, -1)
 };
 
+const size_t Constants::pathSelfDepth = 6;
+const size_t Constants::pathOtherCarDepth = 3;
+
 double Constants::bonusPriorityForCar(const model::BonusType& bonusType, const model::Car& car) {
   switch (bonusType) {
     case model::REPAIR_KIT:

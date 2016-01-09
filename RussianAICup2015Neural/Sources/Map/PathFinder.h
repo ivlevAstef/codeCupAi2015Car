@@ -25,6 +25,10 @@ namespace Map
       return path;
     }
 
+    inline const model::Car& getCar() const {
+      return *pCar;
+    }
+
 #ifdef ENABLE_VISUALIZATOR
     void visualizationPath(const Visualizator& visualizator, int32_t color) const;
     void visualizationPointWeight(const Visualizator& visualizator, int32_t color, const ConnectionMap& map) const;
@@ -40,7 +44,7 @@ namespace Map
     PointIndex minPointIndexInPos(SIA::Position pos, const ConnectionMap& map) const;
 
     std::vector<PointIndex> findPathPointIndex(PointIndex fromIndex, PointIndex toIndex, const ConnectionMap& map) const;
-    void fillPathByPointIndex(const std::vector<PointIndex>& points, const ConnectionMap& map);
+    void fillPathByPointIndex(const std::vector<PointIndex>& points, size_t maxDepth, const ConnectionMap& map);
 
     double calculatePointWeight(const ConnectionJoin& join, const ConnectionJoin* lastJoin, const PointIndex& commonPointIndex) const;
 
@@ -52,6 +56,8 @@ namespace Map
     std::vector<PointIndex> minLastPointIndexes;
 
     std::vector<PathPoint> path;
+
+    const model::Car* pCar;
   };
 
 };

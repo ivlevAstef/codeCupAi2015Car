@@ -27,6 +27,7 @@ NeuralNet::NeuralNet(std::string fileName) {
 void NeuralNet::setWeights(const WeightsBeforeLayers& weights) {
 
 }
+
 #endif
 
 ///default neural net

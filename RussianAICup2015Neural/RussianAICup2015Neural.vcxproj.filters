@@ -14,6 +14,9 @@
     <Filter Include="Sources\Map">
       <UniqueIdentifier>{7677904b-1457-417c-8dc0-760c58dbe522}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sources\Neural">
+      <UniqueIdentifier>{f4e73448-faac-4bcf-8a66-f69d8635e5a1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Sources\MyStrategy.cpp">
@@ -36,6 +39,18 @@
     </ClCompile>
     <ClCompile Include="Sources\Common\Constants.cpp">
       <Filter>Sources\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Neural\NeuralNet.cpp">
+      <Filter>Sources\Neural</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Neural\NeuralIn.cpp">
+      <Filter>Sources\Neural</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Neural\NeuralOut.cpp">
+      <Filter>Sources\Neural</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Neural\NeuralCalculator.cpp">
+      <Filter>Sources\Neural</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -65,6 +80,18 @@
     </ClInclude>
     <ClInclude Include="Sources\Map\PathFinder.h">
       <Filter>Sources\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Neural\NeuralNet.h">
+      <Filter>Sources\Neural</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Neural\NeuralIn.h">
+      <Filter>Sources\Neural</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Neural\NeuralOut.h">
+      <Filter>Sources\Neural</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Neural\NeuralCalculator.h">
+      <Filter>Sources\Neural</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

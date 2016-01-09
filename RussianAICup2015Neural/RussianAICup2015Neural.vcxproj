@@ -56,7 +56,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>ENABLE_VISUALIZATOR;WIN32;_DEBUG;_CONSOLE;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>ENABLE_NET_LEARNING;ENABLE_VISUALIZATOR;WIN32;_DEBUG;_CONSOLE;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(SolutionDir)Sources;</AdditionalIncludeDirectories>
     </ClCompile>
@@ -92,6 +92,10 @@
     <ClCompile Include="Sources\Map\ConnectionMap.cpp" />
     <ClCompile Include="Sources\Map\PathFinder.cpp" />
     <ClCompile Include="Sources\MyStrategy.cpp" />
+    <ClCompile Include="Sources\Neural\NeuralCalculator.cpp" />
+    <ClCompile Include="Sources\Neural\NeuralIn.cpp" />
+    <ClCompile Include="Sources\Neural\NeuralNet.cpp" />
+    <ClCompile Include="Sources\Neural\NeuralOut.cpp" />
     <ClCompile Include="Sources\Visualizator\Visualizator.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -103,6 +107,10 @@
     <ClInclude Include="Sources\Map\ConnectionMap.h" />
     <ClInclude Include="Sources\Map\PathFinder.h" />
     <ClInclude Include="Sources\MyStrategy.h" />
+    <ClInclude Include="Sources\Neural\NeuralCalculator.h" />
+    <ClInclude Include="Sources\Neural\NeuralIn.h" />
+    <ClInclude Include="Sources\Neural\NeuralNet.h" />
+    <ClInclude Include="Sources\Neural\NeuralOut.h" />
     <ClInclude Include="Sources\Visualizator\Visualizator.h" />
   </ItemGroup>
   <ItemGroup>

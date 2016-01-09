@@ -17,13 +17,13 @@ namespace Neural
 {
   class NeuralOut {
   public:
-    NeuralOut(const std::vector<double>& output);
+    NeuralOut(const std::vector<double>& neurons);
 
     model::Move getMove() const;
     void fillMove(model::Move& moveForFill) const;
 
   private:
-    void calculateMove(const std::vector<double>& output);
+    void calculateMove(const std::vector<double>& neurons);
 
   private:
     model::Move move;

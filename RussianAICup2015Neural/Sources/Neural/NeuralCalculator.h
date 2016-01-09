@@ -22,6 +22,12 @@ namespace Neural
 
     const NeuralOut calculate(const NeuralIn& input) const;
 
+    NeuralCalculator(const NeuralCalculator& net) = delete;
+    NeuralCalculator& operator=(const NeuralCalculator& v) = delete;
+
+  private:
+    double calculateNeuronExcitation(const std::vector<double>& lastNeurons, const double* beginWeight, const double* lastWeight) const;
+
   private:
     const NeuralNet& net;
   };

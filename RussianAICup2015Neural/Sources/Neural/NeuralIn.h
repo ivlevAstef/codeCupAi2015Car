@@ -18,15 +18,16 @@ namespace Neural
 {
   class NeuralIn {
   public:
-    NeuralIn(const model::Car& car, const model::World& world, const Map::PathFinder& path);
+    NeuralIn(const model::World& world, const std::vector<Map::PathFinder>& paths);
 
-    const std::vector<double>& input() const;
-
-  private:
-    void calculateInputValue(const model::Car& car, const model::World& world, const Map::PathFinder& path);
-
+    const std::vector<double>& values() const;
 
   private:
+    void calculateInputValue(const model::World& world, const std::vector<Map::PathFinder>& paths);
+
+  private:
+    static const size_t sInputValuesCount;
+
     std::vector<double> inputValues;
   };
 

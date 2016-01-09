@@ -7,15 +7,24 @@
 //
 
 #include "NeuralOut.h"
+#include "Common/SIALogger.h"
 
 using namespace Neural;
 
-NeuralOut::NeuralOut(const std::vector<double>& output) {
-  calculateMove(output);
+NeuralOut::NeuralOut(const std::vector<double>& neurons) {
+  calculateMove(neurons);
 }
 
-void NeuralOut::calculateMove(const std::vector<double>& output) {
+void NeuralOut::calculateMove(const std::vector<double>& neurons) {
+  SIAAssert(6 == neurons.size());
 
+  move.setEnginePower(neurons[0]);
+  move.setWheelTurn(neurons[1]);
+  move.setBrake(neurons[2] > 0);
+
+  move.setUseNitro(neurons[3] > 0);
+  move.setThrowProjectile(neurons[4] > 0);
+  move.setSpillOil(neurons[5] > 0);
 }
 
 model::Move NeuralOut::getMove() const {
