@@ -23,16 +23,17 @@ namespace Neural
   public:
     NeuralNet() = default;
 
-    const WeightsBeforeLayers& getWeights() const;
-
 #ifdef ENABLE_NET_LEARNING
-    NeuralNet(std::string fileName);
-    void setWeights(const WeightsBeforeLayers& weights);
+    WeightsBeforeLayers& getWeights() const;
+    void rand();
+    void load();
+    void save();
+#else
+    const WeightsBeforeLayers& getWeights() const;
 #endif
 
   private:
-    std::vector<Weights> weightsBeforeLayers;
-    static std::vector<Weights> sDefaultWeightsBeforeLayers;
+    static std::vector<Weights> sWeightsBeforeLayers;
   };
 
 };

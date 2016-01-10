@@ -52,6 +52,12 @@
     <ClCompile Include="Sources\Neural\NeuralCalculator.cpp">
       <Filter>Sources\Neural</Filter>
     </ClCompile>
+    <ClCompile Include="Sources\Neural\DefaultNeuralNet.cpp">
+      <Filter>Sources\Neural</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Neural\NeuralTraining.cpp">
+      <Filter>Sources\Neural</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Sources\MyStrategy.h">
@@ -91,6 +97,9 @@
       <Filter>Sources\Neural</Filter>
     </ClInclude>
     <ClInclude Include="Sources\Neural\NeuralCalculator.h">
+      <Filter>Sources\Neural</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Neural\NeuralTraining.h">
       <Filter>Sources\Neural</Filter>
     </ClInclude>
   </ItemGroup>

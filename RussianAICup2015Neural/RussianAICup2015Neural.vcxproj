@@ -92,10 +92,12 @@
     <ClCompile Include="Sources\Map\ConnectionMap.cpp" />
     <ClCompile Include="Sources\Map\PathFinder.cpp" />
     <ClCompile Include="Sources\MyStrategy.cpp" />
+    <ClCompile Include="Sources\Neural\DefaultNeuralNet.cpp" />
     <ClCompile Include="Sources\Neural\NeuralCalculator.cpp" />
     <ClCompile Include="Sources\Neural\NeuralIn.cpp" />
     <ClCompile Include="Sources\Neural\NeuralNet.cpp" />
     <ClCompile Include="Sources\Neural\NeuralOut.cpp" />
+    <ClCompile Include="Sources\Neural\NeuralTraining.cpp" />
     <ClCompile Include="Sources\Visualizator\Visualizator.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -111,6 +113,7 @@
     <ClInclude Include="Sources\Neural\NeuralIn.h" />
     <ClInclude Include="Sources\Neural\NeuralNet.h" />
     <ClInclude Include="Sources\Neural\NeuralOut.h" />
+    <ClInclude Include="Sources\Neural\NeuralTraining.h" />
     <ClInclude Include="Sources\Visualizator\Visualizator.h" />
   </ItemGroup>
   <ItemGroup>

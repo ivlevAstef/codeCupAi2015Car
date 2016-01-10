@@ -6,9 +6,15 @@
 #include "Map/ConnectionMap.h"
 #include "Map/PathFinder.h"
 
+#include "Neural/NeuralTraining.h"
+#include "Neural/NeuralNet.h"
+#include "Neural/NeuralIn.h"
+#include "Neural/NeuralCalculator.h"
+
 using namespace model;
 using namespace std;
 using namespace Map;
+using namespace Neural;
 
 void MyStrategy::move(const Car& car, const World& world, const Game& game, Move& move) {
   volatile Constants constants = Constants(game);
@@ -31,9 +37,27 @@ void MyStrategy::move(const Car& car, const World& world, const Game& game, Move
     }
   }
 
+
+  ///neural
+#ifdef ENABLE_NET_LEARNING
+  const NeuralNet& neuralNet = NeuralTraining::instance().getNet();
+#else
+  NeuralNet neuralNet;
+#endif
+
+  NeuralIn neuralIn(world, paths);
+
+  NeuralCalculator moveCalculator(neuralNet);
+  NeuralOut neuralOut = moveCalculator.calculate(neuralIn);
+  
+  neuralOut.fillMove(move);
+
+#ifdef ENABLE_NET_LEARNING
+  NeuralTraining::instance().update(neuralIn, neuralOut);
+#endif
+
   ///simple move
-  //move.setThrowProjectile(true);
-  move.setSpillOil(true);
+  /*move.setSpillOil(true);
 
   if (world.getTick() > game.getInitialFreezeDurationTicks()) {
     move.setUseNitro(true);
@@ -46,7 +70,7 @@ void MyStrategy::move(const Car& car, const World& world, const Game& game, Move
   double speedModule = SIA::Vector(car.getSpeedX(), car.getSpeedY()).length();
   if (speedModule * speedModule * abs(angleToWaypoint) > 10 * 3.14) {
     move.setBrake(true);
-  }
+  }*/
 
   ///visualization
 #ifdef ENABLE_VISUALIZATOR

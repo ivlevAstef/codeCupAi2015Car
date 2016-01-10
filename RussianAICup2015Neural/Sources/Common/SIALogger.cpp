@@ -21,7 +21,7 @@
 
 using namespace SIA;
 
-static std::string fileName(std::string filePath) {
+static std::string filePath(std::string filePath) {
   std::size_t found = filePath.find_last_of("/\\");
   if (found == std::string::npos) {
      return filePath;
@@ -48,7 +48,7 @@ void Logger::logToStream(const char* logLevel, const char* file, int line, const
 
   ///Added filename and file line
   if (nullptr != file) {
-    logIndex += sprintf(logBuffer + logIndex, "{%s:%d} ", fileName(file).c_str(), line);
+    logIndex += sprintf(logBuffer + logIndex, "{%s:%d} ", filePath(file).c_str(), line);
   }
 
   ///Added message

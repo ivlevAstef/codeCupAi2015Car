@@ -11,12 +11,14 @@
 
 using namespace Neural;
 
+const size_t NeuralOut::sOutputValuesCount = 6;
+
 NeuralOut::NeuralOut(const std::vector<double>& neurons) {
   calculateMove(neurons);
 }
 
 void NeuralOut::calculateMove(const std::vector<double>& neurons) {
-  SIAAssert(6 == neurons.size());
+  SIAAssert(sOutputValuesCount == neurons.size());
 
   move.setEnginePower(neurons[0]);
   move.setWheelTurn(neurons[1]);

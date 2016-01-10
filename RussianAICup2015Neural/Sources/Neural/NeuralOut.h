@@ -17,6 +17,9 @@ namespace Neural
 {
   class NeuralOut {
   public:
+    static const size_t sOutputValuesCount;
+
+  public:
     NeuralOut(const std::vector<double>& neurons);
 
     model::Move getMove() const;
