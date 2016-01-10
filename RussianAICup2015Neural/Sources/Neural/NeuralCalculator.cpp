@@ -28,9 +28,9 @@ const NeuralOut NeuralCalculator::calculate(const NeuralIn& input) const {
   neurons[0] = inputValues;
 
   for (size_t layerIndex = 1; layerIndex < layerCount + 1; ++layerIndex) {
-    const auto* pLayerWeights = weights[layerIndex].data();
+    const auto* pLayerWeights = weights[layerIndex - 1].data();
     const size_t lastNeuronsCount = neurons[layerIndex - 1].size();
-    const size_t currentNeuronsCount = weights[layerIndex].size() / lastNeuronsCount;
+    const size_t currentNeuronsCount = weights[layerIndex - 1].size() / lastNeuronsCount;
 
     neurons[layerIndex].resize(currentNeuronsCount);
     const auto& lastLayerNeurons = neurons[layerIndex - 1];
@@ -47,7 +47,7 @@ const NeuralOut NeuralCalculator::calculate(const NeuralIn& input) const {
 }
 
 double NeuralCalculator::calculateNeuronExcitation(const std::vector<double>& lastNeurons, const double* beginWeight, const double* lastWeight) const {
-  SIAAssert(lastNeurons.size() == (long int(lastWeight - beginWeight) / sizeof(double)));
+  SIAAssert(lastNeurons.size() == (lastWeight - beginWeight));
 
   const auto* pNeuronIter = lastNeurons.data();
   const double* pWeightIter = beginWeight;

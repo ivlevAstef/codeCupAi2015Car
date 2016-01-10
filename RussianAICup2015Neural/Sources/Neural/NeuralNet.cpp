@@ -27,9 +27,9 @@ NeuralNet::WeightsBeforeLayers& NeuralNet::getWeights() const {
 }
 
 void NeuralNet::rand() {
-  static std::vector<size_t> weightsCountData = {1400 * NeuralIn::sInputValuesCount, 1400 * 700, 700 * 300, 300 * NeuralOut::sOutputValuesCount};
+  static std::vector<size_t> weightsCountData = {700 * NeuralIn::sInputValuesCount, 700 * 100, 100 * 50, 50 * NeuralOut::sOutputValuesCount};
 
-  srand(time(0));
+  srand(unsigned int(time(0)));
 
   sWeightsBeforeLayers.clear();
   sWeightsBeforeLayers.resize(weightsCountData.size());
@@ -52,23 +52,21 @@ void NeuralNet::load() {
 
   SIAAssert(file.is_open());
 
-  char buffer[1024] = {0};
+  file.ignore(1024, '{');///static std::vector<NeuralNet::Weights> GetWeightsBeforeLayers() {
 
-  file.getline(buffer, 1024);///#include "NeuralNet.h"
-  file.getline(buffer, 1024);///using namespace Neural;
-  file.getline(buffer, 1024);///\n
-  file.getline(buffer, 1024);///std::vector<NeuralNet::Weights> NeuralNet::sWeightsBeforeLayers = {
-  
   sWeightsBeforeLayers.clear();
-
   while (!file.eof()) {
+    do {
+      file.ignore(1024, '{');///static const double dataI[] = {
+    } while (!file.eof() && file.peek() == '\n');
+
     Weights weights;
-    while (file.peek() != '}') {
+    while (!file.eof() && file.peek() != '}') {
       double value = 0;
+      file.ignore();
       file >> value;
       weights.push_back(value);
     }
-    file.getline(buffer, 1024);
 
     if (!weights.empty()) {
       sWeightsBeforeLayers.push_back(weights);
@@ -84,10 +82,10 @@ void NeuralNet::save() {
   file << "#include \"NeuralNet.h\"" << std::endl;
   file << "using namespace Neural;" << std::endl;
   file << std::endl;
-  file << "std::vector<NeuralNet::Weights> NeuralNet::sWeightsBeforeLayers = {" << std::endl;
-
+  file << "static std::vector<NeuralNet::Weights> GetWeightsBeforeLayers() {" << std::endl;
   for (size_t weightsIter = 0; weightsIter < sWeightsBeforeLayers.size(); ++weightsIter) {
-    file << "{";
+    size_t index = weightsIter + 1;
+    file << "  static const double data" << index << "[] = {";
 
     const auto* pWeights = sWeightsBeforeLayers[weightsIter].data();
     const size_t weightsSize = sWeightsBeforeLayers[weightsIter].size();
@@ -98,15 +96,21 @@ void NeuralNet::save() {
       separator = ',';
     }
 
-    if (weightsIter + 1 == sWeightsBeforeLayers.size()) {
-      file << "}" << std::endl;
-    } else {
-      file << "}," << std::endl;
-    }
-    
+    file << "};" << std::endl;
   }
 
-  file << "};" << std::endl;
+  file << "  static std::vector<NeuralNet::Weights> result;" << std::endl;
+  file << "  if (result.empty()) {" << std::endl;
+  for (size_t weightsIter = 0; weightsIter < sWeightsBeforeLayers.size(); ++weightsIter) {
+    size_t index = weightsIter + 1;
+    file << "    result.push_back(NeuralNet::Weights(data" << index << ", data" << index << " + sizeof(data" << index << ")/sizeof(double)));" << std::endl;
+  }
+
+  file << "  }" << std::endl;
+  file << "  return result;" << std::endl;
+  file << "}" << std::endl;
+  file << std::endl;
+  file << "std::vector<NeuralNet::Weights> NeuralNet::sWeightsBeforeLayers = GetWeightsBeforeLayers();" << std::endl;
 }
 
 #else

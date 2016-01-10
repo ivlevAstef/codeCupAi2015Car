@@ -10,10 +10,13 @@
 
 using namespace Neural;
 
+NeuralTraining NeuralTraining::singleton;
+
 NeuralTraining::NeuralTraining() {
   net.load();
   if (net.getWeights().empty()) {
     net.rand();
+    net.save();
   }
 }
 
